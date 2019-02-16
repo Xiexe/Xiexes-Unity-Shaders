@@ -36,6 +36,17 @@ struct XSLighting
 	half4 worldPos;
 };
 
+struct DotProducts
+{
+	half ndl;
+	half vdn;
+	half vdh;
+	half tdh;
+	half bdh;
+	half ndh;
+	half rdv;
+	half ldh;
+};
 
 sampler2D _MainTex; half4 _MainTex_ST;
 sampler2D _BumpMap; half4 _BumpMap_ST;
@@ -44,6 +55,8 @@ sampler2D _DetailMask; half4 _DetailMask_ST;
 sampler2D _SpecularMap; half4 _SpecularMap_ST;
 sampler2D _MetallicGlossMap; half4 _MetallicGlossMap_ST;
 sampler2D _Ramp;
+
+half4 _Color;
 
 half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;

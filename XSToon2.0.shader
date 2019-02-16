@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex("Texture", 2D) = "white" {}
+		_Color("Color Tint", Color) = (1,1,1,1)
 
 		_BumpMap("Normal Map", 2D) = "bump" {}
 		_BumpScale("Normal Scale", Float) = 1
@@ -11,7 +12,7 @@
 		_DetailMask("Detail Mask", 2D) = "white" {}
 		_DetailNormalMapScale("Detail Normal Scale", Float) = 1.0
 
-		_MetallicGlossMap("Metallic", 2D) = "white" {}
+		_MetallicGlossMap("Metallic (M, )", 2D) = "white" {}
 		_Metallic("Metallic", Range(0,1)) = 0
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 
@@ -19,12 +20,12 @@
 		[Enum(Smooth, 0, Sharp, 1)]_SpecularStyle("Specular Style", Int) = 0
 		_SpecularMap("Specular Map", 2D) = "white" {}
 		_SpecularIntensity("Specular Intensity", Float) = 1
-		_SpecularArea("SpecularArea", Range(0,1)) = 0.5
+		_SpecularArea("Specular Smoothness", Range(0,1)) = 0.5
 
 		_AnisotropicAX("Anisotropic X", Range(0,1)) = 0.25
 		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
 		
-		[Enum(Ambient, 0, Mixed, 1, Ramp, 2)]_RampMode("Ramp Mode", Int) = 1
+		[Enum(Mixed, 0, Ramp, 1)]_RampMode("Ramp Mode", Int) = 1
 		_Ramp("Shadow Ramp", 2D) = "white" {}
 		
 

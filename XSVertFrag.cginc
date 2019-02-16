@@ -22,7 +22,7 @@ float4 frag (v2f i) : SV_Target
 	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
 	
 	XSLighting o = (XSLighting)0; //Populate Lighting Struct
-	o.albedo = tex2D(_MainTex, i.uv);
+	o.albedo = tex2D(_MainTex, i.uv) * _Color;
 	o.specularMap = tex2D(_SpecularMap, i.uv);
 	o.metallicGlossMap = tex2D(_MetallicGlossMap, i.uv);
 	o.detailMask = tex2D(_DetailMask, i.uv);
