@@ -33,8 +33,8 @@ void calcNormal(inout XSLighting i)
 								i.normal * nMap.b  );
 
 	calcedNormal = normalize(calcedNormal);
-	float3 bumpedBitangent = (cross(calcedNormal, i.tangent));
-	float3 bumpedTangent = (cross(bumpedBitangent , calcedNormal));
+	half3 bumpedTangent = (cross(i.bitangent, calcedNormal));
+    half3 bumpedBitangent = (cross(calcedNormal, bumpedTangent));
 	
 	i.normal = calcedNormal;
 	i.tangent = bumpedTangent;

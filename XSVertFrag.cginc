@@ -4,8 +4,8 @@ v2f vert (appdata v)
 	
 	o.pos = UnityObjectToClipPos(v.vertex);
 	o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-	float3 wnormal = mul(unity_ObjectToWorld, v.normal);
-	float3 tangent = mul(unity_ObjectToWorld, v.tangent);
+	float3 wnormal = UnityObjectToWorldNormal(v.normal);
+	float3 tangent = UnityObjectToWorldDir(v.tangent.xyz);
 	float3 bitangent = cross(tangent, wnormal);
 	o.ntb[0] = wnormal;
 	o.ntb[1] = tangent;

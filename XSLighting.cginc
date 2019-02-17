@@ -29,7 +29,6 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, lightEnv);
     half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);
     
-
 	half4 col;
     col = diffuse;
     col += indirectSpecular.xyzz;
