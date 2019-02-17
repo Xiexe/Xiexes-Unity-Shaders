@@ -1,60 +1,40 @@
-
-
-float4 lighting(XSLighting i)
+half4 XSLighting_BRDF_Toon(XSLighting i)
 {   
-    
+    calcNormal(i);
     half4 lightCol = _LightColor0;
     half2 metallicSmoothness = calcMetallicSmoothness(i);
     half3 viewDir = calcViewDir(i.worldPos);
     half3 stereoViewDir = calcStereoViewDir(i.worldPos);
-    half3 lightDir = calcLightDir(i.worldPos);
+    int lightEnv = int(any(_WorldSpaceLightPos0.xyz));
+    half3 lightDir = calcLightDir(i.worldPos, lightEnv);
     half3 halfVector = normalize(lightDir + viewDir);
 
-    //Reflection Vectors
-        half3 reflView = reflect(-viewDir, i.worldNormal);
-        half3 reflLight = reflect(lightDir, i.worldNormal);
-    //----
+    half3 reflView = reflect(-viewDir, i.normal);
+    half3 reflLight = reflect(lightDir, i.normal);
 
-	//Dot Products
-        DotProducts d = (DotProducts)0;
-		d.ndl = calcNdL(i.worldNormal, lightDir, i.attenuation);
-        d.vdn = abs(dot(viewDir, i.normal));
-        d.vdh = DotClamped(viewDir, halfVector);
-        d.tdh = dot(i.tangent, halfVector);
-        d.bdh = dot(i.bitangent, halfVector);
-        d.ndh = DotClamped(i.worldNormal, halfVector);
-        d.rdv = saturate( dot( reflLight, float4(-viewDir, 0) ));
-        d.ldh = DotClamped(lightDir, halfVector);
-	//------------
+    DotProducts d = (DotProducts)0;
+    d.ndl = dot(i.normal, lightDir);
+    d.vdn = dot(viewDir, i.normal);
+    d.vdh = DotClamped(viewDir, halfVector);
+    d.tdh = dot(i.tangent, halfVector);
+    d.bdh = dot(i.bitangent, halfVector);
+    d.ndh = DotClamped(i.normal, halfVector);
+    d.rdv = saturate( dot( reflLight, float4(-viewDir, 0) ));
+    d.ldh = DotClamped(lightDir, halfVector);
 
-    //Indirect 
-        half3 indirectDiffuse = calcIndirectDiffuse();
-        half3 indirectSpecular = calcIndirectSpecular(i.albedo, metallicSmoothness, reflView);
-	//--------
-
-    //Direct
-        half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);
-	//--------
-
-    //Ramp
-        float4 ramp = calcRamp(i, d, indirectDiffuse);
-        float rampAvg = (ramp.r + ramp.g + ramp.b) * 0.33333;
-        float indirectAvg = (indirectDiffuse.r + indirectDiffuse.g + indirectDiffuse.b) * 0.33333;
-    //--------
-
-    float4 light;
-    UNITY_BRANCH
-    if (_RampMode == 0) // Mixed
-        light = (lightCol + indirectDiffuse.xyzz) * ramp;
-    else // Ramp
-        light = (lightCol + indirectAvg) * ramp;
+    i.albedo.rgb *= 1-metallicSmoothness.x;
+    half3 indirectDiffuse = calcIndirectDiffuse();
+    half3 indirectSpecular = calcIndirectSpecular(i, metallicSmoothness, reflView);
+    half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse);
+    half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, lightEnv);
+    half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);
     
-    light *= i.attenuation + indirectDiffuse.xyzz;
 
-	float4 col;
-	col = i.albedo * (1-metallicSmoothness.x);
+	half4 col;
+	col = diffuse;
 	col += indirectSpecular.xyzz;
     col += directSpecular.xyzz;
+    col += rimLight;
 
-	return col * light;
+	return col;
 }

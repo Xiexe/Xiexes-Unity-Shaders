@@ -1,7 +1,7 @@
-﻿Shader "Unlit/XSToon2.0"
+﻿Shader "Unlit/XSToon2.0_CutoutA2C"
 {
 	Properties
-	{	
+	{
 		[Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
 		_MainTex("Texture", 2D) = "white" {}
 		_Color("Color Tint", Color) = (1,1,1,1)
@@ -49,7 +49,8 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+		Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
+		AlphaToMask On
 		Cull [_Culling]
 		Pass
 		{
@@ -61,6 +62,7 @@
 			#pragma fragment frag
 			#pragma multi_compile_fwdbase 
 			#pragma multi_compile UNITY_PASS_FORWARDBASE
+			#define AlphaToMask
 
 			#include "XSDefines.cginc"
 			#include "XSHelperFunctions.cginc"
@@ -80,6 +82,7 @@
 			#pragma fragment frag
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma multi_compile UNITY_PASS_FORWARDADD
+			#define AlphaToMask
 			
 			#include "XSDefines.cginc"
 			#include "XSHelperFunctions.cginc"
@@ -88,5 +91,5 @@
 			ENDCG
 		}
 	}
-	Fallback "Diffuse"
+	Fallback "Transparent/Cutout/Diffuse"
 }
