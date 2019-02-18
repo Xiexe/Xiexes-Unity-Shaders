@@ -1,4 +1,4 @@
-﻿Shader "Unlit/XSToon2.0_Cutout"
+﻿Shader "Unlit/XSToon2.0_CutoutA2C"
 {
 	Properties
 	{
@@ -36,8 +36,11 @@
 		[Enum(Mixed Ramp Color, 0, Ramp Color, 1, Natural, 2)]_RampMode("Shadow Mode", Int) = 2
 		_Ramp("Shadow Ramp", 2D) = "white" {}
 		_ShadowColor("Shadow Tint", Color) = (1,1,1,1)
-		_ShadowSharpness("Shadow Range", Range(0.001, 1)) = 0.2
-		[IntRange]_ShadowSteps("Shadow Smoothness", Range(0,2048)) = 10
+		_ShadowSharpness("Shadow Hardness", Range(0.001, 1)) = 0.2
+		[IntRange]_ShadowSteps("Shadow Smoothness", Range(2,1024)) = 10
+		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
+		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
+		_ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
 
 		[Enum(UV1,0,UV2,1)] _UVSetAlbedo ("Albedo UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetNormal ("Normal Map UVs", Int) = 0
@@ -55,18 +58,18 @@
 		{
 			Name "FORWARD"
 			Tags { "LightMode" = "ForwardBase" }
-			
+			AlphaToMask On
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile_fwdbase 
 			#pragma multi_compile UNITY_PASS_FORWARDBASE
-			#define Cutout
+			#define AlphaToMask
 
-			#include "XSDefines.cginc"
-			#include "XSHelperFunctions.cginc"
-			#include "XSLighting.cginc"
-			#include "XSVertFrag.cginc"
+			#include "../CGIncludes/XSDefines.cginc"
+			#include "../CGIncludes/XSHelperFunctions.cginc"
+			#include "../CGIncludes/XSLighting.cginc"
+			#include "../CGIncludes/XSVertFrag.cginc"
 			ENDCG
 		}
 
@@ -75,18 +78,36 @@
 			Name "FWDADD"
 			Tags { "LightMode" = "ForwardAdd" }
 			Blend One One
-
+			AlphaToMask On
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma multi_compile UNITY_PASS_FORWARDADD
-			#define Cutout
+			#define AlphaToMask
 			
-			#include "XSDefines.cginc"
-			#include "XSHelperFunctions.cginc"
-			#include "XSLighting.cginc"
-			#include "XSVertFrag.cginc"
+			#include "../CGIncludes/XSDefines.cginc"
+			#include "../CGIncludes/XSHelperFunctions.cginc"
+			#include "../CGIncludes/XSLighting.cginc"
+			#include "../CGIncludes/XSVertFrag.cginc"
+			ENDCG
+		}
+
+		Pass
+		{
+			Name "ShadowCaster"
+			Tags{ "LightMode" = "ShadowCaster" }
+			ZWrite On ZTest LEqual
+			CGPROGRAM
+			#pragma vertex vertShadowCaster
+			#pragma fragment fragShadowCaster
+			#pragma target 3.0
+			#pragma multi_compile_shadowcaster
+			#pragma multi_compile UNITY_PASS_SHADOWCASTER
+			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
+			#define AlphaToMask
+
+			#include "../CGIncludes/XSShadowCaster.cginc"
 			ENDCG
 		}
 	}

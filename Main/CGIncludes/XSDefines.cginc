@@ -2,7 +2,7 @@
 #include "AutoLight.cginc"
 #include "UnityCG.cginc"
 
-struct appdata
+struct VertexInput
 {
 	float4 vertex : POSITION;
 	float2 uv : TEXCOORD0;
@@ -11,7 +11,7 @@ struct appdata
 	float3 tangent : TANGENT;
 };
 
-struct v2f
+struct VertexOutput
 {
 	float4 pos : SV_POSITION;
 	float2 uv : TEXCOORD0;
@@ -20,6 +20,28 @@ struct v2f
 	float4 worldPos : TEXCOORD5;
 	SHADOW_COORDS(6)
 };
+
+#if defined(Geometry)
+	struct v2g
+	{
+		float4 pos : SV_POSITION;
+		float2 uv : TEXCOORD0;
+		float2 uv1 : TEXCROORD1;
+		float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
+		float4 worldPos : TEXCOORD5;
+		SHADOW_COORDS(6)
+	};
+
+	struct g2f
+	{
+		float4 pos : SV_POSITION;
+		float2 uv : TEXCOORD0;
+		float2 uv1 : TEXCROORD1;
+		float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
+		float4 worldPos : TEXCOORD5;
+		SHADOW_COORDS(6)
+	};
+#endif
 
 struct XSLighting
 {
@@ -71,7 +93,8 @@ sampler2D _SpecularMap; half4 _SpecularMap_ST;
 sampler2D _MetallicGlossMap; half4 _MetallicGlossMap_ST;
 sampler2D _Ramp;
 
-half4 _Color, _ShadowColor;
+half4 _Color, _ShadowColor, _ShadowRim;
+half _ShadowRimRange, _ShadowRimThreshold, _ShadowRange;
 
 half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;

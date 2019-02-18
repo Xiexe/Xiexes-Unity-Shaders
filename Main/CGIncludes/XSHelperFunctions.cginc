@@ -41,7 +41,7 @@ void calcNormal(inout XSLighting i)
 	i.bitangent = bumpedBitangent;
 }
 
-void InitializeTextureUVs(in v2f i, inout TextureUV t)
+void InitializeTextureUVs(in VertexOutput i, inout TextureUV t)
 {	
 	half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
 	half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
@@ -57,6 +57,24 @@ void InitializeTextureUVs(in v2f i, inout TextureUV t)
 	t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _SpecularMap);
 	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _MetallicGlossMap);
 }
+
+// // Same as above but works with the Geometry shader
+// void InitializeTextureUVs(in g2f i, inout TextureUV t) 
+// {	
+// 	half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
+// 	half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
+// 	half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
+// 	half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
+// 	half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
+// 	half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
+
+// 	t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
+// 	t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
+// 	t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
+// 	t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
+// 	t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _SpecularMap);
+// 	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _MetallicGlossMap);
+// }
 
 half3 calcViewDir(half3 worldPos)
 {
@@ -110,6 +128,16 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 	half4 rim = (rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz) * i.albedo * i.attenuation);
 	
 	return rim;
+}
+
+half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
+{
+	half rimIntensity = saturate((1-d.vdn) * pow(-d.ndl, _ShadowRimThreshold * 2));
+	rimIntensity = smoothstep(_ShadowRimRange - 0.3, _ShadowRimRange + 0.3, rimIntensity);
+	
+	half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * _ShadowColor * 0.1), rimIntensity);
+
+	return shadowRim;
 }
 
 //Direct Lighting Fuctions
@@ -215,10 +243,13 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 		}
 		else
 		{	
+			d.ndl = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, d.ndl);
 			half altNDL = d.ndl * i.attenuation; 
 			altNDL = (ceil(altNDL * _ShadowSteps) / _ShadowSteps); 
-			altNDL = smoothstep(0, _ShadowSharpness, altNDL);
 			diffuse = altNDL * lightCol;
+			#if defined(POINT) || defined(SPOT)
+				diffuse *= i.attenuation;
+			#endif
 			diffuse += (indirectDiffuse.rgbb * _ShadowColor);
 		}
 		return i.albedo * diffuse;
@@ -229,7 +260,11 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 		//Default to 1 alpha || Opaque
 		i.alpha = 1;
 
-		#if defined(AlphaToMask)
+		// #if defined(AlphaToMask)
+		// 	i.alpha = i.albedo.a;
+		// #endif
+
+		#if defined(AlphaBlend) || defined(AlphaToMask)
 			i.alpha = i.albedo.a;
 		#endif
 
