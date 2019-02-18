@@ -1,4 +1,4 @@
-﻿Shader "Unlit/XSToon2.0"
+﻿Shader "Unlit/XSToon2.0_Outlined"
 {
 	Properties
 	{	
@@ -42,7 +42,8 @@
 		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
 		_ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
 
-
+		_OutlineWidth("Outline Width", Range(0, 5)) = 1
+		_OutlineColor("Outline Color", Color) = (0,0,0,1) 
 
 		[Enum(UV1,0,UV2,1)] _UVSetAlbedo ("Albedo UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetNormal ("Normal Map UVs", Int) = 0
@@ -62,14 +63,14 @@
 			Tags { "LightMode" = "ForwardBase" }
 			
 			CGPROGRAM
-			//#define Geometry
+			#define Geometry
 
 			#pragma vertex vert
-			//#pragma geometry geom
+			#pragma geometry geom
 			#pragma fragment frag
 
 			#pragma multi_compile_fwdbase 
-			#pragma multi_compile UNITY_PASS_FORWARDBASE
+			//#pragma multi_compile UNITY_PASS_FORWARDBASE
 
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -85,14 +86,14 @@
 			Blend One One
 
 			CGPROGRAM
-			//#define Geometry
+			#define Geometry
 
 			#pragma vertex vert
-			//#pragma geometry geom
+			#pragma geometry geom
 			#pragma fragment frag
 
 			#pragma multi_compile_fwdadd_fullshadows
-			#pragma multi_compile UNITY_PASS_FORWARDADD
+			//#pragma multi_compile UNITY_PASS_FORWARDADD
 			
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -109,7 +110,7 @@
 			CGPROGRAM
 			#pragma vertex vertShadowCaster
 			#pragma fragment fragShadowCaster
-			#pragma target 3.0
+
 			#pragma multi_compile_shadowcaster
 			#pragma multi_compile UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2

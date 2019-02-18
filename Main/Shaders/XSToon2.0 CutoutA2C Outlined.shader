@@ -1,7 +1,7 @@
-﻿Shader "Unlit/XSToon2.0"
+﻿Shader "Unlit/XSToon2.0_CutoutA2C_Outlined"
 {
 	Properties
-	{	
+	{
 		[Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
 		_MainTex("Texture", 2D) = "white" {}
 		_Color("Color Tint", Color) = (1,1,1,1)
@@ -42,7 +42,8 @@
 		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
 		_ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
 
-
+		_OutlineWidth("Outline Width", Range(0, 5)) = 1
+		_OutlineColor("Outline Color", Color) = (0,0,0,1) 
 
 		[Enum(UV1,0,UV2,1)] _UVSetAlbedo ("Albedo UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetNormal ("Normal Map UVs", Int) = 0
@@ -54,22 +55,22 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+		Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
 		Cull [_Culling]
 		Pass
 		{
 			Name "FORWARD"
 			Tags { "LightMode" = "ForwardBase" }
-			
+			AlphaToMask On
 			CGPROGRAM
-			//#define Geometry
+			#define Geometry
 
 			#pragma vertex vert
-			//#pragma geometry geom
+			#pragma geometry geom
 			#pragma fragment frag
-
 			#pragma multi_compile_fwdbase 
-			#pragma multi_compile UNITY_PASS_FORWARDBASE
+			//#pragma multi_compile UNITY_PASS_FORWARDBASE
+			#define AlphaToMask
 
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -83,16 +84,16 @@
 			Name "FWDADD"
 			Tags { "LightMode" = "ForwardAdd" }
 			Blend One One
-
+			AlphaToMask On
 			CGPROGRAM
-			//#define Geometry
+			#define Geometry
 
 			#pragma vertex vert
-			//#pragma geometry geom
+			#pragma geometry geom
 			#pragma fragment frag
-
 			#pragma multi_compile_fwdadd_fullshadows
-			#pragma multi_compile UNITY_PASS_FORWARDADD
+			//#pragma multi_compile UNITY_PASS_FORWARDADD
+			#define AlphaToMask
 			
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -113,10 +114,11 @@
 			#pragma multi_compile_shadowcaster
 			#pragma multi_compile UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
+			#define AlphaToMask
 
 			#include "../CGIncludes/XSShadowCaster.cginc"
 			ENDCG
 		}
 	}
-	Fallback "Diffuse"
+	Fallback "Transparent/Cutout/Diffuse"
 }

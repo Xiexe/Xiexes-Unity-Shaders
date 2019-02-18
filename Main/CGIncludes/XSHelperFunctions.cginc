@@ -41,7 +41,13 @@ void calcNormal(inout XSLighting i)
 	i.bitangent = bumpedBitangent;
 }
 
-void InitializeTextureUVs(in VertexOutput i, inout TextureUV t)
+void InitializeTextureUVs(
+	#if defined(Geometry)
+		in g2f i,
+	#else
+		in VertexOutput i, 
+	#endif
+		inout TextureUV t)
 {	
 	half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
 	half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
@@ -58,23 +64,6 @@ void InitializeTextureUVs(in VertexOutput i, inout TextureUV t)
 	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _MetallicGlossMap);
 }
 
-// // Same as above but works with the Geometry shader
-// void InitializeTextureUVs(in g2f i, inout TextureUV t) 
-// {	
-// 	half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
-// 	half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
-// 	half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
-// 	half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
-// 	half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
-// 	half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
-
-// 	t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
-// 	t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
-// 	t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
-// 	t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
-// 	t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _SpecularMap);
-// 	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _MetallicGlossMap);
-// }
 
 half3 calcViewDir(half3 worldPos)
 {
@@ -200,6 +189,14 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 		return indirectLighting;
 	}
 //----
+
+	half4 calcOutlineColor(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol)
+	{
+		float3 outlineColor = _OutlineColor * i.attenuation * d.ndl * lightCol.xyz;
+		outlineColor += indirectDiffuse * _OutlineColor;
+
+		return float4(outlineColor,1);
+	}
 
 //Ramp
 	half4 calcRamp(XSLighting i, DotProducts d)
