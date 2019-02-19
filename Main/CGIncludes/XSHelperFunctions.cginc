@@ -26,6 +26,7 @@
 
 void calcNormal(inout XSLighting i)
 {
+	i.normal = normalize(i.normal);
 	half3 nMap = UnpackNormal(i.normalMap);
 	nMap.xy *= _BumpScale;
 	half3 calcedNormal = half3( i.bitangent * nMap.r + 
@@ -132,9 +133,10 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 //Direct Lighting Fuctions
 	// From HDRenderPipeline
 	float D_GGXAnisotropic(float TdotH, float BdotH, float NdotH, float roughnessT, float roughnessB)
-	{
+	{	
 		float f = TdotH * TdotH / (roughnessT * roughnessT) + BdotH * BdotH / (roughnessB * roughnessB) + NdotH * NdotH;
-		return 1.0 / (roughnessT * roughnessB * f * f);
+		float aniso = 1.0 / (roughnessT * roughnessB * f * f);
+		return aniso;
 	}
 
 	half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half2 metallicSmoothness, half ax, half ay)
@@ -169,6 +171,7 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 			return specular * i.attenuation;
 		}
 	}
+
 //----
 
 //Indirect Lighting functions
@@ -195,7 +198,7 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 		float3 outlineColor = _OutlineColor * i.attenuation * d.ndl * lightCol.xyz;
 		outlineColor += indirectDiffuse * _OutlineColor;
 
-		return float4(outlineColor,1);
+		return float4(i.color.rgb,1);
 	}
 
 //Ramp
@@ -270,3 +273,36 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 		#endif
 	}
 //----
+
+
+//Custom Light Attenuation Macros -- Lifted from ACiiL's branch of UCTS
+//// Redefine UNITY_LIGHT_ATTENUATION without shadow multiply from AutoLight.cginc
+#ifdef POINT
+#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) \
+	unityShadowCoord3 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xyz; \
+	fixed destName = tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).UNITY_ATTEN_CHANNEL;
+#endif
+
+#ifdef SPOT
+#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) \
+	unityShadowCoord4 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)); \
+	fixed destName = (lightCoord.z > 0) * UnitySpotCookie(lightCoord) * UnitySpotAttenuate(lightCoord.xyz);
+#endif
+
+#ifdef DIRECTIONAL
+#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) fixed destName = 1;
+// #define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) fixed destName = UNITY_SHADOW_ATTENUATION(input, worldPos);
+#endif
+
+#ifdef POINT_COOKIE
+#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) \
+	unityShadowCoord3 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xyz; \
+	fixed destName = tex2D(_LightTextureB0, dot(lightCoord, lightCoord).rr).UNITY_ATTEN_CHANNEL * texCUBE(_LightTexture0, lightCoord).w;
+#endif
+
+#ifdef DIRECTIONAL_COOKIE
+#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) \
+	unityShadowCoord2 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xy; \
+	fixed destName = tex2D(_LightTexture0, lightCoord).w;
+#endif
+//---

@@ -27,6 +27,7 @@ struct VertexOutput
 	float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
 	float4 worldPos : TEXCOORD5;
 	float4 color : TEXCOORD6;
+	float3 normal : TEXCOORD8;
 	SHADOW_COORDS(7)
 };
 
@@ -41,6 +42,7 @@ struct VertexOutput
 		float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
+		float3 normal : TEXCOORD8;
 		SHADOW_COORDS(7)
 	};
 
@@ -70,7 +72,7 @@ struct XSLighting
 	half3 tangent;
 	half3 bitangent;
 	half4 worldPos;
-
+	half3 color;
 	half alpha;
 	float isOutline;
 };

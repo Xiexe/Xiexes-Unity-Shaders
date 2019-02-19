@@ -15,8 +15,9 @@ VertexOutput vert (VertexInput v)
 	o.ntb[2] = bitangent;
 	o.uv = v.uv;
 	o.uv1 = v.uv1;
-	o.color = float4(1,1,1,0); // store wether or not it's an outline in the alpha channel of v.color
-	
+	o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
+	o.normal = v.normal;
+
 	TRANSFER_SHADOW(o);
 	return o;
 }
@@ -28,13 +29,15 @@ VertexOutput vert (VertexInput v)
 		g2f o;
 
 		for (int i = 2; i >= 0; i--)
-		{
-			float outlineWidth = (_OutlineWidth * .01);
+		{	
+			float4 worldPos = mul(unity_ObjectToWorld, IN[i].vertex);
+			float3 outlineWidth = (_OutlineWidth) * .01;
 			outlineWidth *= min(distance(IN[i].worldPos, _WorldSpaceCameraPos) * 3, 1);
 			float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].ntb[0]) * outlineWidth, 1);
 			
+
 			o.pos = UnityObjectToClipPos(outlinePos);
-			o.worldPos = mul(unity_ObjectToWorld, IN[i].vertex);
+			o.worldPos = worldPos;
 			o.ntb[0] = IN[i].ntb[0];
 			o.ntb[1] = IN[i].ntb[1];
 			o.ntb[2] = IN[i].ntb[2];
@@ -42,9 +45,8 @@ VertexOutput vert (VertexInput v)
 			o.uv1 = IN[i].uv1;
 			o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors
 
-		// Pass-through the shadow coordinates if this pass has shadows.
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
-				o._ShadowCoord = IN[i]._ShadowCoord;
+				o._ShadowCoord = IN[i]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here because it expects vertex shader inputs
 			#endif
 
 			tristream.Append(o);
@@ -60,11 +62,10 @@ VertexOutput vert (VertexInput v)
 			o.ntb[2] = IN[ii].ntb[2];
 			o.uv = IN[ii].uv;
 			o.uv1 = IN[ii].uv1;
-			o.color = float4(1,1,1,0);
+			o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
 
-		// Pass-through the shadow coordinates if this pass has shadows.
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
-				o._ShadowCoord = IN[ii]._ShadowCoord;
+				o._ShadowCoord = IN[ii]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here because it expects vertex shader inputs
 			#endif
 
 			tristream.Append(o);
@@ -82,6 +83,12 @@ float4 frag (
 	) : SV_Target
 {
 	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
+	#if defined(DIRECTIONAL)
+		attenuation = smoothstep(0, 0.2, attenuation); // This cleans up light atten from directional lights.
+		half nAtten = pow(1-attenuation, 5); // Take 1-Atten as a mask to clean up left over artifacts from self shadowing.
+		attenuation = saturate(attenuation + (1-nAtten));
+	#endif
+	
 	TextureUV t = (TextureUV)0; // Populate UVs
 	InitializeTextureUVs(i, t);
 	
@@ -98,6 +105,7 @@ float4 frag (
 	o.tangent = i.ntb[1];
 	o.bitangent = i.ntb[2];
 	o.worldPos = i.worldPos;
+	o.color = i.color.rgb;
 	o.isOutline = i.color.a;
 	
 	float4 col = XSLighting_BRDF_Toon(o);
