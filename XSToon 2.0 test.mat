@@ -42,6 +42,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _IBLTexCube:
+        m_Texture: {fileID: 8900000, guid: faaf766bad698244a97c50960036806b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -55,6 +59,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Normal:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -115,6 +123,7 @@ Material:
     - _EmissUv2: 0
     - _EmissionPower: 1
     - _Emissive: 1
+    - _Gloss: 0.495
     - _Glossiness: 0
     - _LitOutlines: 1
     - _MATCAP_CUBEMAP_ON: 0
@@ -136,6 +145,7 @@ Material:
     - _ReadMask: 255
     - _ReflSmoothness: 1
     - _ReflType: 0
+    - _Reflectivity: 0
     - _RimIntensity: 0.8
     - _RimRange: 0.7
     - _RimThreshold: 0.1

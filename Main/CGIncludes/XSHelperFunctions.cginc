@@ -195,10 +195,10 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 
 	half4 calcOutlineColor(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol)
 	{
-		float3 outlineColor = _OutlineColor * i.attenuation * d.ndl * lightCol.xyz;
+		float3 outlineColor = _OutlineColor * saturate(i.attenuation * d.ndl) * lightCol.xyz;
 		outlineColor += indirectDiffuse * _OutlineColor;
 
-		return float4(i.color.rgb,1);
+		return float4(outlineColor,1);
 	}
 
 //Ramp
