@@ -24,7 +24,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 3.42, y: 0}
+        m_Scale: {x: 10, y: 5}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
@@ -124,7 +124,7 @@ Material:
     - _AOUV2: 0
     - _AnisotropicAX: 0.894
     - _AnisotropicAY: 0.172
-    - _BumpScale: 0.54
+    - _BumpScale: 0.1
     - _Culling: 2
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
@@ -170,8 +170,8 @@ Material:
     - _RimThreshold: 1
     - _RimWidth: 0.2
     - _RimlightType: 0
-    - _SSDistortion: 0.28
-    - _SSPower: 3
+    - _SSDistortion: 0
+    - _SSPower: 1
     - _SSSDist: 1
     - _SSSIntensity: 0
     - _SSSPow: 1
@@ -181,13 +181,13 @@ Material:
     - _ShadowRimRange: 0.269
     - _ShadowRimSharpness: 0.3
     - _ShadowRimThreshold: 0.313
-    - _ShadowSharpness: 0.322
+    - _ShadowSharpness: 0.228
     - _ShadowSteps: 1024
     - _ShadowType: 0
     - _SmoothnessTextureChannel: 0
     - _SolidRimColor: 0
     - _SpecMode: 2
-    - _SpecularArea: 0.535
+    - _SpecularArea: 0.773
     - _SpecularHighlights: 1
     - _SpecularIntensity: 0.3
     - _SpecularPatternUv2: 0
@@ -229,7 +229,7 @@ Material:
     - _xd: 1.85
     - _xd2: 5
     m_Colors:
-    - _Color: {r: 0.9485294, g: 0.66820335, b: 0.6207288, a: 1}
+    - _Color: {r: 0.43382353, g: 0.43382353, b: 0.43382353, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 0}
     - _NormalTiling: {r: 1, g: 1, b: 0, a: 0}

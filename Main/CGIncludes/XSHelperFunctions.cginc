@@ -291,12 +291,13 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 //Modified by Xiexe
 	float4 calcSubsurfaceScattering(XSLighting i, DotProducts d, float3 lightDir, float3 viewDir, float3 normal, float4 lightCol, float3 indirectDiffuse)
 	{	
-		d.ndl = smoothstep(1 - _ShadowSharpness, 1 + _ShadowSharpness, d.ndl);
+		d.ndl = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, d.ndl);
 		float attenuation = saturate(i.attenuation * d.ndl);
 		float3 H = normalize(lightDir + normal * _SSDistortion);
 		float VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
 		float3 I = _SSColor * (VdotH + indirectDiffuse) * attenuation * i.thickness * _SSScale;
 		float4 SSS = float4(lightCol.rgb * I * i.albedo.rgb, 1);
+		SSS = max(0, SSS); // Make sure it doesn't go NaN
 
 		return SSS;
 	}
