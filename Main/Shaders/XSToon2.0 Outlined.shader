@@ -22,6 +22,7 @@
 		_RimIntensity("Rimlight Intensity", Float) = 1
 		_RimRange("Rim Range", Range(0,1)) = 0.7
 		_RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
+		_RimSharpness("Rim Sharpness", Range(0,1)) = 0.1
 
 		[Header(Specularity)]
 		[Enum(Blinn Phong, 0, Anisotropic, 1, GGX, 2)]_SpecMode("Specular Mode", Int) = 0
@@ -41,16 +42,27 @@
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
 		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
 		_ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
+		_ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
 
+		[Header(Outlines)]
 		_OutlineWidth("Outline Width", Range(0, 5)) = 1
 		_OutlineColor("Outline Color", Color) = (0,0,0,1) 
 
+		[Header(Subsurface Scattering)]
+		_ThicknessMap("Thickness Map", 2D) = "white" {}
+		_SSDistortion("Subsurface Distortion", Range(0,3)) = 1
+		_SSPower("Subsurface Power", Range(0,3)) = 1
+		_SSScale("Subsurface Scale", Range(0,3)) = 1
+		_SSColor ("Subsurface Color", Color) = (0,0,0,0)
+
+		[Header(UVSets)]
 		[Enum(UV1,0,UV2,1)] _UVSetAlbedo ("Albedo UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetNormal ("Normal Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetDetNormal ("Detail Normal UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetDetMask ("Detail Mask UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetMetallic ("Metallic Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetSpecular ("Specular Map UVs", Int) = 0
+		[Enum(UV1,0,UV2,1)] _UVSetThickness ("Thickness Map UVs", Int) = 0
 		
 	}
 	SubShader

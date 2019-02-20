@@ -66,6 +66,7 @@ struct XSLighting
 	half4 detailMask;
 	half4 metallicGlossMap;
 	half4 specularMap;
+	half4 thickness;
 
 	half attenuation;
 	half3 normal;
@@ -87,6 +88,7 @@ struct TextureUV
 	half2 detailMaskUV;
 	half2 normalMapUV;
 	half2 detailNormalUV;
+	half2 thicknessMapUV;
 };
 
 struct DotProducts
@@ -107,16 +109,19 @@ sampler2D _DetailNormalMap; half4 _DetailNormalMap_ST;
 sampler2D _DetailMask; half4 _DetailMask_ST;
 sampler2D _SpecularMap; half4 _SpecularMap_ST;
 sampler2D _MetallicGlossMap; half4 _MetallicGlossMap_ST;
+sampler2D _ThicknessMap; half4 _ThicknessMap_ST;
 sampler2D _Ramp;
 
-half4 _Color, _ShadowColor, _ShadowRim, _OutlineColor;
+half4 _Color, _ShadowColor, _ShadowRim, _OutlineColor, _SSColor;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRange;
+
+half _SSDistortion, _SSPower, _SSScale;
 
 half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY;
-half _RimRange, _RimThreshold, _RimIntensity;
-half _ShadowSharpness;
+half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness;
+half _ShadowSharpness, _ShadowRimSharpness;
 half _Cutoff;
 
 half _OutlineWidth;
@@ -124,5 +129,6 @@ half _OutlineWidth;
 int _RampMode, _SpecMode, _SpecularStyle, _ShadowSteps;
 
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
-	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular;
+	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
+	_UVSetThickness;
 

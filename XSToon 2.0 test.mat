@@ -23,8 +23,12 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 2800000, guid: b3d940e75e1f5d24684cd93a2758e1bf, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 3.42, y: 0}
+        m_Offset: {x: 0, y: 0}
+    - _DetailAlbedoMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailMask:
         m_Texture: {fileID: 0}
@@ -35,6 +39,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailNormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -71,6 +79,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OutlineTextureMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ParallaxMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -119,12 +131,15 @@ Material:
     - _DetailNormalStrength: 1
     - _DetailNormalUv2: 0
     - _DitherPatternScale: 8
+    - _DstBlend: 0
     - _EmissTintToColor: 1
     - _EmissUv2: 0
     - _EmissionPower: 1
     - _Emissive: 1
     - _Gloss: 0.495
+    - _GlossMapScale: 1
     - _Glossiness: 0
+    - _GlossyReflections: 1
     - _LitOutlines: 1
     - _MATCAP_CUBEMAP_ON: 0
     - _MATCAP_ON: 0
@@ -132,12 +147,15 @@ Material:
     - _MatcapStyle: 1
     - _Metallic: 0
     - _MetallicUv2: 0
+    - _Mode: 0
     - _NormalStrength: 1
     - _NormalUv2: 0
     - _OcclusionStrength: 1
     - _Offset: 0
     - _OutlineThickness: 0.1
+    - _OutlineWidth: 1
     - _PBRREFL_ON: 0
+    - _Parallax: 0.02
     - _RampBaseAnchor: 0.5
     - _RampColor: 2
     - _RampDir: 1
@@ -146,28 +164,36 @@ Material:
     - _ReflSmoothness: 1
     - _ReflType: 0
     - _Reflectivity: 0
-    - _RimIntensity: 0.8
-    - _RimRange: 0.7
-    - _RimThreshold: 0.1
+    - _RimIntensity: 1
+    - _RimRange: 0.464
+    - _RimSharpness: 0.5
+    - _RimThreshold: 1
     - _RimWidth: 0.2
     - _RimlightType: 0
+    - _SSDistortion: 0.28
+    - _SSPower: 3
     - _SSSDist: 1
     - _SSSIntensity: 0
     - _SSSPow: 1
+    - _SSScale: 3
     - _Saturation: 1
     - _ScaleWithLight: 1
-    - _ShadowRimRange: 0.7
-    - _ShadowRimThreshold: 0.1
-    - _ShadowSharpness: 0.1
+    - _ShadowRimRange: 0.269
+    - _ShadowRimSharpness: 0.3
+    - _ShadowRimThreshold: 0.313
+    - _ShadowSharpness: 0.322
     - _ShadowSteps: 1024
     - _ShadowType: 0
+    - _SmoothnessTextureChannel: 0
     - _SolidRimColor: 0
-    - _SpecMode: 1
-    - _SpecularArea: 0.5
-    - _SpecularIntensity: 0.28
+    - _SpecMode: 2
+    - _SpecularArea: 0.535
+    - _SpecularHighlights: 1
+    - _SpecularIntensity: 0.3
     - _SpecularPatternUv2: 0
     - _SpecularStyle: 0
     - _SpecularUv2: 0
+    - _SrcBlend: 1
     - _Stencil: 0
     - _StencilComp: 0
     - _StencilFail: 0
@@ -176,12 +202,14 @@ Material:
     - _StylelizedIntensity: 1
     - _StylizedReflStyle: 0
     - _ThicknessMapPower: 1
+    - _UVSec: 0
     - _UVSetAlbedo: 0
     - _UVSetDetMask: 0
     - _UVSetDetNormal: 0
     - _UVSetMetallic: 0
     - _UVSetNormal: 0
     - _UVSetSpecular: 0
+    - _UVSetThickness: 0
     - _UseReflections: 1
     - _UseSSS: 1
     - _UseSpecular: 1
@@ -201,14 +229,16 @@ Material:
     - _xd: 1.85
     - _xd2: 5
     m_Colors:
-    - _Color: {r: 0.50754684, g: 0.07093425, b: 0.60294116, a: 1}
+    - _Color: {r: 0.9485294, g: 0.66820335, b: 0.6207288, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 0}
     - _NormalTiling: {r: 1, g: 1, b: 0, a: 0}
     - _OcclusionColor: {r: 0, g: 0, b: 0, a: 0}
-    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
+    - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _SSColor: {r: 1, g: 0, b: 0, a: 1}
     - _SSSCol: {r: 1, g: 1, b: 1, a: 1}
-    - _ShadowColor: {r: 1, g: 1, b: 1, a: 1}
-    - _ShadowRim: {r: 1, g: 1, b: 1, a: 1}
+    - _ShadowColor: {r: 1, g: 0.9558824, b: 0.9558824, a: 1}
+    - _ShadowRim: {r: 0.7352941, g: 0.621756, b: 0.621756, a: 1}
     - _SpecularPatternTiling: {r: 20, g: 20, b: 0, a: 0}
     - _SubsurfaceColor: {r: 0, g: 0, b: 0, a: 0}

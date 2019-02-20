@@ -26,13 +26,16 @@
 
 void calcNormal(inout XSLighting i)
 {
-	i.normal = normalize(i.normal);
 	half3 nMap = UnpackNormal(i.normalMap);
 	nMap.xy *= _BumpScale;
 	half3 calcedNormal = half3( i.bitangent * nMap.r + 
 								i.tangent * nMap.g +
 								i.normal * nMap.b  );
 
+	
+	
+	
+	
 	calcedNormal = normalize(calcedNormal);
 	half3 bumpedTangent = (cross(i.bitangent, calcedNormal));
     half3 bumpedBitangent = (cross(calcedNormal, bumpedTangent));
@@ -56,6 +59,7 @@ void InitializeTextureUVs(
 	half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
 	half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
 	half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
+	half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
 
 	t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
 	t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
@@ -63,6 +67,7 @@ void InitializeTextureUVs(
 	t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
 	t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _SpecularMap);
 	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _MetallicGlossMap);
+	t.thicknessMapUV = TRANSFORM_TEX(uvSetSpecularMap, _ThicknessMap);
 }
 
 
@@ -101,6 +106,18 @@ half3 calcLightDir(half3 worldPos, int lightEnv)
 	return normalize(lightDir);
 }
 
+half4 calcLightCol(int lightEnv, float3 indirectDiffuse)
+{
+	//If we don't have a directional light or realtime light in the scene, we can derive light color from a slightly
+	//Modified indirect color. 
+	half4 lightCol = _LightColor0; 
+
+	if(lightEnv != 1)
+		lightCol = indirectDiffuse.xyzz * 0.2; 
+
+	return lightCol;	
+}
+
 half2 calcMetallicSmoothness(XSLighting i)
 {
 	half roughness = 1-(_Glossiness * i.metallicGlossMap.a);
@@ -114,7 +131,7 @@ half2 calcMetallicSmoothness(XSLighting i)
 half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse)
 {	
 	half rimIntensity = saturate((1-d.vdn) * pow(d.ndl, _RimThreshold));
-	rimIntensity = smoothstep(_RimRange - 0.01, _RimRange + 0.01, rimIntensity);
+	rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
 	half4 rim = (rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz) * i.albedo * i.attenuation);
 	
 	return rim;
@@ -123,7 +140,7 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 {
 	half rimIntensity = saturate((1-d.vdn) * pow(-d.ndl, _ShadowRimThreshold * 2));
-	rimIntensity = smoothstep(_ShadowRimRange - 0.3, _ShadowRimRange + 0.3, rimIntensity);
+	rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
 	
 	half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * _ShadowColor * 0.1), rimIntensity);
 
@@ -146,7 +163,7 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 		if(_SpecMode == 0)
 		{
 			half3 reflectionUntouched = saturate(pow(d.rdv, _SpecularArea * 128));
-			float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol;
+			float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol * (_SpecularArea * 2) * i.albedo;
 			return specular * i.attenuation;
 		}
 		else if(_SpecMode == 1)
@@ -177,7 +194,7 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 //Indirect Lighting functions
 	half3 calcIndirectDiffuse()
 	{
-		return ShadeSH9(float4(0, 0, 0, 1)); //Just get the Lightprobe Color information
+		return ShadeSH9(float4(0, 0, 0, 1)); // We don't care about anything other than the color from GI, so only feed in 0,0,0, rather than the normal
 	}
 
 	half3 calcIndirectSpecular(XSLighting i, float2 metallicSmoothness, half3 reflDir)
@@ -212,13 +229,9 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
         return ramp;
 	}
 
-	half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol, int lightEnv) 
+	half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol) 
 	{	
 		float4 diffuse; 
-		//I treat the indirect color as the light color if there's no Main Directional Light (This only happens in the forward base pass). 
-		//mult by 0.2 to make it slightly more appealing visually (Makes the shadows lighter and less overbearing).
-		if(lightEnv != 1)
-			lightCol = indirectDiffuse.xyzz * 0.2; 
 
 		UNITY_BRANCH
 		if(_RampMode != 2)
@@ -244,8 +257,8 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 		else
 		{	
 			d.ndl = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, d.ndl);
-			half altNDL = d.ndl * i.attenuation; 
-			altNDL = (ceil(altNDL * _ShadowSteps) / _ShadowSteps); 
+			half altNDL = saturate(d.ndl * i.attenuation); 
+			altNDL = ceil(altNDL * _ShadowSteps) / _ShadowSteps; 
 			diffuse = altNDL * lightCol;
 			#if defined(POINT) || defined(SPOT)
 				diffuse *= i.attenuation;
@@ -274,35 +287,17 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 	}
 //----
 
+//Subsurface Scattering - Based on a 2011 GDC Conference from by Colin Barre-Bresebois & Marc Bouchard
+//Modified by Xiexe
+	float4 calcSubsurfaceScattering(XSLighting i, DotProducts d, float3 lightDir, float3 viewDir, float3 normal, float4 lightCol, float3 indirectDiffuse)
+	{	
+		d.ndl = smoothstep(1 - _ShadowSharpness, 1 + _ShadowSharpness, d.ndl);
+		float attenuation = saturate(i.attenuation * d.ndl);
+		float3 H = normalize(lightDir + normal * _SSDistortion);
+		float VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
+		float3 I = _SSColor * (VdotH + indirectDiffuse) * attenuation * i.thickness * _SSScale;
+		float4 SSS = float4(lightCol.rgb * I * i.albedo.rgb, 1);
 
-//Custom Light Attenuation Macros -- Lifted from ACiiL's branch of UCTS
-//// Redefine UNITY_LIGHT_ATTENUATION without shadow multiply from AutoLight.cginc
-#ifdef POINT
-#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) \
-	unityShadowCoord3 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xyz; \
-	fixed destName = tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).UNITY_ATTEN_CHANNEL;
-#endif
-
-#ifdef SPOT
-#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) \
-	unityShadowCoord4 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)); \
-	fixed destName = (lightCoord.z > 0) * UnitySpotCookie(lightCoord) * UnitySpotAttenuate(lightCoord.xyz);
-#endif
-
-#ifdef DIRECTIONAL
-#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) fixed destName = 1;
-// #define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) fixed destName = UNITY_SHADOW_ATTENUATION(input, worldPos);
-#endif
-
-#ifdef POINT_COOKIE
-#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) \
-	unityShadowCoord3 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xyz; \
-	fixed destName = tex2D(_LightTextureB0, dot(lightCoord, lightCoord).rr).UNITY_ATTEN_CHANNEL * texCUBE(_LightTexture0, lightCoord).w;
-#endif
-
-#ifdef DIRECTIONAL_COOKIE
-#define UNITY_LIGHT_ATTENUATION_NOSHADOW(destName, input, worldPos) \
-	unityShadowCoord2 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xy; \
-	fixed destName = tex2D(_LightTexture0, lightCoord).w;
-#endif
-//---
+		return SSS;
+	}
+//

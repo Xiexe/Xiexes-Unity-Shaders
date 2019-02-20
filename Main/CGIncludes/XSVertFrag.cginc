@@ -30,10 +30,10 @@ VertexOutput vert (VertexInput v)
 
 		for (int i = 2; i >= 0; i--)
 		{	
-			float4 worldPos = mul(unity_ObjectToWorld, IN[i].vertex);
+			float4 worldPos = (mul(unity_ObjectToWorld, IN[i].vertex));
 			float3 outlineWidth = (_OutlineWidth) * .01;
-			outlineWidth *= min(distance(IN[i].worldPos, _WorldSpaceCameraPos) * 3, 1);
-			float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].ntb[0]) * outlineWidth, 1);
+			outlineWidth *= min(distance(worldPos, _WorldSpaceCameraPos) * 3, 1);
+			float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].normal) * outlineWidth, 1);
 			
 
 			o.pos = UnityObjectToClipPos(outlinePos);
@@ -99,6 +99,7 @@ float4 frag (
 	o.detailMask = tex2D(_DetailMask, t.detailMaskUV);
 	o.normalMap = tex2D(_BumpMap, t.normalMapUV);
 	o.detailNormal = tex2D(_DetailNormalMap, t.detailNormalUV);
+	o.thickness = tex2D(_ThicknessMap, t.thicknessMapUV);
 
 	o.attenuation = attenuation;
 	o.normal = i.ntb[0];
