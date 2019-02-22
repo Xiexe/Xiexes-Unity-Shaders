@@ -2,7 +2,7 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
 {   
     calcNormal(i);
     int lightEnv = int(any(_WorldSpaceLightPos0.xyz));
-    half3 lightDir = calcLightDir(i.worldPos, lightEnv);
+    half3 lightDir = calcLightDir(i);
     half3 viewDir = calcViewDir(i.worldPos);
     half2 metallicSmoothness = calcMetallicSmoothness(i);
     half3 stereoViewDir = calcStereoViewDir(i.worldPos);

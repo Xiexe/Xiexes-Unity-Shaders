@@ -37,8 +37,6 @@
 		[Enum(Mixed Ramp Color, 0, Ramp Color, 1, Natural, 2)]_RampMode("Shadow Mode", Int) = 2
 		_Ramp("Shadow Ramp", 2D) = "grey" {}
 		_ShadowColor("Shadow Tint", Color) = (1,1,1,1)
-		_ShadowSharpness("Shadow Hardness", Range(0.001, 1)) = 0.2
-		[IntRange]_ShadowSteps("Shadow Smoothness", Range(2,1024)) = 10
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
 		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
 		_ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
@@ -48,12 +46,15 @@
 		_OutlineWidth("Outline Width", Range(0, 5)) = 1
 		_OutlineColor("Outline Color", Color) = (0,0,0,1) 
 
+
 		[Header(Subsurface Scattering)]
 		_ThicknessMap("Thickness Map", 2D) = "white" {}
-		_SSDistortion("Subsurface Distortion", Range(0,3)) = 1
+		_SSColor ("Subsurface Color", Color) = (0,0,0,0)
+		_SSDistortion("Normal Distortion", Range(0,3)) = 1
 		_SSPower("Subsurface Power", Range(0,3)) = 1
 		_SSScale("Subsurface Scale", Range(0,3)) = 1
-		_SSColor ("Subsurface Color", Color) = (0,0,0,0)
+		_SSSRange("Subsurface Range", Range(0,1)) = 1
+		_SSSSharpness("Subsurface Falloff", Range(0.001, 1)) = 0.2
 
 		[Header(UVSets)]
 		[Enum(UV1,0,UV2,1)] _UVSetAlbedo ("Albedo UVs", Int) = 0

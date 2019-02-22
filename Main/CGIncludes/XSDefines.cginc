@@ -113,7 +113,7 @@ sampler2D _ThicknessMap; half4 _ThicknessMap_ST;
 sampler2D _Ramp;
 
 half4 _Color, _ShadowColor, _ShadowRim, _OutlineColor, _SSColor;
-half _ShadowRimRange, _ShadowRimThreshold, _ShadowRange;
+half _ShadowRimRange, _ShadowRimThreshold;
 
 half _SSDistortion, _SSPower, _SSScale;
 
@@ -121,9 +121,9 @@ half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY;
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness;
-half _ShadowSharpness, _ShadowRimSharpness;
+half _ShadowRimSharpness;
 half _Cutoff;
-
+half _SSSRange, _SSSSharpness;
 half _OutlineWidth;
 
 int _RampMode, _SpecMode, _SpecularStyle, _ShadowSteps;
@@ -132,3 +132,5 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
 	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
 	_UVSetThickness;
 
+//Defines for helper functions
+#define grayscaleVec float3(0.2125, 0.7154, 0.0721)

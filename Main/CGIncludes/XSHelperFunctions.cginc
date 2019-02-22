@@ -32,10 +32,6 @@ void calcNormal(inout XSLighting i)
 								i.tangent * nMap.g +
 								i.normal * nMap.b  );
 
-	
-	
-	
-	
 	calcedNormal = normalize(calcedNormal);
 	half3 bumpedTangent = (cross(i.bitangent, calcedNormal));
     half3 bumpedBitangent = (cross(calcedNormal, bumpedTangent));
@@ -88,13 +84,13 @@ half3 calcStereoViewDir(half3 worldPos)
 	return normalize(viewDir);
 }
 
-half3 calcLightDir(half3 worldPos, int lightEnv)
+half3 calcLightDir(XSLighting i)
 {
-	half3 lightDir = UnityWorldSpaceLightDir(worldPos);
-
-    if(lightEnv != 1)
-    {
-        lightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz; // Get light direction from light probes if there is no Directional Light.
+	half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
+	
+	lightDir *= i.attenuation * dot(_LightColor0, grayscaleVec);
+	half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
+	lightDir = (lightDir + probeLightDir) / 2; // Get the most intense light Dir from probes OR from a light source. 
 
 		#if !defined(POINT) && !defined(SPOT)
 			if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0)
@@ -102,7 +98,7 @@ half3 calcLightDir(half3 worldPos, int lightEnv)
 				lightDir = float4(1, 1, 1, 0);
 			}
 		#endif
-    }
+
 	return normalize(lightDir);
 }
 
@@ -232,16 +228,6 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 	half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol) 
 	{	
 		float4 diffuse; 
-
-		UNITY_BRANCH
-		if(_RampMode != 2)
-		{	
-			//Modify ndl to make the shadow ramp "wrap" around the attenuation if being lit by a directional light.
-			//I prefer this look only on directional lights, as it slightly obscures the attenuation.
-			//Whereas on Point and Spot lights, it looks a lot worse.
-			#if defined(DIRECTIONAL)
-				d.ndl *= i.attenuation;
-			#endif
 			half4 ramp = calcRamp(i, d);
 			half lightAvg = (lightCol.r + lightCol.g + lightCol.b) * 0.33333;
 			half indirectAvg = (indirectDiffuse.r + indirectDiffuse.g + indirectDiffuse.b) * 0.33333;
@@ -252,19 +238,8 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 			else // Ramp
 				diffuse = (ramp * lightAvg) + indirectAvg;
 
-			diffuse *= i.attenuation + indirectDiffuse.xyzz;
-		}
-		else
-		{	
-			d.ndl = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, d.ndl);
-			half altNDL = saturate(d.ndl * i.attenuation); 
-			altNDL = ceil(altNDL * _ShadowSteps) / _ShadowSteps; 
-			diffuse = altNDL * lightCol;
-			#if defined(POINT) || defined(SPOT)
-				diffuse *= i.attenuation;
-			#endif
-			diffuse += (indirectDiffuse.rgbb * _ShadowColor);
-		}
+			diffuse *= i.attenuation + (indirectDiffuse.xyzz * _ShadowColor);
+
 		return i.albedo * diffuse;
 	}
 
@@ -272,10 +247,6 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 	{	
 		//Default to 1 alpha || Opaque
 		i.alpha = 1;
-
-		// #if defined(AlphaToMask)
-		// 	i.alpha = i.albedo.a;
-		// #endif
 
 		#if defined(AlphaBlend) || defined(AlphaToMask)
 			i.alpha = i.albedo.a;
@@ -291,7 +262,7 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 //Modified by Xiexe
 	float4 calcSubsurfaceScattering(XSLighting i, DotProducts d, float3 lightDir, float3 viewDir, float3 normal, float4 lightCol, float3 indirectDiffuse)
 	{	
-		d.ndl = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, d.ndl);
+		d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
 		float attenuation = saturate(i.attenuation * d.ndl);
 		float3 H = normalize(lightDir + normal * _SSDistortion);
 		float VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
