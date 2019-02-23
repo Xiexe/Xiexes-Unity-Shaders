@@ -1,5 +1,5 @@
 //Half tone functions
-float2 calcScreenUVs(float4 screenPos, float distanceToObjectOrigin, float3 viewDir, float3 worldPos)
+float2 calcScreenUVs(float4 screenPos, float distanceToObjectOrigin)
 {
 	float2 clipPos = screenPos / (screenPos.w + 0.0000000001);
 	float2 uv = 2*clipPos-1;
