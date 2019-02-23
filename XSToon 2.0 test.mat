@@ -140,6 +140,9 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _HalftoneDotAmount: 70
+    - _HalftoneDotSize: 1.7
+    - _HalftoneLineAmount: 150
     - _LitOutlines: 1
     - _MATCAP_CUBEMAP_ON: 0
     - _MATCAP_ON: 0
@@ -175,6 +178,8 @@ Material:
     - _SSSDist: 1
     - _SSSIntensity: 0
     - _SSSPow: 1
+    - _SSSRange: 1
+    - _SSSSharpness: 0.2
     - _SSScale: 3
     - _Saturation: 1
     - _ScaleWithLight: 1

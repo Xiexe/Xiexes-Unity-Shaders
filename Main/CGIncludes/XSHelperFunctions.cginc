@@ -1,3 +1,60 @@
+//Half tone functions
+float2 calcScreenUVs(float4 screenPos, float distanceToObjectOrigin, float3 viewDir, float3 worldPos)
+{
+	float2 clipPos = screenPos / (screenPos.w + 0.0000000001);
+	float2 uv = 2*clipPos-1;
+
+	#if UNITY_SINGLE_PASS_STEREO
+		uv.x *= (_ScreenParams.x * 2) / _ScreenParams.y;
+	#else
+		uv.x *= (_ScreenParams.x) / _ScreenParams.y;
+	#endif
+	uv *= distanceToObjectOrigin;
+	return uv;
+}
+
+float2 rotateUV(float2 uv, float rotation)
+{
+    float mid = 0.5;
+    return float2(
+        cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
+        cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
+    );
+}
+
+float DotHalftone(XSLighting i, float scalar) //Scalar can be anything from attenuation to a dot product
+{
+	float2 uv = i.screenUV;
+	#if UNITY_SINGLE_PASS_STEREO
+		uv *= 2.5;
+	#endif
+	
+    float2 nearest = 2 * frac(_HalftoneDotAmount * uv) - 1;
+    float dist = length(nearest);
+	float dotSize = _HalftoneDotSize * scalar;
+    float dotMask = step(dotSize, dist);
+
+	return dotMask;
+}
+
+float LineHalftone(XSLighting i, float scalar)
+{	
+	// #if defined(DIRECTIONAL)
+	// 	scalar = saturate(scalar + ((1-i.attenuation) * 0.2));
+	// #endif
+	float2 uv = i.screenUV;
+	uv = rotateUV(uv, -0.785398);
+	#if UNITY_SINGLE_PASS_STEREO
+		_HalftoneLineAmount = _HalftoneLineAmount * 2.5;
+	#endif
+	uv.x = sin(uv.x * _HalftoneLineAmount);
+
+	float2 steppedUV = smoothstep(0,0.2,uv.x);
+	float lineMask = steppedUV * 0.2 * scalar;
+
+	return saturate(lineMask);
+}
+//
 
 //Helper Functions for Reflections
 	inline half3 XSFresnelTerm (half3 F0, half cosA)
@@ -84,13 +141,14 @@ half3 calcStereoViewDir(half3 worldPos)
 	return normalize(viewDir);
 }
 
+// Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
 half3 calcLightDir(XSLighting i)
 {
 	half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
-	
 	lightDir *= i.attenuation * dot(_LightColor0, grayscaleVec);
+
 	half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
-	lightDir = (lightDir + probeLightDir) / 2; // Get the most intense light Dir from probes OR from a light source. 
+	lightDir = (lightDir + probeLightDir) / 2;
 
 		#if !defined(POINT) && !defined(SPOT)
 			if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0)
@@ -129,6 +187,8 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 	half rimIntensity = saturate((1-d.vdn) * pow(d.ndl, _RimThreshold));
 	rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
 	half4 rim = (rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz) * i.albedo * i.attenuation);
+	float dotHalftone = 1-DotHalftone(i, rimIntensity);
+	rim *= dotHalftone;
 	
 	return rim;
 }
@@ -137,7 +197,6 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 {
 	half rimIntensity = saturate((1-d.vdn) * pow(-d.ndl, _ShadowRimThreshold * 2));
 	rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
-	
 	half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * _ShadowColor * 0.1), rimIntensity);
 
 	return shadowRim;
@@ -156,10 +215,12 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 	{	
 		lightCol = (lightCol + indirectDiffuse.xyzz) * i.albedo;
 		float specularIntensity = _SpecularIntensity * i.specularMap.r;
+
 		if(_SpecMode == 0)
 		{
-			half3 reflectionUntouched = saturate(pow(d.rdv, _SpecularArea * 128));
-			float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol * (_SpecularArea * 2) * i.albedo;
+			half reflectionUntouched = saturate(pow(d.rdv, _SpecularArea * 128));
+			float dotHalftone = 1-DotHalftone(i, reflectionUntouched);
+			float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol * (_SpecularArea * 2) * i.albedo * dotHalftone;
 			return specular * i.attenuation;
 		}
 		else if(_SpecMode == 1)
@@ -273,3 +334,4 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 		return SSS;
 	}
 //
+

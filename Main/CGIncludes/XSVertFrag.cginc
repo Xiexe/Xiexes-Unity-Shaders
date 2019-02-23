@@ -17,6 +17,10 @@ VertexOutput vert (VertexInput v)
 	o.uv1 = v.uv1;
 	o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
 	o.normal = v.normal;
+	float3 viewDir = normalize(_WorldSpaceCameraPos-o.worldPos);
+	float distanceToOrigin = distance( _WorldSpaceCameraPos, mul(unity_ObjectToWorld, float4(0,0,0,1) ));
+	float4 screenPos = ComputeScreenPos(o.pos);
+	o.screenUV = calcScreenUVs(screenPos, distanceToOrigin, viewDir, o.worldPos);
 
 	TRANSFER_SHADOW(o);
 	return o;
@@ -35,7 +39,6 @@ VertexOutput vert (VertexInput v)
 			outlineWidth *= min(distance(worldPos, _WorldSpaceCameraPos) * 3, 1);
 			float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].normal) * outlineWidth, 1);
 			
-
 			o.pos = UnityObjectToClipPos(outlinePos);
 			o.worldPos = worldPos;
 			o.ntb[0] = IN[i].ntb[0];
@@ -44,6 +47,7 @@ VertexOutput vert (VertexInput v)
 			o.uv = IN[i].uv;
 			o.uv1 = IN[i].uv1;
 			o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors
+			o.screenUV = IN[i].screenUV;
 
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
 				o._ShadowCoord = IN[i]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here because it expects vertex shader inputs
@@ -63,6 +67,7 @@ VertexOutput vert (VertexInput v)
 			o.uv = IN[ii].uv;
 			o.uv1 = IN[ii].uv1;
 			o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
+			o.screenUV = IN[ii].screenUV;
 
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
 				o._ShadowCoord = IN[ii]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here because it expects vertex shader inputs
@@ -108,6 +113,7 @@ float4 frag (
 	o.worldPos = i.worldPos;
 	o.color = i.color.rgb;
 	o.isOutline = i.color.a;
+	o.screenUV = i.screenUV;
 	
 	float4 col = XSLighting_BRDF_Toon(o);
 	calcAlpha(o);

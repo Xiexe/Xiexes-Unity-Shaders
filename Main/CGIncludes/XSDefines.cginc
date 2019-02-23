@@ -23,11 +23,12 @@ struct VertexOutput
 	#endif
 
 	float2 uv : TEXCOORD0;
-	float2 uv1 : TEXCROORD1;
+	float2 uv1 : TEXCOORD1;
 	float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
 	float4 worldPos : TEXCOORD5;
 	float4 color : TEXCOORD6;
 	float3 normal : TEXCOORD8;
+	float2 screenUV : TEXCOORD9;
 	SHADOW_COORDS(7)
 };
 
@@ -43,6 +44,7 @@ struct VertexOutput
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
 		float3 normal : TEXCOORD8;
+		float2 screenUV : TEXCOORD9;
 		SHADOW_COORDS(7)
 	};
 
@@ -54,6 +56,7 @@ struct VertexOutput
 		float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
+		float2 screenUV : TEXCOORD8;
 		SHADOW_COORDS(7)
 	};
 #endif
@@ -76,6 +79,7 @@ struct XSLighting
 	half3 color;
 	half alpha;
 	float isOutline;
+	float2 screenUV;
 };
 
 struct TextureUV
@@ -126,11 +130,16 @@ half _Cutoff;
 half _SSSRange, _SSSSharpness;
 half _OutlineWidth;
 
+
 int _RampMode, _SpecMode, _SpecularStyle, _ShadowSteps;
 
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
 	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
 	_UVSetThickness;
+
+half _HalftoneDotSize;
+half _HalftoneDotAmount;
+half _HalftoneLineAmount;
 
 //Defines for helper functions
 #define grayscaleVec float3(0.2125, 0.7154, 0.0721)

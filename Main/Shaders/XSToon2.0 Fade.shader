@@ -52,6 +52,11 @@
 		_SSSRange("Subsurface Range", Range(0,1)) = 1
 		_SSSSharpness("Subsurface Falloff", Range(0.001, 1)) = 0.2
 
+				[Header(HalfTones)]
+		_HalftoneDotSize("Halftone Dot Size", Float) = 1.7
+		_HalftoneDotAmount("Halftone Dot Amount", Float) = 50
+		_HalftoneLineAmount("Halftone Line Amount", Float) = 150
+
 		[Header(UVSets)]
 		[Enum(UV1,0,UV2,1)] _UVSetAlbedo ("Albedo UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetNormal ("Normal Map UVs", Int) = 0

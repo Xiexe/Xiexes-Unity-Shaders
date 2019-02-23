@@ -1,6 +1,8 @@
 half4 XSLighting_BRDF_Toon(XSLighting i)
 {   
     calcNormal(i);
+    
+
     int lightEnv = int(any(_WorldSpaceLightPos0.xyz));
     half3 lightDir = calcLightDir(i);
     half3 viewDir = calcViewDir(i.worldPos);
@@ -34,11 +36,12 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
 
 	half4 col;
-    col = diffuse *= shadowRim;
+    col = diffuse * shadowRim;
     col += indirectSpecular.xyzz;
     col += directSpecular.xyzz;
     col += rimLight;
     col += subsurface;
+    col -= LineHalftone(i, smoothstep(0.1, 5, -d.ndl*0.5+0.5) );
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline);
 
