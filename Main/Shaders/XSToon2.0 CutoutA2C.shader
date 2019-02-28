@@ -1,7 +1,7 @@
 ﻿Shader "Unlit/XSToon2.0_CutoutA2C"
 {
 	Properties
-	{
+	{	
 		[Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
 		_MainTex("Texture", 2D) = "white" {}
 		_Color("Color Tint", Color) = (1,1,1,1)
@@ -14,7 +14,10 @@
 		_DetailMask("Detail Mask", 2D) = "white" {}
 		_DetailNormalMapScale("Detail Normal Scale", Float) = 1.0
 
-		_MetallicGlossMap("Metallic (M,O,_,S)", 2D) = "white" {}
+		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 0
+		_MetallicGlossMap("Metallic (M,O,M,S)", 2D) = "white" {} //Metallic, Occlusion, Mask, Smoothness
+		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
+		_Matcap("Matcap", 2D) = "black" {}
 		_Metallic("Metallic", Range(0,1)) = 0
 		_Glossiness("Smoothness", Range(0,1)) = 0
 
@@ -34,13 +37,16 @@
 		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
 		
 		[Header(Shadows)]
-		[Enum(Mixed Ramp Color, 0, Ramp Color, 1, Natural, 2)]_RampMode("Shadow Mode", Int) = 2
-		_Ramp("Shadow Ramp", 2D) = "white" {}
+		[Enum(Mixed Ramp Color, 0, Ramp Color, 1)]_RampMode("Shadow Mode", Int) = 2
+		_Ramp("Shadow Ramp", 2D) = "grey" {}
 		_ShadowColor("Shadow Tint", Color) = (1,1,1,1)
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
 		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
 		_ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
 		_ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
+		
+		_OcclusionMap("Occlusion", 2D) = "white" {}
+		_OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
 
 		[Header(Subsurface Scattering)]
@@ -52,7 +58,7 @@
 		_SSSRange("Subsurface Range", Range(0,1)) = 1
 		_SSSSharpness("Subsurface Falloff", Range(0.001, 1)) = 0.2
 
-				[Header(HalfTones)]
+		[Header(HalfTones)]
 		_HalftoneDotSize("Halftone Dot Size", Float) = 1.7
 		_HalftoneDotAmount("Halftone Dot Amount", Float) = 50
 		_HalftoneLineAmount("Halftone Line Amount", Float) = 150
@@ -65,12 +71,23 @@
 		[Enum(UV1,0,UV2,1)] _UVSetMetallic ("Metallic Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetSpecular ("Specular Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetThickness ("Thickness Map UVs", Int) = 0
-		
+		[Enum(UV1,0,UV2,1)] _UVSetOcclusion ("Occlusion Map UVs", Int) = 0
+
+		[Header(Stencil)]
+		[IntRange] _Stencil ("Stencil ID [0;255]", Range(0,255)) = 0
+		[Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
+		[Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
 	}
 	SubShader
 	{
 		Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
 		Cull [_Culling]
+				Stencil 
+		{
+			Ref [_Stencil]
+			Comp [_StencilComp]
+			Pass [StencilOp]
+		}
 		Pass
 		{
 			Name "FORWARD"

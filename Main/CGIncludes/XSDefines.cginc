@@ -28,8 +28,8 @@ struct VertexOutput
 	float4 worldPos : TEXCOORD5;
 	float4 color : TEXCOORD6;
 	float3 normal : TEXCOORD8;
-	float4 screenPos : TEXCOORD9;
-	float distanceToOrigin : TEXCOORD10;
+	//float4 screenPos : TEXCOORD9;
+	//float distanceToOrigin : TEXCOORD10;
 	SHADOW_COORDS(7)
 };
 
@@ -45,8 +45,8 @@ struct VertexOutput
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
 		float3 normal : TEXCOORD8;
-		float4 screenPos : TEXCOORD9;
-		float distanceToOrigin : TEXCOORD10;
+		//float4 screenPos : TEXCOORD9;
+		//float distanceToOrigin : TEXCOORD10;
 		SHADOW_COORDS(7)
 	};
 
@@ -58,8 +58,8 @@ struct VertexOutput
 		float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
-		float4 screenPos : TEXCOORD8;
-		float distanceToOrigin : TEXCOORD9;
+		//float4 screenPos : TEXCOORD8;
+		//float distanceToOrigin : TEXCOORD9;
 		SHADOW_COORDS(7)
 	};
 #endif
@@ -73,7 +73,9 @@ struct XSLighting
 	half4 metallicGlossMap;
 	half4 specularMap;
 	half4 thickness;
+	half4 occlusion;
 
+	half3 diffuseColor;
 	half attenuation;
 	half3 normal;
 	half3 tangent;
@@ -82,7 +84,7 @@ struct XSLighting
 	half3 color;
 	half alpha;
 	float isOutline;
-	float2 screenUV;
+	//float2 screenUV;
 };
 
 struct TextureUV
@@ -96,6 +98,7 @@ struct TextureUV
 	half2 normalMapUV;
 	half2 detailNormalUV;
 	half2 thicknessMapUV;
+	half2 occlusionUV;
 };
 
 struct DotProducts
@@ -108,6 +111,7 @@ struct DotProducts
 	half ndh;
 	half rdv;
 	half ldh;
+	half svdn;
 };
 
 sampler2D _MainTex; half4 _MainTex_ST;
@@ -117,10 +121,13 @@ sampler2D _DetailMask; half4 _DetailMask_ST;
 sampler2D _SpecularMap; half4 _SpecularMap_ST;
 sampler2D _MetallicGlossMap; half4 _MetallicGlossMap_ST;
 sampler2D _ThicknessMap; half4 _ThicknessMap_ST;
+sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _Ramp;
+sampler2D _Matcap;
 
-half4 _Color, _ShadowColor, _ShadowRim, _OutlineColor, _SSColor;
-half _ShadowRimRange, _ShadowRimThreshold;
+samplerCUBE _BakedCubemap;
+
+half4 _Color, _ShadowColor, _ShadowRim, _OutlineColor, _SSColor, _OcclusionColor;
 
 half _SSDistortion, _SSPower, _SSScale;
 
@@ -128,21 +135,18 @@ half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY;
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness;
-half _ShadowRimSharpness;
+half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness;
 half _Cutoff;
 half _SSSRange, _SSSSharpness;
 half _OutlineWidth;
 
-
-int _RampMode, _SpecMode, _SpecularStyle, _ShadowSteps;
+int _RampMode, _SpecMode, _SpecularStyle, _ReflectionMode;
 
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
 	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
-	_UVSetThickness;
+	_UVSetThickness, _UVSetOcclusion;
 
-half _HalftoneDotSize;
-half _HalftoneDotAmount;
-half _HalftoneLineAmount;
+half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount;
 
 //Defines for helper functions
 #define grayscaleVec float3(0.2125, 0.7154, 0.0721)

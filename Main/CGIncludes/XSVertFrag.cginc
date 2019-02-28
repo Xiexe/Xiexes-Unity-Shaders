@@ -17,8 +17,8 @@ VertexOutput vert (VertexInput v)
 	o.uv1 = v.uv1;
 	o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
 	o.normal = v.normal;
-	o.distanceToOrigin = distance( _WorldSpaceCameraPos, mul(unity_ObjectToWorld, float4(0,0,0,1) ));
-	o.screenPos = ComputeScreenPos(o.pos);
+	//o.distanceToOrigin = distance( _WorldSpaceCameraPos, mul(unity_ObjectToWorld, float4(0,0,0,1) ));
+	//o.screenPos = ComputeScreenPos(o.pos);
 	
 
 	TRANSFER_SHADOW(o);
@@ -46,8 +46,8 @@ VertexOutput vert (VertexInput v)
 			o.uv = IN[i].uv;
 			o.uv1 = IN[i].uv1;
 			o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors
-			o.screenPos = IN[i].screenPos;
-			o.distanceToOrigin = IN[i].distanceToOrigin;
+			//o.screenPos = IN[i].screenPos;
+			//o.distanceToOrigin = IN[i].distanceToOrigin;
 
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
 				o._ShadowCoord = IN[i]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here because it expects vertex shader inputs
@@ -67,8 +67,8 @@ VertexOutput vert (VertexInput v)
 			o.uv = IN[ii].uv;
 			o.uv1 = IN[ii].uv1;
 			o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
-			o.screenPos = IN[i].screenPos;
-			o.distanceToOrigin = IN[i].distanceToOrigin;
+			//o.screenPos = IN[ii].screenPos;
+			//o.distanceToOrigin = IN[ii].distanceToOrigin;
 
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
 				o._ShadowCoord = IN[ii]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here because it expects vertex shader inputs
@@ -106,7 +106,9 @@ float4 frag (
 	o.normalMap = tex2D(_BumpMap, t.normalMapUV);
 	o.detailNormal = tex2D(_DetailNormalMap, t.detailNormalUV);
 	o.thickness = tex2D(_ThicknessMap, t.thicknessMapUV);
+	o.occlusion = tex2D(_OcclusionMap, t.occlusionUV);
 
+	o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
 	o.attenuation = attenuation;
 	o.normal = i.ntb[0];
 	o.tangent = i.ntb[1];
@@ -114,7 +116,7 @@ float4 frag (
 	o.worldPos = i.worldPos;
 	o.color = i.color.rgb;
 	o.isOutline = i.color.a;
-	o.screenUV = calcScreenUVs(i.screenPos, i.distanceToOrigin);
+	//o.screenUV = calcScreenUVs(i.screenPos, i.distanceToOrigin);
 	
 	float4 col = XSLighting_BRDF_Toon(o);
 	calcAlpha(o);

@@ -14,7 +14,10 @@
 		_DetailMask("Detail Mask", 2D) = "white" {}
 		_DetailNormalMapScale("Detail Normal Scale", Float) = 1.0
 
-		_MetallicGlossMap("Metallic (M,O,_,S)", 2D) = "white" {}
+		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 0
+		_MetallicGlossMap("Metallic (M,O,M,S)", 2D) = "white" {} //Metallic, Occlusion, Mask, Smoothness
+		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
+		_Matcap("Matcap", 2D) = "black" {}
 		_Metallic("Metallic", Range(0,1)) = 0
 		_Glossiness("Smoothness", Range(0,1)) = 0
 
@@ -41,6 +44,9 @@
 		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
 		_ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
 		_ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
+		
+		_OcclusionMap("Occlusion", 2D) = "white" {}
+		_OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
 
 		[Header(Subsurface Scattering)]
@@ -65,12 +71,24 @@
 		[Enum(UV1,0,UV2,1)] _UVSetMetallic ("Metallic Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetSpecular ("Specular Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetThickness ("Thickness Map UVs", Int) = 0
-		
+		[Enum(UV1,0,UV2,1)] _UVSetOcclusion ("Occlusion Map UVs", Int) = 0
+
+		[Header(Stencil)]
+		[IntRange] _Stencil ("Stencil ID [0;255]", Range(0,255)) = 0
+		[Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
+		[Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
 	}
+
 	SubShader
 	{
 		Tags { "RenderType"="Opaque" "Queue"="Geometry" }
 		Cull [_Culling]
+		Stencil 
+		{
+			Ref [_Stencil]
+			Comp [_StencilComp]
+			Pass [StencilOp]
+		}
 		Pass
 		{
 			Name "FORWARD"

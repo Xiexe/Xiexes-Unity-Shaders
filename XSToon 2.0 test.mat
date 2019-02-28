@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: XSToon 2.0 test
   m_Shader: {fileID: 4800000, guid: 85c615217d617204cb497ae6838b8bae, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: _MIXEDSHADOWCOLOR_ON_ON _REFLECTIONS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -19,7 +19,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BakedCube:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 8900000, guid: 40ea18bf7298bd3428adcd1737d4b66e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -60,10 +60,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 200, y: 100}
         m_Offset: {x: 0, y: 0}
     - _MetallicMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 5b2590ca5a1b17548ad80b1097272173, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Normal:
@@ -87,7 +87,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Ramp:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 3c48799439fc02a49bfc11f51f60a060, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RoughMap:
@@ -99,7 +99,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecularMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 5b2590ca5a1b17548ad80b1097272173, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SpecularPattern:
@@ -122,8 +122,8 @@ Material:
     - _ANISTROPIC_ON: 0
     - _AORAMPMODE_ON: 0
     - _AOUV2: 0
-    - _AnisotropicAX: 0.894
-    - _AnisotropicAY: 0.172
+    - _AnisotropicAX: 1
+    - _AnisotropicAY: 1
     - _BumpScale: 0.1
     - _Culling: 2
     - _Cutoff: 0.5
@@ -138,13 +138,13 @@ Material:
     - _Emissive: 1
     - _Gloss: 0.495
     - _GlossMapScale: 1
-    - _Glossiness: 0
+    - _Glossiness: 1
     - _GlossyReflections: 1
-    - _HalftoneDotAmount: 70
-    - _HalftoneDotSize: 1.7
-    - _HalftoneLineAmount: 150
+    - _HalftoneDotAmount: 40
+    - _HalftoneDotSize: 0.7
+    - _HalftoneLineAmount: 100
     - _LitOutlines: 1
-    - _MATCAP_CUBEMAP_ON: 0
+    - _MATCAP_CUBEMAP_ON: 1
     - _MATCAP_ON: 0
     - _MIXEDSHADOWCOLOR_ON: 1
     - _MatcapStyle: 1
@@ -162,10 +162,10 @@ Material:
     - _RampBaseAnchor: 0.5
     - _RampColor: 2
     - _RampDir: 1
-    - _RampMode: 2
+    - _RampMode: 0
     - _ReadMask: 255
     - _ReflSmoothness: 1
-    - _ReflType: 0
+    - _ReflType: 2
     - _Reflectivity: 0
     - _RimIntensity: 1
     - _RimRange: 0.464
@@ -192,9 +192,9 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SolidRimColor: 0
     - _SpecMode: 2
-    - _SpecularArea: 0.773
+    - _SpecularArea: 0.247
     - _SpecularHighlights: 1
-    - _SpecularIntensity: 0.3
+    - _SpecularIntensity: 142.15
     - _SpecularPatternUv2: 0
     - _SpecularStyle: 0
     - _SpecularUv2: 0
@@ -215,7 +215,7 @@ Material:
     - _UVSetNormal: 0
     - _UVSetSpecular: 0
     - _UVSetThickness: 0
-    - _UseReflections: 1
+    - _UseReflections: 0
     - _UseSSS: 1
     - _UseSpecular: 1
     - _WORLDSHADOWCOLOR_ON: 0
@@ -234,14 +234,14 @@ Material:
     - _xd: 1.85
     - _xd2: 5
     m_Colors:
-    - _Color: {r: 0.43382353, g: 0.43382353, b: 0.43382353, a: 1}
+    - _Color: {r: 1, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 0}
     - _NormalTiling: {r: 1, g: 1, b: 0, a: 0}
     - _OcclusionColor: {r: 0, g: 0, b: 0, a: 0}
     - _OutlineColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SSColor: {r: 1, g: 0, b: 0, a: 1}
+    - _SSColor: {r: 0, g: 0, b: 0, a: 1}
     - _SSSCol: {r: 1, g: 1, b: 1, a: 1}
     - _ShadowColor: {r: 1, g: 0.9558824, b: 0.9558824, a: 1}
     - _ShadowRim: {r: 0.7352941, g: 0.621756, b: 0.621756, a: 1}

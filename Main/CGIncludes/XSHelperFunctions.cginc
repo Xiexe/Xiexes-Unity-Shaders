@@ -1,80 +1,26 @@
-//Half tone functions
-float2 calcScreenUVs(float4 screenPos, float distanceToObjectOrigin)
-{
-	float2 clipPos = screenPos / (screenPos.w + 0.0000000001);
-	float2 uv = 2*clipPos-1;
 
-	#if UNITY_SINGLE_PASS_STEREO
-		uv.x *= (_ScreenParams.x * 2) / _ScreenParams.y;
-	#else
-		uv.x *= (_ScreenParams.x) / _ScreenParams.y;
-	#endif
-	uv *= distanceToObjectOrigin;
-	return uv;
-}
-
-float2 rotateUV(float2 uv, float rotation)
-{
-    float mid = 0.5;
-    return float2(
-        cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
-        cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
-    );
-}
-
-float DotHalftone(XSLighting i, float scalar) //Scalar can be anything from attenuation to a dot product
-{
-	float2 uv = i.screenUV;
-	#if UNITY_SINGLE_PASS_STEREO
-		uv *= 2.5;
-	#endif
-	
-    float2 nearest = 2 * frac(_HalftoneDotAmount * uv) - 1;
-    float dist = length(nearest);
-	float dotSize = _HalftoneDotSize * scalar;
-    float dotMask = step(dotSize, dist);
-
-	return dotMask;
-}
-
-float LineHalftone(XSLighting i, float scalar)
-{	
-	// #if defined(DIRECTIONAL)
-	// 	scalar = saturate(scalar + ((1-i.attenuation) * 0.2));
-	// #endif
-	float2 uv = i.screenUV;
-	uv = rotateUV(uv, -0.785398);
-	#if UNITY_SINGLE_PASS_STEREO
-		_HalftoneLineAmount = _HalftoneLineAmount * 2.5;
-	#endif
-	uv.x = sin(uv.x * _HalftoneLineAmount);
-
-	float2 steppedUV = smoothstep(0,0.2,uv.x);
-	float lineMask = steppedUV * 0.2 * scalar;
-
-	return saturate(lineMask);
-}
-//
 
 //Helper Functions for Reflections
-	inline half3 XSFresnelTerm (half3 F0, half cosA)
+	half3 XSFresnelTerm (half3 F0, half cosA)
 	{
 		half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
 		return F0 + (1-F0) * t;
 	}
-	inline half3 XSFresnelLerp (half3 F0, half3 F90, half cosA)
+	
+	half3 XSFresnelLerp (half3 F0, half3 F90, half cosA)
 	{
 		half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
 		return lerp (F0, F90, t);
 	}
 
-	inline half XSGGXTerm (half NdotH, half roughness)
+	half XSGGXTerm (half NdotH, half roughness)
 	{
 		half a2 = roughness * roughness;
 		half d = (NdotH * a2 - NdotH) * NdotH + 1.0f; // 2 mad
 		return UNITY_INV_PI * a2 / (d * d + 1e-7f); // This function is not intended to be running on Mobile,
 												// therefore epsilon is smaller than what can be represented by half
 	}
+	
 	float3 F_Schlick(float3 SpecularColor, float VoH)
 	{
 		return SpecularColor + (1.0 - SpecularColor) * exp2((-5.55473 * VoH) - (6.98316 * VoH));
@@ -113,14 +59,16 @@ void InitializeTextureUVs(
 	half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
 	half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
 	half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
+	half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
 
 	t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
 	t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
 	t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
 	t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
-	t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _SpecularMap);
-	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _MetallicGlossMap);
+	t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
+	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
 	t.thicknessMapUV = TRANSFORM_TEX(uvSetSpecularMap, _ThicknessMap);
+	t.occlusionUV = TRANSFORM_TEX(uvSetSpecularMap, _OcclusionMap);
 }
 
 
@@ -141,17 +89,25 @@ half3 calcStereoViewDir(half3 worldPos)
 	return normalize(viewDir);
 }
 
+float2 matcapSample(float3 worldUp, float3 viewDirection, float3 normalDirection)
+{
+	half3 worldViewUp = normalize(worldUp - viewDirection * dot(viewDirection, worldUp));
+	half3 worldViewRight = normalize(cross(viewDirection, worldViewUp));
+	half2 matcapUV = half2(dot(worldViewRight, normalDirection), dot(worldViewUp, normalDirection)) * 0.5 + 0.5;
+	return matcapUV;				
+}
+
 // Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
 half3 calcLightDir(XSLighting i)
 {
 	half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
-	lightDir *= i.attenuation * dot(_LightColor0, grayscaleVec);
+	lightDir *= i.attenuation * dot(_LightColor0, grayscaleVec);//Use only probe direction in shadows by masking out the light dir with attenuation.
 
 	half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
-	lightDir = (lightDir + probeLightDir) / 2;
+	lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
 
-		#if !defined(POINT) && !defined(SPOT)
-			if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0)
+		#if !defined(POINT) && !defined(SPOT) // if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
+			if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0 && ((_LightColor0.r+_LightColor0.g+_LightColor0.b) / 3) < 0.1)
 			{
 				lightDir = float4(1, 1, 1, 0);
 			}
@@ -172,30 +128,31 @@ half4 calcLightCol(int lightEnv, float3 indirectDiffuse)
 	return lightCol;	
 }
 
-half2 calcMetallicSmoothness(XSLighting i)
+half4 calcMetallicSmoothness(XSLighting i)
 {
 	half roughness = 1-(_Glossiness * i.metallicGlossMap.a);
 	roughness *= 1.7 - 0.7 * roughness;
 
 	half metallic = i.metallicGlossMap.r * _Metallic;
+	half reflectionMask = 1-i.metallicGlossMap.b;
 
-	return half2(metallic, roughness);
+	return half4(metallic, 0, reflectionMask, roughness);
 }
 
 half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse)
 {	
-	half rimIntensity = saturate((1-d.vdn) * pow(d.ndl, _RimThreshold));
+	half rimIntensity = saturate((1-d.svdn) * pow(d.ndl, _RimThreshold));
 	rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
 	half4 rim = (rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz) * i.albedo * i.attenuation);
-	float dotHalftone = 1-DotHalftone(i, rimIntensity);
-	rim *= dotHalftone;
+	// float dotHalftone = 1-DotHalftone(i, rimIntensity);
+	// rim *= dotHalftone;
 	
 	return rim;
 }
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 {
-	half rimIntensity = saturate((1-d.vdn) * pow(-d.ndl, _ShadowRimThreshold * 2));
+	half rimIntensity = saturate((1-d.svdn) * pow(-d.ndl, _ShadowRimThreshold * 2));
 	rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
 	half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * _ShadowColor * 0.1), rimIntensity);
 
@@ -211,16 +168,16 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 		return aniso;
 	}
 
-	half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half2 metallicSmoothness, half ax, half ay)
+	half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half4 metallicSmoothness, half ax, half ay)
 	{	
-		lightCol = (lightCol + indirectDiffuse.xyzz) * i.albedo;
+		lightCol = (lightCol + indirectDiffuse.xyzz);
 		float specularIntensity = _SpecularIntensity * i.specularMap.r;
 
 		if(_SpecMode == 0)
 		{
 			half reflectionUntouched = saturate(pow(d.rdv, _SpecularArea * 128));
-			float dotHalftone = 1-DotHalftone(i, reflectionUntouched);
-			float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol * (_SpecularArea * 2) * i.albedo * dotHalftone;
+			//float dotHalftone = 1-DotHalftone(i, reflectionUntouched);
+			float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol * (_SpecularArea * 2) * i.albedo;
 			return specular * i.attenuation;
 		}
 		else if(_SpecMode == 1)
@@ -254,17 +211,42 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 		return ShadeSH9(float4(0, 0, 0, 1)); // We don't care about anything other than the color from GI, so only feed in 0,0,0, rather than the normal
 	}
 
-	half3 calcIndirectSpecular(XSLighting i, float2 metallicSmoothness, half3 reflDir)
-	{	
-		half4 envSample = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflDir, metallicSmoothness.y * UNITY_SPECCUBE_LOD_STEPS);
-		half3 indirectSpecular = DecodeHDR(envSample, unity_SpecCube0_HDR);
-		half3 indirectLighting = indirectSpecular * i.albedo * metallicSmoothness.x;
-		#if !defined(DIRECTIONAL)
-			indirectLighting *= i.attenuation;
-		#endif
+	half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothness, half3 reflDir, half3 indirectLight, float3 viewDir)
+	{	//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
+		half3 spec = half3(0,0,0);
+		half lightAvg = (indirectLight.r + indirectLight.g + indirectLight.b + _LightColor0) / 4;
 
-		return indirectLighting;
+		UNITY_BRANCH
+		if(_ReflectionMode == 0) // PBR
+		{
+			half4 envSample = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
+			half3 indirectSpecular = DecodeHDR(envSample, unity_SpecCube0_HDR);
+			if (any(indirectSpecular) == 0)
+			{
+				indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));
+			}
+			half3 metallicColor = indirectSpecular * i.diffuseColor.rgb;
+			spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
+		}
+		else if(_ReflectionMode == 1) //Baked Cubemap
+		{	
+			half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
+			half3 metallicColor = indirectSpecular * i.diffuseColor.rgb;
+			spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
+		}
+		else if (_ReflectionMode == 2) //Matcap
+		{	
+			float3 upVector = float3(0,1,0);
+			float2 remapUV = matcapSample(upVector, viewDir, i.normal);
+			spec = tex2Dlod(_Matcap, float4(remapUV, 0, (metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)));
+		}
+
+		spec *= min(lightAvg,1);
+		spec *= metallicSmoothness.z; // Mask out specular based on metallicSmoothness.b
+		return spec;
 	}
+
+
 //----
 
 	half4 calcOutlineColor(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol)
@@ -290,14 +272,15 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 	{	
 		float4 diffuse; 
 			half4 ramp = calcRamp(i, d);
+			//lightCol = max(lightCol * i.attenuation, indirectDiffuse.xyzz);
 			half lightAvg = (lightCol.r + lightCol.g + lightCol.b) * 0.33333;
 			half indirectAvg = (indirectDiffuse.r + indirectDiffuse.g + indirectDiffuse.b) * 0.33333;
 			
 			UNITY_BRANCH
 			if (_RampMode == 0) // Mixed
-				diffuse = (ramp * lightCol) + indirectDiffuse.xyzz;
+				diffuse = ramp * (lightCol + indirectDiffuse.xyzz);
 			else // Ramp
-				diffuse = (ramp * lightAvg) + indirectAvg;
+				diffuse = ramp * (lightAvg + indirectAvg);
 
 			diffuse *= i.attenuation + (indirectDiffuse.xyzz * _ShadowColor);
 
@@ -335,3 +318,71 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 	}
 //
 
+
+
+// Halftone functions, finish implementing later.. Not correct right now.
+// //Half tone functions
+// float2 calcScreenUVs(float4 screenPos, float distanceToObjectOrigin)
+// {
+// 	float2 clipPos = screenPos / (screenPos.w + 0.0000000001);
+// 	float2 uv = 2*clipPos-1;
+
+// 	#if UNITY_SINGLE_PASS_STEREO
+// 		uv.x *= (_ScreenParams.x * 2) / _ScreenParams.y;
+// 	#else
+// 		uv.x *= (_ScreenParams.x) / _ScreenParams.y;
+// 	#endif
+// 	uv *= distanceToObjectOrigin;
+// 	return uv;
+// }
+
+// float2 rotateUV(float2 uv, float rotation)
+// {
+//     float mid = 0.5;
+//     return float2(
+//         cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
+//         cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
+//     );
+// }
+
+// bool IsInMirror()
+// {
+//     return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+// }
+
+// float DotHalftone(XSLighting i, float scalar) //Scalar can be anything from attenuation to a dot product
+// {
+// 	bool inMirror = IsInMirror();
+// 	float2 uv = i.screenUV;
+// 	#if UNITY_SINGLE_PASS_STEREO
+// 		uv *= 2;
+// 	#endif
+	
+//     float2 nearest = 2 * frac(_HalftoneDotAmount * uv) - 1;
+//     float dist = length(nearest);
+// 	float dotSize = _HalftoneDotSize * scalar;
+//     float dotMask = step(dotSize, dist);
+
+// 	return dotMask;
+// }
+
+// float LineHalftone(XSLighting i, float scalar)
+// {	
+// 	// #if defined(DIRECTIONAL)
+// 	// 	scalar = saturate(scalar + ((1-i.attenuation) * 0.2));
+// 	// #endif
+// 	bool inMirror = IsInMirror();
+// 	float2 uv = i.screenUV;
+// 	uv = rotateUV(uv, -0.785398);
+// 	#if UNITY_SINGLE_PASS_STEREO
+// 		_HalftoneLineAmount = _HalftoneLineAmount * 2;
+
+// 	#endif
+// 	uv.x = sin(uv.x * _HalftoneLineAmount);
+
+// 	float2 steppedUV = smoothstep(0,0.2,uv.x);
+// 	float lineMask = steppedUV * 0.2 * scalar;
+
+// 	return saturate(lineMask);
+// }
+// //
