@@ -37,7 +37,6 @@
 		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
 		
 		[Header(Shadows)]
-		[Enum(Mixed Ramp Color, 0, Ramp Color, 1)]_RampMode("Shadow Mode", Int) = 2
 		_Ramp("Shadow Ramp", 2D) = "grey" {}
 		_ShadowColor("Shadow Tint", Color) = (1,1,1,1)
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
@@ -48,6 +47,9 @@
 		_OcclusionMap("Occlusion", 2D) = "white" {}
 		_OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
+		[Header(Outlines)]
+		_OutlineWidth("Outline Width", Range(0, 5)) = 1
+		_OutlineColor("Outline Color", Color) = (0,0,0,1) 
 
 		[Header(Subsurface Scattering)]
 		_ThicknessMap("Thickness Map", 2D) = "white" {}
@@ -105,6 +107,7 @@
 
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
+			#include "../CGIncludes/XSLightingFunctions.cginc"
 			#include "../CGIncludes/XSLighting.cginc"
 			#include "../CGIncludes/XSVertFrag.cginc"
 			ENDCG
@@ -128,6 +131,7 @@
 			
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
+			#include "../CGIncludes/XSLightingFunctions.cginc"
 			#include "../CGIncludes/XSLighting.cginc"
 			#include "../CGIncludes/XSVertFrag.cginc"
 			ENDCG

@@ -37,7 +37,6 @@
 		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
 		
 		[Header(Shadows)]
-		[Enum(Mixed Ramp Color, 0, Ramp Color, 1)]_RampMode("Shadow Mode", Int) = 2
 		_Ramp("Shadow Ramp", 2D) = "grey" {}
 		_ShadowColor("Shadow Tint", Color) = (1,1,1,1)
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
@@ -104,6 +103,7 @@
 
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
+			#include "../CGIncludes/XSLightingFunctions.cginc"
 			#include "../CGIncludes/XSLighting.cginc"
 			#include "../CGIncludes/XSVertFrag.cginc"
 			ENDCG
@@ -124,6 +124,7 @@
 			
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
+			#include "../CGIncludes/XSLightingFunctions.cginc"
 			#include "../CGIncludes/XSLighting.cginc"
 			#include "../CGIncludes/XSVertFrag.cginc"
 			ENDCG

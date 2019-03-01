@@ -128,25 +128,26 @@ sampler2D _Matcap;
 samplerCUBE _BakedCubemap;
 
 half4 _Color, _ShadowColor, _ShadowRim, _OutlineColor, _SSColor, _OcclusionColor;
-
-half _SSDistortion, _SSPower, _SSScale;
+half _Cutoff;
 
 half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY;
+
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness;
-half _Cutoff;
+
+half _SSDistortion, _SSPower, _SSScale;
 half _SSSRange, _SSSSharpness;
 half _OutlineWidth;
 
-int _RampMode, _SpecMode, _SpecularStyle, _ReflectionMode;
+int _SpecMode, _SpecularStyle, _ReflectionMode;
 
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
 	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
 	_UVSetThickness, _UVSetOcclusion;
 
-half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount;
+// half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount;
 
 //Defines for helper functions
 #define grayscaleVec float3(0.2125, 0.7154, 0.0721)
