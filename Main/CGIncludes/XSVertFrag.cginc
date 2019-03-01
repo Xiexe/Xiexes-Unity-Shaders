@@ -90,7 +90,7 @@ float4 frag (
 {
 	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
 	#if defined(DIRECTIONAL)
-		attenuation = smoothstep(0, 0.5, attenuation); // This cleans up light atten from directional lights.
+		//attenuation = //smoothstep(0, 1, attenuation); // This cleans up light atten from directional lights.
 		half nAtten = pow(1-attenuation, 5); // Take 1-Atten as a mask to clean up left over artifacts from self shadowing.
 		attenuation = saturate(attenuation + (1-nAtten));
 	#endif

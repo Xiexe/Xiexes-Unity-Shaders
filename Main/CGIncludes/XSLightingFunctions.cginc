@@ -106,15 +106,15 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 	{
 		half reflectionUntouched = saturate(pow(d.rdv, _SpecularArea * 128));
 		//float dotHalftone = 1-DotHalftone(i, reflectionUntouched);
-		float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol * (_SpecularArea * 2) * i.albedo;
-		return specular * i.attenuation;
+		float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol * (_SpecularArea * 2) ;
+		return specular * i.attenuation * i.albedo;
 	}
 	else if(_SpecMode == 1)
 	{
 		half smooth = saturate(D_GGXAnisotropic(d.tdh, d.bdh, d.ndh, ax, ay));
 		half sharp = round(smooth) * 2 * 0.5;
 		float specular = lerp(smooth, sharp, _SpecularStyle) * lightCol * specularIntensity;
-		return specular * i.attenuation;
+		return specular * i.attenuation * i.albedo;
 	}
 	else
 	{

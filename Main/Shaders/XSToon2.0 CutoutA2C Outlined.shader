@@ -14,7 +14,7 @@ Properties
 		_DetailMask("Detail Mask", 2D) = "white" {}
 		_DetailNormalMapScale("Detail Normal Scale", Float) = 1.0
 
-		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 0
+		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 3
 		_MetallicGlossMap("Metallic (M,O,M,S)", 2D) = "white" {} //Metallic, Occlusion, Mask, Smoothness
 		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
 		_Matcap("Matcap", 2D) = "black" {}
