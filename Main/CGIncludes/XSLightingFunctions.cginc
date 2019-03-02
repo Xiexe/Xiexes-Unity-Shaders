@@ -146,8 +146,6 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 	if(_ReflectionMode == 0) // PBR
 	{
 		float3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
-		float3 reflectionUV2 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube1_ProbePosition, unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax);
-
 		half4 probe0 = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflectionUV1, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
 		half3 probe0sample = DecodeHDR(probe0, unity_SpecCube0_HDR);
 
@@ -156,6 +154,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 		
 		UNITY_BRANCH
 		if (interpolator < 0.99999) {
+			float3 reflectionUV2 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube1_ProbePosition, unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax);
 			half4 probe1 = UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0, reflectionUV2, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
 			half3 probe1sample = DecodeHDR(probe1, unity_SpecCube1_HDR);
 			indirectSpecular = lerp(probe1sample, probe0sample, interpolator);
@@ -169,13 +168,13 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 			indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)) * lightAvg;
 		}
 
-		half3 metallicColor = indirectSpecular * i.diffuseColor.rgb;
+		half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
 		spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
 	}
 	else if(_ReflectionMode == 1) //Baked Cubemap
 	{	
 		half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
-		half3 metallicColor = indirectSpecular * i.diffuseColor.rgb;
+		half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
 		spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
 		spec *= min(lightAvg,1);
 	}
