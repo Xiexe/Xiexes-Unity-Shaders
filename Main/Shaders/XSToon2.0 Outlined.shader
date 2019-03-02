@@ -15,9 +15,10 @@
 		_DetailNormalMapScale("Detail Normal Scale", Float) = 1.0
 
 		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 3
-		_MetallicGlossMap("Metallic (M,O,M,S)", 2D) = "white" {} //Metallic, Occlusion, Mask, Smoothness
+		_MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
 		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
 		_Matcap("Matcap", 2D) = "black" {}
+		_ReflectivityMask("Reflection Mask" , 2D) = "white" {}
 		_Metallic("Metallic", Range(0,1)) = 0
 		_Glossiness("Smoothness", Range(0,1)) = 0
 
@@ -72,6 +73,7 @@
 		[Enum(UV1,0,UV2,1)] _UVSetDetMask ("Detail Mask UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetMetallic ("Metallic Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetSpecular ("Specular Map UVs", Int) = 0
+		[Enum(UV1,0,UV2,1)] _UVSetReflectivity ("Reflection Mask UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetThickness ("Thickness Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetOcclusion ("Occlusion Map UVs", Int) = 0
 

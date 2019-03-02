@@ -71,6 +71,7 @@ struct XSLighting
 	half4 detailNormal;
 	half4 detailMask;
 	half4 metallicGlossMap;
+	half4 reflectivityMask;
 	half4 specularMap;
 	half4 thickness;
 	half4 occlusion;
@@ -99,6 +100,7 @@ struct TextureUV
 	half2 detailNormalUV;
 	half2 thicknessMapUV;
 	half2 occlusionUV;
+	half2 reflectivityMaskUV;
 };
 
 struct DotProducts
@@ -120,11 +122,11 @@ sampler2D _DetailNormalMap; half4 _DetailNormalMap_ST;
 sampler2D _DetailMask; half4 _DetailMask_ST;
 sampler2D _SpecularMap; half4 _SpecularMap_ST;
 sampler2D _MetallicGlossMap; half4 _MetallicGlossMap_ST;
+sampler2D _ReflectivityMask; half4 _ReflectivityMask_ST;
 sampler2D _ThicknessMap; half4 _ThicknessMap_ST;
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
-sampler2D _Ramp;
 sampler2D _Matcap;
-
+sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
 
 half4 _Color, _ShadowColor, _ShadowRim, _OutlineColor, _SSColor, _OcclusionColor;
@@ -145,7 +147,7 @@ int _SpecMode, _SpecularStyle, _ReflectionMode;
 
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
 	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
-	_UVSetThickness, _UVSetOcclusion;
+	_UVSetThickness, _UVSetOcclusion, _UVSetReflectivity;
 
 // half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount;
 

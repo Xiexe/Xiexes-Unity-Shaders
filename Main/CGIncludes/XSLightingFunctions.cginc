@@ -187,7 +187,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 		spec *= min(lightAvg,1);
 	}
 
-	//spec *= metallicSmoothness.z; // Mask out specular based on metallicSmoothness.b
+	spec *= i.reflectivityMask;
 	return spec;
 }
 

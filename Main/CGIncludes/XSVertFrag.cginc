@@ -107,6 +107,7 @@ float4 frag (
 	o.detailNormal = tex2D(_DetailNormalMap, t.detailNormalUV);
 	o.thickness = tex2D(_ThicknessMap, t.thicknessMapUV);
 	o.occlusion = tex2D(_OcclusionMap, t.occlusionUV);
+	o.reflectivityMask = tex2D(_ReflectivityMask, t.reflectivityMaskUV);
 
 	o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
 	o.attenuation = attenuation;
