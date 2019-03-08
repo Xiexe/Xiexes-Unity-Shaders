@@ -7,6 +7,7 @@ using System;
 
 public class XSToonInspector : ShaderGUI
 {
+
 	//Material Properties
 	MaterialProperty _Culling;
 	MaterialProperty _MainTex;
@@ -38,7 +39,6 @@ public class XSToonInspector : ShaderGUI
 	MaterialProperty _AnisotropicAX;
 	MaterialProperty _AnisotropicAY;
 	MaterialProperty _Ramp;
-	MaterialProperty _ShadowColor;
 	MaterialProperty _ShadowRim;
 	MaterialProperty _ShadowRimRange;
 	MaterialProperty _ShadowRimThreshold;
@@ -70,6 +70,8 @@ public class XSToonInspector : ShaderGUI
 	MaterialProperty _StencilOp;
 	MaterialProperty _OutlineWidth;
 	MaterialProperty _OutlineColor;
+	MaterialProperty _ShadowSharpness;
+	MaterialProperty _AdvMode;
 
 	static bool isAdvancedMode = false;
 
@@ -82,6 +84,7 @@ public class XSToonInspector : ShaderGUI
 	static bool showSubsurface = false;
 	static bool showOutlines = false;
 	static bool showEmission = false;
+	static bool showAdvanced = false;
 
 	bool isOutlined = false;
 	bool isCutout = false;
@@ -124,11 +127,11 @@ public class XSToonInspector : ShaderGUI
 		_AnisotropicAX = FindProperty("_AnisotropicAX", props);
 		_AnisotropicAY = FindProperty("_AnisotropicAY", props);
 		_Ramp = FindProperty("_Ramp", props);
-		_ShadowColor = FindProperty("_ShadowColor", props);
 		_ShadowRim = FindProperty("_ShadowRim", props);
 		_ShadowRimRange = FindProperty("_ShadowRimRange", props);
 		_ShadowRimThreshold = FindProperty("_ShadowRimThreshold", props);
 		_ShadowRimSharpness = FindProperty("_ShadowRimSharpness", props);
+		_ShadowSharpness = FindProperty("_ShadowSharpness", props);
 		_OcclusionMap = FindProperty("_OcclusionMap", props);
 		_OcclusionColor = FindProperty("_OcclusionColor", props);
 		_ThicknessMap = FindProperty("_ThicknessMap", props);
@@ -154,6 +157,7 @@ public class XSToonInspector : ShaderGUI
 		_Stencil = FindProperty("_Stencil", props);
 		_StencilComp = FindProperty("_StencilComp", props);
 		_StencilOp = FindProperty("_StencilOp", props);
+		_AdvMode = ShaderGUI.FindProperty("_AdvMode", props);
 
 		if (isOutlined)
 		{
@@ -161,9 +165,9 @@ public class XSToonInspector : ShaderGUI
 			_OutlineColor = FindProperty("_OutlineColor", props);
 		}
 
-
 		EditorGUI.BeginChangeCheck();
 		{
+			materialEditor.ShaderProperty(_AdvMode, _AdvMode.displayName);
 			showMainSettings = XSStyles.ShurikenFoldout("Main Settings", showMainSettings);
 			if (showMainSettings)
 			{
@@ -174,6 +178,7 @@ public class XSToonInspector : ShaderGUI
 				}
 				materialEditor.ShaderProperty(_UVSetAlbedo, new GUIContent("UV Set", "The UV set to use for the Albedo Texture"), 2);
 				materialEditor.TextureScaleOffsetProperty(_MainTex);
+				materialEditor.ShaderProperty(_Culling, _Culling.displayName);
 			}
 
 			if(!isCutout)
@@ -185,7 +190,7 @@ public class XSToonInspector : ShaderGUI
 			if(showShadows)
 			{
 				materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right, or Down to Up"), _Ramp);
-				XSStyles.constrainedShaderProperty(materialEditor, _ShadowColor, new GUIContent("Recieved Shadow Tint", "Tinting of shadows recieved from realtime lights. Does not effect Shadow Ramp color"), 0);
+				materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Only affects recieved shadows and self shadows. Does not affect shadow ramp. You need a realtime directional light with shadows to see changes from this!"));
 
 				GUILayout.Space(5);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Occlusion Map", "Occlusion Map, used to darken areas on the model artifically."), _OcclusionMap);
@@ -220,8 +225,8 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.TextureScaleOffsetProperty(_BumpMap);
 
 				materialEditor.TexturePropertySingleLine(new GUIContent("Detail Normal Map", "Detail Normal Map"), _DetailNormalMap);
-				materialEditor.ShaderProperty(_BumpScale, new GUIContent("Detail Normal Strength", "Strength of the detail Normal Map"), 2);
-				materialEditor.ShaderProperty(_UVSetNormal, new GUIContent("UV Set", "The UV set to use for the Detail Normal Map"), 2);
+				materialEditor.ShaderProperty(_DetailNormalMapScale, new GUIContent("Detail Normal Strength", "Strength of the detail Normal Map"), 2);
+				materialEditor.ShaderProperty(_UVSetDetNormal, new GUIContent("UV Set", "The UV set to use for the Detail Normal Map"), 2);
 				materialEditor.TextureScaleOffsetProperty(_DetailNormalMap);
 			}
 
@@ -269,8 +274,8 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.ShaderProperty(_ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
 				if (_ReflectionMode.floatValue == 0) // PBR
 				{
-					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel"), _MetallicGlossMap);
+					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
 				}
 				else if (_ReflectionMode.floatValue == 1) //Baked cube
@@ -298,7 +303,7 @@ public class XSToonInspector : ShaderGUI
 			if(showSubsurface)
 			{
 				materialEditor.TexturePropertySingleLine(new GUIContent("Thickness Map", "Thickness Map, used to mask areas where subsurface can happen"), _ThicknessMap);
-				materialEditor.TextureScaleOffsetProperty(_UVSetThickness);
+				materialEditor.TextureScaleOffsetProperty(_ThicknessMap);
 				materialEditor.ShaderProperty(_UVSetThickness, new GUIContent("UV Set", "The UV set to use for the Thickness Map"), 2);
 				
 				XSStyles.constrainedShaderProperty(materialEditor, _SSColor, new GUIContent("Subsurface Color", "Subsurface Scattering Color"), 2);
@@ -307,6 +312,17 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.ShaderProperty(_SSScale, new GUIContent("Subsurface Scale", "Subsurface Scale"), 2);
 				materialEditor.ShaderProperty(_SSSRange, new GUIContent("Subsurface Range", "Subsurface Range"), 2);
 				materialEditor.ShaderProperty(_SSSSharpness, new GUIContent("Subsurface Sharpness", "Subsurface Sharpness"), 2);
+			}
+
+			if (_AdvMode.floatValue == 1)
+			{
+				showAdvanced = XSStyles.ShurikenFoldout("Advanced Settings", showAdvanced);
+				if (showAdvanced)
+				{
+					materialEditor.ShaderProperty(_Stencil, _Stencil.displayName);
+					materialEditor.ShaderProperty(_StencilComp, _StencilComp.displayName);
+					materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
+				}
 			}
 
 			XSStyles.DoFooter();

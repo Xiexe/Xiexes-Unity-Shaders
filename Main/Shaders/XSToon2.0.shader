@@ -1,4 +1,4 @@
-﻿Shader "Unlit/XSToon2.0"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0"
 {
 	Properties
 	{	
@@ -41,7 +41,7 @@
 		
 
 		_Ramp("Shadow Ramp", 2D) = "grey" {}
-		_ShadowColor("Shadow Tint", Color) = (1,1,1,1)
+		_ShadowSharpness("Shadow Sharpness", Range(0,1)) = 0.5
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
 		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
 		_ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
@@ -77,7 +77,7 @@
 		[Enum(UV1,0,UV2,1)] _UVSetOcclusion("Occlusion Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetEmission("Emission Map UVs", Int) = 0
 
-
+		[HideInInspector][Enum(Basic, 0, Advanced, 1)]_AdvMode("Shader Mode", Int) = 0
 		[IntRange] _Stencil ("Stencil ID [0;255]", Range(0,255)) = 0
 		[Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
 		[Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0

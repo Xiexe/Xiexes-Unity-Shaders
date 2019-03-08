@@ -132,7 +132,7 @@ sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
 
-half4 _Color, _ShadowColor, _ShadowRim, 
+half4 _Color, _ShadowRim, 
 	_OutlineColor, _SSColor, _OcclusionColor,
 	_EmissionColor;
 
@@ -143,7 +143,7 @@ half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY;
 
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness;
-half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness;
+half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness;
 
 half _SSDistortion, _SSPower, _SSScale;
 half _SSSRange, _SSSSharpness;

@@ -10,6 +10,8 @@ public class XSGradientEditor : EditorWindow
     // resolution presets
     public static Texture shadowRamp;
     public string finalFilePath;
+
+	static public bool isLinear;
     public enum resolutions
     {
         Tiny64x8,
@@ -67,6 +69,8 @@ public class XSGradientEditor : EditorWindow
                 break;
         }
 
+		isLinear = GUILayout.Toggle(isLinear, "Make Linear Texture");
+
         if (gradient != null)
         {
 
@@ -119,7 +123,9 @@ public class XSGradientEditor : EditorWindow
             texture.maxTextureSize = 512;
             texture.mipmapEnabled = false;
             texture.textureCompression = TextureImporterCompression.Uncompressed;
-            texture.sRGBTexture = false;
+
+			if (isLinear != true)
+				texture.sRGBTexture = false;
 
             texture.SaveAndReimport();
             AssetDatabase.Refresh();
