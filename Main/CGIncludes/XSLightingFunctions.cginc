@@ -39,7 +39,7 @@
 half3 calcLightDir(XSLighting i)
 {
 	half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
-	//lightDir *= i.attenuation * dot(_LightColor0, grayscaleVec);//Use only probe direction in shadows by masking out the light dir with attenuation.
+	lightDir *= i.attenuation * dot(_LightColor0, grayscaleVec);//Use only probe direction in shadows by masking out the light dir with attenuation.
 
 	half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
 	lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
@@ -132,11 +132,6 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 	}
 }
 
-half3 calcIndirectDiffuse()
-{
-	return ShadeSH9(float4(0, 0, 0, 1)); // We don't care about anything other than the color from GI, so only feed in 0,0,0, rather than the normal
-}
-
 half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothness, half3 reflDir, half3 indirectLight, float3 viewDir)
 {	//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
 	half3 spec = half3(0,0,0);
@@ -209,13 +204,18 @@ half4 calcRamp(XSLighting i, DotProducts d)
 	return ramp;
 }
 
+half3 calcIndirectDiffuse()
+{
+	return ShadeSH9(float4(0, 0, 0, 1)); // We don't care about anything other than the color from GI, so only feed in 0,0,0, rather than the normal
+}
+
 half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol) 
 {	
 	float4 diffuse; 
 	half4 ramp = calcRamp(i, d);
-	// lightCol = max(lightCol * i.attenuation, indirectDiffuse.xyzz);
-	diffuse = ramp * (lightCol + indirectDiffuse.xyzz);
-	diffuse *= i.attenuation + indirectDiffuse.xyzz;
+	half4 indirect = indirectDiffuse.xyzz;
+	diffuse = ramp * i.attenuation * lightCol + indirect;
+	//diffuse *= i.attenuation + indirect;
 
 	return i.albedo * diffuse;
 }
