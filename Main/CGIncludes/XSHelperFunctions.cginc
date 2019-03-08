@@ -32,6 +32,7 @@ void InitializeTextureUVs(
 	half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
 	half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
 	half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
+	half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
 
 	t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
 	t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
@@ -42,6 +43,7 @@ void InitializeTextureUVs(
 	t.thicknessMapUV = TRANSFORM_TEX(uvSetSpecularMap, _ThicknessMap);
 	t.occlusionUV = TRANSFORM_TEX(uvSetSpecularMap, _OcclusionMap);
 	t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);
+	t.emissionMapUV = TRANSFORM_TEX(uvSetEmissionMap, _EmissionMap);
 }
 
 

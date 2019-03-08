@@ -22,13 +22,15 @@
 		_Metallic("Metallic", Range(0,1)) = 0
 		_Glossiness("Smoothness", Range(0,1)) = 0
 
-		[Header(RimLight)]
+		_EmissionMap("Emission Map", 2D) = "white" {}
+		[HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
+
 		_RimIntensity("Rimlight Intensity", Float) = 1
 		_RimRange("Rim Range", Range(0,1)) = 0.7
 		_RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
 		_RimSharpness("Rim Sharpness", Range(0,1)) = 0.1
 
-		[Header(Specularity)]
+
 		[Enum(Blinn Phong, 0, Anisotropic, 1, GGX, 2)]_SpecMode("Specular Mode", Int) = 0
 		[Enum(Smooth, 0, Sharp, 1)]_SpecularStyle("Specular Style", Int) = 0
 		_SpecularMap("Specular Map", 2D) = "white" {}
@@ -37,7 +39,7 @@
 		_AnisotropicAX("Anisotropic X", Range(0,1)) = 0.25
 		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
 		
-		[Header(Shadows)]
+
 		_Ramp("Shadow Ramp", 2D) = "grey" {}
 		_ShadowColor("Shadow Tint", Color) = (1,1,1,1)
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
@@ -49,7 +51,6 @@
 		_OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
 
-		[Header(Subsurface Scattering)]
 		_ThicknessMap("Thickness Map", 2D) = "white" {}
 		_SSColor ("Subsurface Color", Color) = (0,0,0,0)
 		_SSDistortion("Normal Distortion", Range(0,3)) = 1
@@ -58,12 +59,11 @@
 		_SSSRange("Subsurface Range", Range(0,1)) = 1
 		_SSSSharpness("Subsurface Falloff", Range(0.001, 1)) = 0.2
 
-		[Header(HalfTones)]
+
 		_HalftoneDotSize("Halftone Dot Size", Float) = 1.7
 		_HalftoneDotAmount("Halftone Dot Amount", Float) = 50
 		_HalftoneLineAmount("Halftone Line Amount", Float) = 150
 
-		[Header(UVSets)]
 		[Enum(UV1,0,UV2,1)] _UVSetAlbedo ("Albedo UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetNormal ("Normal Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetDetNormal ("Detail Normal UVs", Int) = 0
@@ -73,8 +73,8 @@
 		[Enum(UV1,0,UV2,1)] _UVSetReflectivity ("Reflection Mask UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetThickness ("Thickness Map UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetOcclusion ("Occlusion Map UVs", Int) = 0
+		[Enum(UV1,0,UV2,1)] _UVSetEmission("Emission Map UVs", Int) = 0
 
-		[Header(Stencil)]
 		[IntRange] _Stencil ("Stencil ID [0;255]", Range(0,255)) = 0
 		[Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
 		[Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
@@ -151,4 +151,5 @@
 		}
 	}
 	Fallback "Transparent/Diffuse"
+	CustomEditor "XSToonInspector"
 }
