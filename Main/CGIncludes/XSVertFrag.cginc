@@ -104,7 +104,7 @@ float4 frag (
 	o.metallicGlossMap = tex2D(_MetallicGlossMap, t.metallicGlossMapUV);
 	o.detailMask = tex2D(_DetailMask, t.detailMaskUV);
 	o.normalMap = tex2D(_BumpMap, t.normalMapUV);
-	o.detailNormal = tex2D(_DetailNormalMap, t.detailNormalUV);
+	o.detailNormal = tex2D(_DetailNormalMap, t.detailNormalUV); // UNITY_SAMPLE_TEX2D_SAMPLER(_DetailNormal, _MainTex, uv_DetailNormal)
 	o.thickness = tex2D(_ThicknessMap, t.thicknessMapUV);
 	o.occlusion = tex2D(_OcclusionMap, t.occlusionUV);
 	o.reflectivityMask = tex2D(_ReflectivityMask, t.reflectivityMaskUV);

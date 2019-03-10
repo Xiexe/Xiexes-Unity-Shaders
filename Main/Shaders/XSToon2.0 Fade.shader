@@ -4,6 +4,7 @@
 	{	
 		[Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
 		_MainTex("Texture", 2D) = "white" {}
+		_Saturation("Main Texture Saturation", Range(0,10)) = 1
 		_Color("Color Tint", Color) = (1,1,1,1)
 		_Cutoff("Cutoff", Float) = 0.5
 
@@ -25,7 +26,7 @@
 		_EmissionMap("Emission Map", 2D) = "white" {}
 		[HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
 
-		_RimIntensity("Rimlight Intensity", Float) = 1
+		_RimIntensity("Rimlight Intensity", Float) = 0
 		_RimRange("Rim Range", Range(0,1)) = 0.7
 		_RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
 		_RimSharpness("Rim Sharpness", Range(0,1)) = 0.1
@@ -34,13 +35,13 @@
 		[Enum(Blinn Phong, 0, Anisotropic, 1, GGX, 2)]_SpecMode("Specular Mode", Int) = 0
 		[Enum(Smooth, 0, Sharp, 1)]_SpecularStyle("Specular Style", Int) = 0
 		_SpecularMap("Specular Map", 2D) = "white" {}
-		_SpecularIntensity("Specular Intensity", Float) = 1
+		_SpecularIntensity("Specular Intensity", Float) = 0
 		_SpecularArea("Specular Smoothness", Range(0,1)) = 0.5
 		_AnisotropicAX("Anisotropic X", Range(0,1)) = 0.25
 		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
 		
 
-		_Ramp("Shadow Ramp", 2D) = "grey" {}
+		_Ramp("Shadow Ramp", 2D) = "white" {}
 		_ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
 		_ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
@@ -50,6 +51,9 @@
 		_OcclusionMap("Occlusion", 2D) = "white" {}
 		_OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
+
+		_OutlineWidth("Outline Width", Range(0, 5)) = 1
+		_OutlineColor("Outline Color", Color) = (0,0,0,1)
 
 		_ThicknessMap("Thickness Map", 2D) = "white" {}
 		_SSColor ("Subsurface Color", Color) = (0,0,0,0)

@@ -6,10 +6,10 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: XSToon 2.0 test
+  m_Name: XSToon 2.0
   m_Shader: {fileID: 4800000, guid: 85c615217d617204cb497ae6838b8bae, type: 3}
-  m_ShaderKeywords: 
-  m_LightmapFlags: 4
+  m_ShaderKeywords: _EMISSION _NORMALMAP
+  m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
@@ -23,10 +23,6 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -58,12 +54,8 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _ParallaxMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _Ramp:
-        m_Texture: {fileID: 2800000, guid: df4dfc402a041174db1b96ba4d81dd5e, type: 3}
+        m_Texture: {fileID: 2800000, guid: 529b95e318b684643b47bd73e037118a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ReflectivityMask:
@@ -80,63 +72,54 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AdvMode: 0
-    - _AnisotropicAX: 0.09
-    - _AnisotropicAY: 0.02
+    - _AnisotropicAX: 0.25
+    - _AnisotropicAY: 0.75
     - _BumpScale: 1
     - _Culling: 2
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _DstBlend: 0
-    - _GlossMapScale: 1
-    - _Glossiness: 0.5
-    - _GlossyReflections: 1
+    - _Glossiness: 0
     - _HalftoneDotAmount: 50
     - _HalftoneDotSize: 1.7
     - _HalftoneLineAmount: 150
     - _Metallic: 0
-    - _Mode: 0
-    - _OcclusionStrength: 1
-    - _Parallax: 0.02
-    - _ReflectionMode: 0
+    - _OutlineWidth: 1
+    - _ReflectionMode: 3
     - _RimIntensity: 0
-    - _RimRange: 0.84
+    - _RimRange: 0.7
     - _RimSharpness: 0.1
-    - _RimThreshold: 0.05
-    - _SSDistortion: 0
-    - _SSPower: 1.39
-    - _SSSRange: 0
+    - _RimThreshold: 0.1
+    - _SSDistortion: 1
+    - _SSPower: 1
+    - _SSSRange: 1
     - _SSSSharpness: 0.2
-    - _SSScale: 3
+    - _SSScale: 1
+    - _Saturation: 1
     - _ShadowRimRange: 0.7
     - _ShadowRimSharpness: 0.3
     - _ShadowRimThreshold: 0.1
-    - _ShadowSharpness: 1
-    - _SmoothnessTextureChannel: 0
-    - _SpecMode: 2
+    - _ShadowSharpness: 0.5
+    - _SpecMode: 0
     - _SpecularArea: 0.5
-    - _SpecularHighlights: 1
-    - _SpecularIntensity: 5.79
+    - _SpecularIntensity: 0
     - _SpecularStyle: 0
-    - _SrcBlend: 1
     - _Stencil: 0
     - _StencilComp: 0
     - _StencilOp: 0
-    - _UVSec: 0
     - _UVSetAlbedo: 0
     - _UVSetDetMask: 0
     - _UVSetDetNormal: 0
     - _UVSetEmission: 0
     - _UVSetMetallic: 0
-    - _UVSetNormal: 1
+    - _UVSetNormal: 0
     - _UVSetOcclusion: 0
     - _UVSetReflectivity: 0
     - _UVSetSpecular: 0
     - _UVSetThickness: 0
-    - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
     - _OcclusionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _SSColor: {r: 0, g: 0, b: 0, a: 0}
-    - _ShadowColor: {r: 1, g: 1, b: 1, a: 1}
     - _ShadowRim: {r: 1, g: 1, b: 1, a: 1}

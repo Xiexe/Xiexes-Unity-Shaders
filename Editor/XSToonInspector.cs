@@ -3,77 +3,81 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
 using System;
-
+using System.Reflection;
 
 public class XSToonInspector : ShaderGUI
 {
+	BindingFlags bindingFlags = BindingFlags.Public |
+								BindingFlags.NonPublic |
+								BindingFlags.Instance |
+								BindingFlags.Static;
 
-	//Material Properties
-	MaterialProperty _Culling;
-	MaterialProperty _MainTex;
-	MaterialProperty _Color;
-	MaterialProperty _Cutoff;
-	MaterialProperty _BumpMap;
-	MaterialProperty _BumpScale;
-	MaterialProperty _DetailNormalMap;
-	MaterialProperty _DetailMask;
-	MaterialProperty _DetailNormalMapScale;
-	MaterialProperty _ReflectionMode;
-	MaterialProperty _MetallicGlossMap;
-	MaterialProperty _BakedCubemap;
-	MaterialProperty _Matcap;
-	MaterialProperty _ReflectivityMask;
-	MaterialProperty _Metallic;
-	MaterialProperty _Glossiness;
-	MaterialProperty _EmissionMap;
-	MaterialProperty _EmissionColor;
-	MaterialProperty _RimIntensity;
-	MaterialProperty _RimRange;
-	MaterialProperty _RimThreshold;
-	MaterialProperty _RimSharpness;
-	MaterialProperty _SpecMode;
-	MaterialProperty _SpecularStyle;
-	MaterialProperty _SpecularMap;
-	MaterialProperty _SpecularIntensity;
-	MaterialProperty _SpecularArea;
-	MaterialProperty _AnisotropicAX;
-	MaterialProperty _AnisotropicAY;
-	MaterialProperty _Ramp;
-	MaterialProperty _ShadowRim;
-	MaterialProperty _ShadowRimRange;
-	MaterialProperty _ShadowRimThreshold;
-	MaterialProperty _ShadowRimSharpness;
-	MaterialProperty _OcclusionMap;
-	MaterialProperty _OcclusionColor;
-	MaterialProperty _ThicknessMap;
-	MaterialProperty _SSColor;
-	MaterialProperty _SSDistortion;
-	MaterialProperty _SSPower;
-	MaterialProperty _SSScale;
-	MaterialProperty _SSSRange;
-	MaterialProperty _SSSSharpness;
-	MaterialProperty _HalftoneDotSize;
-	MaterialProperty _HalftoneDotAmount;
-	MaterialProperty _HalftoneLineAmount;
-	MaterialProperty _UVSetAlbedo;
-	MaterialProperty _UVSetNormal;
-	MaterialProperty _UVSetDetNormal;
-	MaterialProperty _UVSetDetMask;
-	MaterialProperty _UVSetMetallic;
-	MaterialProperty _UVSetSpecular;
-	MaterialProperty _UVSetReflectivity;
-	MaterialProperty _UVSetThickness;
-	MaterialProperty _UVSetOcclusion;
-	MaterialProperty _UVSetEmission;
-	MaterialProperty _Stencil;
-	MaterialProperty _StencilComp;
-	MaterialProperty _StencilOp;
-	MaterialProperty _OutlineWidth;
-	MaterialProperty _OutlineColor;
-	MaterialProperty _ShadowSharpness;
-	MaterialProperty _AdvMode;
-
-	static bool isAdvancedMode = false;
+	//Assign all properties as null at first to stop hundreds of warnings spamming the log when script gets compiled.
+	//If they aren't we get warnings, because assigning with reflection seems to make Unity think that the properties never actually get used. 
+	MaterialProperty _Culling = null;
+	MaterialProperty _MainTex = null;
+	MaterialProperty _Saturation = null;
+	MaterialProperty _Color = null;
+	MaterialProperty _Cutoff = null;
+	MaterialProperty _BumpMap = null;
+	MaterialProperty _BumpScale = null;
+	MaterialProperty _DetailNormalMap = null;
+	MaterialProperty _DetailMask = null;
+	MaterialProperty _DetailNormalMapScale = null;
+	MaterialProperty _ReflectionMode = null;
+	MaterialProperty _MetallicGlossMap = null;
+	MaterialProperty _BakedCubemap = null;
+	MaterialProperty _Matcap = null;
+	MaterialProperty _ReflectivityMask = null;
+	MaterialProperty _Metallic = null;
+	MaterialProperty _Glossiness = null;
+	MaterialProperty _EmissionMap = null;
+	MaterialProperty _EmissionColor = null;
+	MaterialProperty _RimIntensity = null;
+	MaterialProperty _RimRange = null;
+	MaterialProperty _RimThreshold = null;
+	MaterialProperty _RimSharpness = null;
+	MaterialProperty _SpecMode = null;
+	MaterialProperty _SpecularStyle = null;
+	MaterialProperty _SpecularMap = null;
+	MaterialProperty _SpecularIntensity = null;
+	MaterialProperty _SpecularArea = null;
+	MaterialProperty _AnisotropicAX = null;
+	MaterialProperty _AnisotropicAY = null;
+	MaterialProperty _Ramp = null;
+	MaterialProperty _ShadowRim = null;
+	MaterialProperty _ShadowRimRange = null;
+	MaterialProperty _ShadowRimThreshold = null;
+	MaterialProperty _ShadowRimSharpness = null;
+	MaterialProperty _OcclusionMap = null;
+	MaterialProperty _OcclusionColor = null;
+	MaterialProperty _ThicknessMap = null;
+	MaterialProperty _SSColor = null;
+	MaterialProperty _SSDistortion = null;
+	MaterialProperty _SSPower = null;
+	MaterialProperty _SSScale = null;
+	MaterialProperty _SSSRange = null;
+	MaterialProperty _SSSSharpness = null;
+	//MaterialProperty _HalftoneDotSize = null;
+	//MaterialProperty _HalftoneDotAmount = null;
+	//MaterialProperty _HalftoneLineAmount = null;
+	MaterialProperty _UVSetAlbedo = null;
+	MaterialProperty _UVSetNormal = null;
+	MaterialProperty _UVSetDetNormal = null;
+	MaterialProperty _UVSetDetMask = null;
+	MaterialProperty _UVSetMetallic = null;
+	MaterialProperty _UVSetSpecular = null;
+	MaterialProperty _UVSetReflectivity = null;
+	MaterialProperty _UVSetThickness = null;
+	MaterialProperty _UVSetOcclusion = null;
+	MaterialProperty _UVSetEmission = null;
+	MaterialProperty _Stencil = null;
+	MaterialProperty _StencilComp = null;
+	MaterialProperty _StencilOp = null;
+	MaterialProperty _OutlineWidth = null;
+	MaterialProperty _OutlineColor = null;
+	MaterialProperty _ShadowSharpness = null;
+	MaterialProperty _AdvMode = null;
 
 	static bool showMainSettings = true;
 	static bool showNormalMapSettings = false;
@@ -94,80 +98,26 @@ public class XSToonInspector : ShaderGUI
 		Material material = materialEditor.target as Material;
 		Shader shader = material.shader;
 
-		isCutout = shader.name.Contains("Cutout");
+		isCutout = shader.name.Contains("Cutout") && !shader.name.Contains("A2C");
 		isOutlined = shader.name.Contains("Outline");
 
-		_Culling = FindProperty("_Culling", props);
-		_MainTex = FindProperty("_MainTex", props);
-		_Color = FindProperty("_Color", props);
-		_Cutoff = FindProperty("_Cutoff", props);
-		_BumpMap = FindProperty("_BumpMap", props);
-		_BumpScale = FindProperty("_BumpScale", props);
-		_DetailNormalMap = FindProperty("_DetailNormalMap", props);
-		_DetailMask = FindProperty("_DetailMask", props);
-		_DetailNormalMapScale = FindProperty("_DetailNormalMapScale", props);
-		_ReflectionMode = FindProperty("_ReflectionMode", props);
-		_MetallicGlossMap = FindProperty("_MetallicGlossMap", props);
-		_BakedCubemap = FindProperty("_BakedCubemap", props);
-		_Matcap = FindProperty("_Matcap", props);
-		_ReflectivityMask = FindProperty("_ReflectivityMask", props);
-		_Metallic = FindProperty("_Metallic", props);
-		_Glossiness = FindProperty("_Glossiness", props);
-		_EmissionMap = FindProperty("_EmissionMap", props);
-		_EmissionColor = FindProperty("_EmissionColor", props);
-		_RimIntensity = FindProperty("_RimIntensity", props);
-		_RimRange = FindProperty("_RimRange", props);
-		_RimThreshold = FindProperty("_RimThreshold", props);
-		_RimSharpness = FindProperty("_RimSharpness", props);
-		_SpecMode = FindProperty("_SpecMode", props);
-		_SpecularStyle = FindProperty("_SpecularStyle", props);
-		_SpecularMap = FindProperty("_SpecularMap", props);
-		_SpecularIntensity = FindProperty("_SpecularIntensity", props);
-		_SpecularArea = FindProperty("_SpecularArea", props);
-		_AnisotropicAX = FindProperty("_AnisotropicAX", props);
-		_AnisotropicAY = FindProperty("_AnisotropicAY", props);
-		_Ramp = FindProperty("_Ramp", props);
-		_ShadowRim = FindProperty("_ShadowRim", props);
-		_ShadowRimRange = FindProperty("_ShadowRimRange", props);
-		_ShadowRimThreshold = FindProperty("_ShadowRimThreshold", props);
-		_ShadowRimSharpness = FindProperty("_ShadowRimSharpness", props);
-		_ShadowSharpness = FindProperty("_ShadowSharpness", props);
-		_OcclusionMap = FindProperty("_OcclusionMap", props);
-		_OcclusionColor = FindProperty("_OcclusionColor", props);
-		_ThicknessMap = FindProperty("_ThicknessMap", props);
-		_SSColor = FindProperty("_SSColor", props);
-		_SSDistortion = FindProperty("_SSDistortion", props);
-		_SSPower = FindProperty("_SSPower", props);
-		_SSScale = FindProperty("_SSScale", props);
-		_SSSRange = FindProperty("_SSSRange", props);
-		_SSSSharpness = FindProperty("_SSSSharpness", props);
-		_HalftoneDotSize = FindProperty("_HalftoneDotSize", props);
-		_HalftoneDotAmount = FindProperty("_HalftoneDotAmount", props);
-		_HalftoneLineAmount = FindProperty("_HalftoneLineAmount", props);
-		_UVSetAlbedo = FindProperty("_UVSetAlbedo", props);
-		_UVSetNormal = FindProperty("_UVSetNormal", props);
-		_UVSetDetNormal = FindProperty("_UVSetDetNormal", props);
-		_UVSetDetMask = FindProperty("_UVSetDetMask", props);
-		_UVSetMetallic = FindProperty("_UVSetMetallic", props);
-		_UVSetSpecular = FindProperty("_UVSetSpecular", props);
-		_UVSetReflectivity = FindProperty("_UVSetReflectivity", props);
-		_UVSetThickness = FindProperty("_UVSetThickness", props);
-		_UVSetOcclusion = FindProperty("_UVSetOcclusion", props);
-		_UVSetEmission = FindProperty("_UVSetEmission", props);
-		_Stencil = FindProperty("_Stencil", props);
-		_StencilComp = FindProperty("_StencilComp", props);
-		_StencilOp = FindProperty("_StencilOp", props);
-		_AdvMode = ShaderGUI.FindProperty("_AdvMode", props);
-
-		if (isOutlined)
-		{
-			_OutlineWidth = FindProperty("_OutlineWidth", props);
-			_OutlineColor = FindProperty("_OutlineColor", props);
+		foreach (var property in GetType().GetFields(bindingFlags)) //Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
+		{                                                           //This makes things a lot nicer to maintain and cleaner to look at.
+			if (property.FieldType == typeof(MaterialProperty))
+			{
+				property.SetValue(this, FindProperty(property.Name, props));
+			}
 		}
 
 		EditorGUI.BeginChangeCheck();
 		{
-			materialEditor.ShaderProperty(_AdvMode, _AdvMode.displayName);
+			if (!isCutout)// Do this to make sure that if you're using AlphaToCoverage that you fallback to cutout with 0.5 Cutoff if your shaders are blocked.
+			{
+				material.SetFloat("_Cutoff", 0.5f);
+			}
+
+			XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
+
 			showMainSettings = XSStyles.ShurikenFoldout("Main Settings", showMainSettings);
 			if (showMainSettings)
 			{
@@ -178,16 +128,13 @@ public class XSToonInspector : ShaderGUI
 				}
 				materialEditor.ShaderProperty(_UVSetAlbedo, new GUIContent("UV Set", "The UV set to use for the Albedo Texture"), 2);
 				materialEditor.TextureScaleOffsetProperty(_MainTex);
+				materialEditor.ShaderProperty(_Saturation, new GUIContent("Saturation", "Controls saturation of the final output from the shader."));
 				materialEditor.ShaderProperty(_Culling, _Culling.displayName);
-			}
-
-			if(!isCutout)
-			{
-				material.SetFloat("_Cutoff", 0.5f);
+				materialEditor.ShaderProperty(_AdvMode, "Shader Mode");
 			}
 
 			showShadows = XSStyles.ShurikenFoldout("Shadows", showShadows);
-			if(showShadows)
+			if (showShadows)
 			{
 				materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right, or Down to Up"), _Ramp);
 				materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Only affects recieved shadows and self shadows. Does not affect shadow ramp. You need a realtime directional light with shadows to see changes from this!"));
@@ -218,33 +165,23 @@ public class XSToonInspector : ShaderGUI
 			showNormalMapSettings = XSStyles.ShurikenFoldout("Normal Maps", showNormalMapSettings);
 			if (showNormalMapSettings)
 			{
-				
+
 				materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map"), _BumpMap);
 				materialEditor.ShaderProperty(_BumpScale, new GUIContent("Normal Strength", "Strength of the main Normal Map"), 2);
 				materialEditor.ShaderProperty(_UVSetNormal, new GUIContent("UV Set", "The UV set to use for the Normal Map"), 2);
 				materialEditor.TextureScaleOffsetProperty(_BumpMap);
 
+				GUILayout.Space(5);
 				materialEditor.TexturePropertySingleLine(new GUIContent("Detail Normal Map", "Detail Normal Map"), _DetailNormalMap);
 				materialEditor.ShaderProperty(_DetailNormalMapScale, new GUIContent("Detail Normal Strength", "Strength of the detail Normal Map"), 2);
 				materialEditor.ShaderProperty(_UVSetDetNormal, new GUIContent("UV Set", "The UV set to use for the Detail Normal Map"), 2);
 				materialEditor.TextureScaleOffsetProperty(_DetailNormalMap);
-			}
 
-			showEmission = XSStyles.ShurikenFoldout("Emission", showEmission);
-			if(showEmission)
-			{
-				materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map", "Emissive map. White to black, unless you want multiple colors."), _EmissionMap, _EmissionColor);
-				materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
-				materialEditor.TextureScaleOffsetProperty(_EmissionMap);
-			}
+				GUILayout.Space(5);
+				materialEditor.TexturePropertySingleLine(new GUIContent("Detail Mask", "Mask for Detail Normal Map"), _DetailMask);
+				materialEditor.ShaderProperty(_UVSetDetMask, new GUIContent("UV Set", "The UV set to use for the Detail Mask"), 2);
+				materialEditor.TextureScaleOffsetProperty(_DetailMask);
 
-			showRimlight = XSStyles.ShurikenFoldout("Rimlight", showRimlight);
-			if (showRimlight)
-			{
-				materialEditor.ShaderProperty(_RimIntensity, new GUIContent("Rimlight Intensity", "Strnegth of the Rimlight."));
-				materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
-				materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);
-				materialEditor.ShaderProperty(_RimSharpness, new GUIContent("Sharpness", "Sharpness of the Rim"), 2);
 			}
 
 			showSpecular = XSStyles.ShurikenFoldout("Specular", showSpecular);
@@ -276,12 +213,14 @@ public class XSToonInspector : ShaderGUI
 				{
 					materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel"), _MetallicGlossMap);
 					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
+					materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the MetallicSmoothness Map"), 2);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
 				}
 				else if (_ReflectionMode.floatValue == 1) //Baked cube
 				{
-					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel"), _MetallicGlossMap);
+					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
+					materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the MetallicSmoothness Map"), 2);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Baked Cubemap", "Baked cubemap."), _BakedCubemap);
 				}
 				else if (_ReflectionMode.floatValue == 2) //Matcap
@@ -290,7 +229,7 @@ public class XSToonInspector : ShaderGUI
 				}
 				if (_ReflectionMode.floatValue != 3)
 				{
-					
+
 					materialEditor.TexturePropertySingleLine(new GUIContent("Reflectivity Mask", "Mask for reflections."), _ReflectivityMask);
 					materialEditor.TextureScaleOffsetProperty(_ReflectivityMask);
 					materialEditor.ShaderProperty(_UVSetReflectivity, new GUIContent("UV Set", "The UV set to use for the Reflectivity Mask"), 2);
@@ -299,13 +238,30 @@ public class XSToonInspector : ShaderGUI
 				}
 			}
 
+			showEmission = XSStyles.ShurikenFoldout("Emission", showEmission);
+			if (showEmission)
+			{
+				materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map", "Emissive map. White to black, unless you want multiple colors."), _EmissionMap, _EmissionColor);
+				materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
+				materialEditor.TextureScaleOffsetProperty(_EmissionMap);
+			}
+
+			showRimlight = XSStyles.ShurikenFoldout("Rimlight", showRimlight);
+			if (showRimlight)
+			{
+				materialEditor.ShaderProperty(_RimIntensity, new GUIContent("Rimlight Intensity", "Strnegth of the Rimlight."));
+				materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
+				materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);
+				materialEditor.ShaderProperty(_RimSharpness, new GUIContent("Sharpness", "Sharpness of the Rim"), 2);
+			}
+
 			showSubsurface = XSStyles.ShurikenFoldout("Subsurface Scattering", showSubsurface);
-			if(showSubsurface)
+			if (showSubsurface)
 			{
 				materialEditor.TexturePropertySingleLine(new GUIContent("Thickness Map", "Thickness Map, used to mask areas where subsurface can happen"), _ThicknessMap);
 				materialEditor.TextureScaleOffsetProperty(_ThicknessMap);
 				materialEditor.ShaderProperty(_UVSetThickness, new GUIContent("UV Set", "The UV set to use for the Thickness Map"), 2);
-				
+
 				XSStyles.constrainedShaderProperty(materialEditor, _SSColor, new GUIContent("Subsurface Color", "Subsurface Scattering Color"), 2);
 				materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Subsurface Distortion", "How much the subsurface follows the normals of the mesh, Normal map."), 2);
 				materialEditor.ShaderProperty(_SSPower, new GUIContent("Subsurface Power", "Subsurface Power"), 2);
@@ -329,4 +285,3 @@ public class XSToonInspector : ShaderGUI
 		}
 	}
 }
-//new GUIContent("", "")

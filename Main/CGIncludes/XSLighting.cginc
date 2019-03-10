@@ -29,7 +29,6 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol);
 
     half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflView, indirectDiffuse, viewDir);
- 
     half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse);
     half4 shadowRim = calcShadowRim(i, d, indirectDiffuse);
     half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);
@@ -45,6 +44,8 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     col += subsurface;
     col *= occlusion;
 	col += i.emissionMap;
+
+	col = lerp(dot(col, grayscaleVec), col, _Saturation);
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline);
 

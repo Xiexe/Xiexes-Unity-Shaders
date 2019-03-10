@@ -2,14 +2,20 @@ void calcNormal(inout XSLighting i)
 {
 	half3 nMap = UnpackNormal(i.normalMap);
 	nMap.xy *= _BumpScale;
-	half3 calcedNormal = half3( i.bitangent * nMap.r + 
-								i.tangent * nMap.g +
-								i.normal * nMap.b  );
 
+	float3 detNMap = UnpackNormal(i.detailNormal);
+	detNMap.xy *= _DetailNormalMapScale * i.detailMask.r;
+
+	half3 blendedNormal = half3(nMap.xy*detNMap.z + detNMap.xy*nMap.z, nMap.z*detNMap.z);
+
+	half3 calcedNormal = half3(i.bitangent * blendedNormal.r +
+								i.tangent * -blendedNormal.g +
+								i.normal * blendedNormal.b);
+	
 	calcedNormal = normalize(calcedNormal);
 	half3 bumpedTangent = (cross(i.bitangent, calcedNormal));
-    half3 bumpedBitangent = (cross(calcedNormal, bumpedTangent));
-	
+	half3 bumpedBitangent = (cross(calcedNormal, bumpedTangent));
+
 	i.normal = calcedNormal;
 	i.tangent = bumpedTangent;
 	i.bitangent = bumpedBitangent;
@@ -23,27 +29,36 @@ void InitializeTextureUVs(
 	#endif
 		inout TextureUV t)
 {	
-	half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
-	half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
-	half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
-	half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
-	half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
-	half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
-	half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
-	half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
-	half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
-	half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
 
-	t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
+	half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
 	t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
-	t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
-	t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
-	t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
-	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
-	t.thicknessMapUV = TRANSFORM_TEX(uvSetSpecularMap, _ThicknessMap);
-	t.occlusionUV = TRANSFORM_TEX(uvSetSpecularMap, _OcclusionMap);
-	t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);
+
+	half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
 	t.emissionMapUV = TRANSFORM_TEX(uvSetEmissionMap, _EmissionMap);
+
+	half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
+	t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
+
+	half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
+	t.occlusionUV = TRANSFORM_TEX(uvSetOcclusion, _OcclusionMap);
+
+	half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
+	t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
+
+	half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
+	t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
+
+	half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
+	t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
+
+	half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
+	t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
+
+	half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
+	t.thicknessMapUV = TRANSFORM_TEX(uvSetThickness, _ThicknessMap);
+
+	half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
+	t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);	
 }
 
 

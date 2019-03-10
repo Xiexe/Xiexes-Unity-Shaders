@@ -138,6 +138,7 @@ half4 _Color, _ShadowRim,
 
 half _Cutoff;
 
+half _Saturation;
 half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY;

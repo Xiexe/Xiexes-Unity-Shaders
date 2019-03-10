@@ -6,7 +6,7 @@ using System.IO;
 [InitializeOnLoad]
 public class XSStyles : MonoBehaviour
 {
-    public static string ver = "2.0 BETA";
+    public static string ver = "2.0b4";
 
     //Help URLs
     public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";
@@ -264,7 +264,6 @@ public class XSStyles : MonoBehaviour
 	{
 		GUILayout.BeginHorizontal();
 		GUILayout.FlexibleSpace();
-		GUI.skin = null;
 		if (GUILayout.Button("Documentation", GUILayout.Width(Width), GUILayout.Height(Height)))
 		{
 			Application.OpenURL(mainURL);
@@ -276,13 +275,26 @@ public class XSStyles : MonoBehaviour
 	private static Rect DrawShuriken(string title, Vector2 contentOffset, int HeaderHeight)
 	{
 		var style = new GUIStyle("ShurikenModuleTitle");
-		style.margin = new RectOffset(0, 0, 8, 0);
 		style.font = new GUIStyle(EditorStyles.boldLabel).font;
 		style.border = new RectOffset(15, 7, 4, 4);
 		style.fixedHeight = HeaderHeight;
 		style.contentOffset = contentOffset;
 		var rect = GUILayoutUtility.GetRect(16f, HeaderHeight, style);
-		
+
+		GUI.Box(rect, title, style);
+		return rect;
+	}
+
+	private static Rect DrawShurikenCenteredTitle(string title, Vector2 contentOffset, int HeaderHeight)
+	{
+		var style = new GUIStyle("ShurikenModuleTitle");
+		style.font = new GUIStyle(EditorStyles.boldLabel).font;
+		style.border = new RectOffset(15, 7, 4, 4);
+		style.fixedHeight = HeaderHeight;
+		style.contentOffset = contentOffset;
+		style.alignment = TextAnchor.MiddleCenter;
+		var rect = GUILayoutUtility.GetRect(16f, HeaderHeight, style);
+
 		GUI.Box(rect, title, style);
 		return rect;
 	}
@@ -309,6 +321,11 @@ public class XSStyles : MonoBehaviour
 		DrawShuriken(title, new Vector2(6f, -2f), 22);
 	}
 
+	public static void ShurikenHeaderCentered(string title)
+	{
+		DrawShurikenCenteredTitle(title, new Vector2(0f, -2f), 22);
+	}
+
 	public static void constrainedShaderProperty(MaterialEditor materialEditor, MaterialProperty prop, GUIContent style, int tabSize)
 	{
 		EditorGUILayout.BeginHorizontal(GUILayout.MaxWidth(30));
@@ -318,12 +335,12 @@ public class XSStyles : MonoBehaviour
 
 	public static void DoFooter()
 	{
-		GUILayout.Label(XSStyles.Styles.version, new GUIStyle(EditorStyles.centeredGreyMiniLabel)
-		{
-			alignment = TextAnchor.MiddleCenter,
-			wordWrap = true,
-			fontSize = 12
-		});
+		//GUILayout.Label(XSStyles.Styles.version, new GUIStyle(EditorStyles.centeredGreyMiniLabel)
+		//{
+		//	alignment = TextAnchor.MiddleCenter,
+		//	wordWrap = true,
+		//	fontSize = 12
+		//});
 
 		EditorGUILayout.BeginHorizontal();
 		GUILayout.FlexibleSpace();
