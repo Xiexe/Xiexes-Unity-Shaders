@@ -61,6 +61,43 @@ void InitializeTextureUVs(
 	t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);	
 }
 
+bool IsInMirror()
+{
+    return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
+}
+
+inline float Dither8x8Bayer( int x, int y )
+{
+	const float dither[ 64 ] = {
+	1, 49, 13, 61,  4, 52, 16, 64,
+	33, 17, 45, 29, 36, 20, 48, 32,
+	9, 57,  5, 53, 12, 60,  8, 56,
+	41, 25, 37, 21, 44, 28, 40, 24,
+	3, 51, 15, 63,  2, 50, 14, 62,
+	35, 19, 47, 31, 34, 18, 46, 30,
+	11, 59,  7, 55, 10, 58,  6, 54,
+	43, 27, 39, 23, 42, 26, 38, 22};
+	int r = y * 8 + x;
+	return dither[r] / 64;
+}
+
+half calcDither(half2 screenPos)
+{
+	half dither = Dither8x8Bayer(fmod(screenPos.x, 8), fmod(screenPos.y, 8));
+	return dither;
+}
+
+float2 calcScreenUVs(float4 screenPos)
+{
+	float2 uv = screenPos / (screenPos.w + 0.0000000001); //0.0x1 Stops division by 0 warning in console.
+	#if UNITY_SINGLE_PASS_STEREO
+		uv.xy *= float2(_ScreenParams.x * 2, _ScreenParams.y);
+	#else
+		uv.xy *= _ScreenParams.xy;
+	#endif
+	
+	return uv;
+}
 
 half3 calcViewDir(half3 worldPos)
 {
@@ -104,8 +141,18 @@ void calcAlpha(inout XSLighting i)
 	//Default to 1 alpha || Opaque
 	i.alpha = 1;
 
-	#if defined(AlphaBlend) || defined(AlphaToMask)
+	#if defined(AlphaBlend)
 		i.alpha = i.albedo.a;
+	#endif
+
+	#if defined(AlphaToMask) // mix of dithering and alpha blend to provide best results.
+		half dither = calcDither(i.screenUV.xy);
+		i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);//lerp(i.albedo.a, i.albedo.a - (dither * (1-i.albedo.a)), 0.2);
+	#endif
+
+	#if defined(Dithered)
+		half dither = calcDither(i.screenUV.xy);
+		clip(i.albedo.a - dither);
 	#endif
 
 	#if defined(Cutout)
@@ -118,19 +165,7 @@ void calcAlpha(inout XSLighting i)
 
 // Halftone functions, finish implementing later.. Not correct right now.
 // //Half tone functions
-// float2 calcScreenUVs(float4 screenPos, float distanceToObjectOrigin)
-// {
-// 	float2 clipPos = screenPos / (screenPos.w + 0.0000000001);
-// 	float2 uv = 2*clipPos-1;
 
-// 	#if UNITY_SINGLE_PASS_STEREO
-// 		uv.x *= (_ScreenParams.x * 2) / _ScreenParams.y;
-// 	#else
-// 		uv.x *= (_ScreenParams.x) / _ScreenParams.y;
-// 	#endif
-// 	uv *= distanceToObjectOrigin;
-// 	return uv;
-// }
 
 // float2 rotateUV(float2 uv, float rotation)
 // {
@@ -141,10 +176,6 @@ void calcAlpha(inout XSLighting i)
 //     );
 // }
 
-// bool IsInMirror()
-// {
-//     return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
-// }
 
 // float DotHalftone(XSLighting i, float scalar) //Scalar can be anything from attenuation to a dot product
 // {

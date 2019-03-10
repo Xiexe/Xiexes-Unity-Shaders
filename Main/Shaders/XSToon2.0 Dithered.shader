@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0_Fade"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0_Dithered"
 {
 	Properties
 	{	
@@ -83,7 +83,7 @@
 	
 	SubShader
 	{
-		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+		Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
 		Cull [_Culling]
 				Stencil 
 		{
@@ -91,8 +91,6 @@
 			Comp [_StencilComp]
 			Pass [StencilOp]
 		}
-		Blend SrcAlpha OneMinusSrcAlpha
-		ZWrite Off
 		Pass
 		{
 			Name "FORWARD"
@@ -103,7 +101,7 @@
 			#pragma fragment frag
 			#pragma multi_compile_fwdbase 
 			#pragma multi_compile UNITY_PASS_FORWARDBASE
-			#define AlphaBlend
+			#define Dithered
 
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -117,14 +115,14 @@
 		{
 			Name "FWDADD"
 			Tags { "LightMode" = "ForwardAdd" }
-			Blend SrcAlpha One
+			Blend One One
 
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma multi_compile UNITY_PASS_FORWARDADD
-			#define AlphaBlend
+			#define Dithered
 			
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -146,12 +144,12 @@
 			#pragma multi_compile_shadowcaster
 			#pragma multi_compile UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-			#define AlphaBlend
+			#define Dithered
 
 			#include "../CGIncludes/XSShadowCaster.cginc"
 			ENDCG
 		}
 	}
-	Fallback "Transparent/Diffuse"
+	Fallback "Transparent/Cutout/Diffuse"
 	CustomEditor "XSToonInspector"
 }

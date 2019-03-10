@@ -101,8 +101,10 @@ public class XSToonInspector : ShaderGUI
 		isCutout = shader.name.Contains("Cutout") && !shader.name.Contains("A2C");
 		isOutlined = shader.name.Contains("Outline");
 
-		foreach (var property in GetType().GetFields(bindingFlags)) //Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
-		{                                                           //This makes things a lot nicer to maintain and cleaner to look at.
+		//Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
+		//This makes things a lot nicer to maintain and cleaner to look at.
+		foreach (var property in GetType().GetFields(bindingFlags)) 
+		{                                                           
 			if (property.FieldType == typeof(MaterialProperty))
 			{
 				property.SetValue(this, FindProperty(property.Name, props));
@@ -192,7 +194,7 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.TexturePropertySingleLine(new GUIContent("Specular Map", "Specular Map"), _SpecularMap);
 				materialEditor.TextureScaleOffsetProperty(_SpecularMap);
 				materialEditor.ShaderProperty(_UVSetSpecular, new GUIContent("UV Set", "The UV set to use for the Specular Map"), 2);
-				materialEditor.ShaderProperty(_SpecularIntensity, new GUIContent("Specular Intesnity", "Specular Intensity."), 2);
+				materialEditor.ShaderProperty(_SpecularIntensity, new GUIContent("Specular Intensity", "Specular Intensity."), 2);
 
 				if (_SpecMode.floatValue == 0 || _SpecMode.floatValue == 2)
 				{

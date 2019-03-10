@@ -1,6 +1,6 @@
 ﻿Shader "Xiexe/Toon2.0/XSToon2.0_CutoutA2C_Outlined"
 {
-Properties
+	Properties
 	{	
 		[Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
 		_MainTex("Texture", 2D) = "white" {}
@@ -9,11 +9,11 @@ Properties
 		_Cutoff("Cutoff", Float) = 0.5
 
 		_BumpMap("Normal Map", 2D) = "bump" {}
-		_BumpScale("Normal Scale", Float) = 1
+		_BumpScale("Normal Scale", Range(-2,2)) = 1
 
 		_DetailNormalMap("Detail Normal Map", 2D) = "bump" {}
 		_DetailMask("Detail Mask", 2D) = "white" {}
-		_DetailNormalMapScale("Detail Normal Scale", Float) = 1.0
+		_DetailNormalMapScale("Detail Normal Scale", Range(-2,2)) = 1.0
 
 		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 3
 		_MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
@@ -31,7 +31,6 @@ Properties
 		_RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
 		_RimSharpness("Rim Sharpness", Range(0,1)) = 0.1
 
-
 		[Enum(Blinn Phong, 0, Anisotropic, 1, GGX, 2)]_SpecMode("Specular Mode", Int) = 0
 		[Enum(Smooth, 0, Sharp, 1)]_SpecularStyle("Specular Style", Int) = 0
 		_SpecularMap("Specular Map", 2D) = "white" {}
@@ -40,7 +39,6 @@ Properties
 		_AnisotropicAX("Anisotropic X", Range(0,1)) = 0.25
 		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
 		
-
 		_Ramp("Shadow Ramp", 2D) = "white" {}
 		_ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
 		_ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
@@ -49,12 +47,10 @@ Properties
 		_ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
 		
 		_OcclusionMap("Occlusion", 2D) = "white" {}
-		_OcclusionColor("Occlusion Color", Color) = (1,1,1,1)
-
+		_OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
 		_OutlineWidth("Outline Width", Range(0, 5)) = 1
-		_OutlineColor("Outline Color", Color) = (0,0,0,1) 
-
+		_OutlineColor("Outline Color", Color) = (0,0,0,1)
 
 		_ThicknessMap("Thickness Map", 2D) = "white" {}
 		_SSColor ("Subsurface Color", Color) = (0,0,0,0)
@@ -64,11 +60,9 @@ Properties
 		_SSSRange("Subsurface Range", Range(0,1)) = 1
 		_SSSSharpness("Subsurface Falloff", Range(0.001, 1)) = 0.2
 
-
 		_HalftoneDotSize("Halftone Dot Size", Float) = 1.7
 		_HalftoneDotAmount("Halftone Dot Amount", Float) = 50
 		_HalftoneLineAmount("Halftone Line Amount", Float) = 150
-
 
 		[Enum(UV1,0,UV2,1)] _UVSetAlbedo("Albedo UVs", Int) = 0
 		[Enum(UV1,0,UV2,1)] _UVSetNormal("Normal Map UVs", Int) = 0
@@ -86,6 +80,7 @@ Properties
 		[Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
 		[Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
 	}
+	
 	SubShader
 	{
 		Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
@@ -108,7 +103,7 @@ Properties
 			#pragma geometry geom
 			#pragma fragment frag
 			#pragma multi_compile_fwdbase 
-			//#pragma multi_compile UNITY_PASS_FORWARDBASE
+			#pragma multi_compile UNITY_PASS_FORWARDBASE
 			#define AlphaToMask
 
 			#include "../CGIncludes/XSDefines.cginc"
@@ -132,7 +127,7 @@ Properties
 			#pragma geometry geom
 			#pragma fragment frag
 			#pragma multi_compile_fwdadd_fullshadows
-			//#pragma multi_compile UNITY_PASS_FORWARDADD
+			#pragma multi_compile UNITY_PASS_FORWARDADD
 			#define AlphaToMask
 			
 			#include "../CGIncludes/XSDefines.cginc"

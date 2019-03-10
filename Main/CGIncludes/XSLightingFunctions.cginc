@@ -134,54 +134,58 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 
 half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothness, half3 reflDir, half3 indirectLight, float3 viewDir)
 {	//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
-	half3 spec = half3(0,0,0);
-	half lightAvg = (indirectLight.r + indirectLight.g + indirectLight.b + _LightColor0) / 4;
+		half3 spec = half3(0,0,0);
 
-	UNITY_BRANCH
-	if(_ReflectionMode == 0) // PBR
-	{
-		float3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
-		half4 probe0 = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflectionUV1, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
-		half3 probe0sample = DecodeHDR(probe0, unity_SpecCube0_HDR);
+		//Indirect specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light. 
+		#if defined(UNITY_PASS_FORWARDBASE) 
+			half lightAvg = (indirectLight.r + indirectLight.g + indirectLight.b + _LightColor0) / 4;
 
-		float3 indirectSpecular;
-		float interpolator = unity_SpecCube0_BoxMin.w;
-		
-		UNITY_BRANCH
-		if (interpolator < 0.99999) {
-			float3 reflectionUV2 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube1_ProbePosition, unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax);
-			half4 probe1 = UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0, reflectionUV2, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
-			half3 probe1sample = DecodeHDR(probe1, unity_SpecCube1_HDR);
-			indirectSpecular = lerp(probe1sample, probe0sample, interpolator);
-		}
-		else {
-			indirectSpecular = probe0sample;
-		}
+			UNITY_BRANCH
+			if(_ReflectionMode == 0) // PBR
+			{
+				float3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
+				half4 probe0 = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflectionUV1, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
+				half3 probe0sample = DecodeHDR(probe0, unity_SpecCube0_HDR);
 
-		if (any(indirectSpecular) == 0)
-		{
-			indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)) * lightAvg;
-		}
+				float3 indirectSpecular;
+				float interpolator = unity_SpecCube0_BoxMin.w;
+				
+				UNITY_BRANCH
+				if (interpolator < 0.99999) {
+					float3 reflectionUV2 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube1_ProbePosition, unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax);
+					half4 probe1 = UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0, reflectionUV2, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
+					half3 probe1sample = DecodeHDR(probe1, unity_SpecCube1_HDR);
+					indirectSpecular = lerp(probe1sample, probe0sample, interpolator);
+				}
+				else {
+					indirectSpecular = probe0sample;
+				}
 
-		half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
-		spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
-	}
-	else if(_ReflectionMode == 1) //Baked Cubemap
-	{	
-		half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
-		half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
-		spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
-		spec *= min(lightAvg,1);
-	}
-	else if (_ReflectionMode == 2) //Matcap
-	{	
-		float3 upVector = float3(0,1,0);
-		float2 remapUV = matcapSample(upVector, viewDir, i.normal);
-		spec = tex2Dlod(_Matcap, float4(remapUV, 0, (metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)));
-		spec *= min(lightAvg,1);
-	}
+				if (any(indirectSpecular) == 0)
+				{
+					indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)) * lightAvg;
+				}
 
-	spec *= i.reflectivityMask;
+				half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
+				spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
+			}
+			else if(_ReflectionMode == 1) //Baked Cubemap
+			{	
+				half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
+				half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
+				spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
+				spec *= min(lightAvg,1);
+			}
+			else if (_ReflectionMode == 2) //Matcap
+			{	
+				float3 upVector = float3(0,1,0);
+				float2 remapUV = matcapSample(upVector, viewDir, i.normal);
+				spec = tex2Dlod(_Matcap, float4(remapUV, 0, (metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)));
+				spec *= min(lightAvg,1);
+			}
+
+			spec *= i.reflectivityMask;
+		#endif
 	return spec;
 }
 

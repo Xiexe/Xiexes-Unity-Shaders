@@ -26,8 +26,8 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     i.albedo.rgb *= (1-metallicSmoothness.x); 
     half3 indirectDiffuse = calcIndirectDiffuse();
     half4 lightCol = calcLightCol(lightEnv, indirectDiffuse);
+    
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol);
-
     half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflView, indirectDiffuse, viewDir);
     half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse);
     half4 shadowRim = calcShadowRim(i, d, indirectDiffuse);
