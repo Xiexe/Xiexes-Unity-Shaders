@@ -49,8 +49,8 @@ public class XSTextureMerger : EditorWindow
     private static Color outColor;
     private static Color[] texColors = new Color[4];
 
-
-    [MenuItem("Tools/Xiexe/XSToon/Texture Merger")]
+	private static float progress;
+	[MenuItem("Tools/Xiexe/XSToon/Texture Merger")]
     static public void Init()
     {
         XSTextureMerger window = EditorWindow.GetWindow<XSTextureMerger>(false, "XSToon: Texture Merger", true);
@@ -140,9 +140,14 @@ public class XSTextureMerger : EditorWindow
                 
             if(GUILayout.Button("Merge Channels"))
             {
-                //Set target textures to be ReadWriteable
-                
-                for(int i = 0; i < textures.Length; i++)
+				if (progress < 2)
+				{
+					EditorUtility.DisplayProgressBar("XSToon Texture Merger", "Merging and compressing new texture...", (float)(progress / 2));
+				}
+
+			//Set target textures to be ReadWriteable
+
+			for (int i = 0; i < textures.Length; i++)
                 {
                     if(textures[i] == null)
                         break;
@@ -186,6 +191,7 @@ public class XSTextureMerger : EditorWindow
                 XSStyles.findAssetPath(finalFilePath);
                 finalFilePath = EditorUtility.SaveFilePanel("Save Merged Texture", finalFilePath + "/Textures/", "mergedTex.png", "png");
 
+				
                 Texture2D newTexture = new Texture2D(resolution, resolution, TextureFormat.RGBA32, false);
 
                 //Get Colors textures and write them to the proper channel
@@ -235,14 +241,17 @@ public class XSTextureMerger : EditorWindow
                             newTexture.SetPixel(x, y, outputColor);
                         }
                     }
-                newTexture.Apply();
+				progress += 1;
+				newTexture.Apply();
                 ExportTexture(newTexture);
             }
             
             GUILayout.Space(10);
         GUILayout.EndVertical();
 
-        EditorGUIUtility.labelWidth = oldLabelWidth;
+		
+
+		EditorGUIUtility.labelWidth = oldLabelWidth;
     }
 
     private static void ExportTexture(Texture2D newTexture)
@@ -254,5 +263,7 @@ public class XSTextureMerger : EditorWindow
             File.WriteAllBytes(finalFilePath, pngData);
             AssetDatabase.Refresh();
         }
-    }
+		progress += 1;
+		EditorUtility.ClearProgressBar();
+	}
 }

@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0_CutoutA2C_Outlined"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0_Dithered_Outlined"
 {
 	Properties
 	{	
@@ -37,8 +37,8 @@
 		_SpecularIntensity("Specular Intensity", Float) = 0
 		_SpecularArea("Specular Smoothness", Range(0,1)) = 0.5
 		_AnisotropicAX("Anisotropic X", Range(0,1)) = 0.25
-		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75
-		_SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1  
+		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
+		_SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
 		
 		_Ramp("Shadow Ramp", 2D) = "white" {}
 		_ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
@@ -96,16 +96,15 @@
 		{
 			Name "FORWARD"
 			Tags { "LightMode" = "ForwardBase" }
-			AlphaToMask On
+			
 			CGPROGRAM
-			#define Geometry
-
 			#pragma vertex vert
 			#pragma geometry geom
 			#pragma fragment frag
 			#pragma multi_compile_fwdbase 
 			#pragma multi_compile UNITY_PASS_FORWARDBASE
-			#define AlphaToMask
+			#define Dithered
+			#define Geometry
 
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -120,16 +119,15 @@
 			Name "FWDADD"
 			Tags { "LightMode" = "ForwardAdd" }
 			Blend One One
-			AlphaToMask On
-			CGPROGRAM
-			#define Geometry
 
+			CGPROGRAM
 			#pragma vertex vert
 			#pragma geometry geom
 			#pragma fragment frag
 			#pragma multi_compile_fwdadd_fullshadows
 			#pragma multi_compile UNITY_PASS_FORWARDADD
-			#define AlphaToMask
+			#define Dithered
+			#define Geometry
 			
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -151,7 +149,7 @@
 			#pragma multi_compile_shadowcaster
 			#pragma multi_compile UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-			#define AlphaToMask
+			#define Dithered
 
 			#include "../CGIncludes/XSShadowCaster.cginc"
 			ENDCG

@@ -17,10 +17,8 @@ VertexOutput vert (VertexInput v)
 	o.uv1 = v.uv1;
 	o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
 	o.normal = v.normal;
+	o.screenPos = ComputeScreenPos(o.pos);
 	//o.distanceToOrigin = distance( _WorldSpaceCameraPos, mul(unity_ObjectToWorld, float4(0,0,0,1) ));
-	//o.screenPos = ComputeScreenPos(o.pos);
-	
-
 	TRANSFER_SHADOW(o);
 	return o;
 }
@@ -46,7 +44,7 @@ VertexOutput vert (VertexInput v)
 			o.uv = IN[i].uv;
 			o.uv1 = IN[i].uv1;
 			o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors
-			//o.screenPos = IN[i].screenPos;
+			o.screenPos = ComputeScreenPos(o.pos);
 			//o.distanceToOrigin = IN[i].distanceToOrigin;
 
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
@@ -67,7 +65,7 @@ VertexOutput vert (VertexInput v)
 			o.uv = IN[ii].uv;
 			o.uv1 = IN[ii].uv1;
 			o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
-			//o.screenPos = IN[ii].screenPos;
+			o.screenPos = ComputeScreenPos(o.pos);
 			//o.distanceToOrigin = IN[ii].distanceToOrigin;
 
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
@@ -86,15 +84,26 @@ float4 frag (
 	#else
 		VertexOutput i
 	#endif
+	, float facing : VFACE
 	) : SV_Target
 {
 	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
 	#if defined(DIRECTIONAL)
-		//attenuation = //smoothstep(0, 1, attenuation); // This cleans up light atten from directional lights.
+		attenuation = lerp(attenuation, round(attenuation), _ShadowSharpness);
 		half nAtten = pow(1-attenuation, 5); // Take 1-Atten as a mask to clean up left over artifacts from self shadowing.
 		attenuation = saturate(attenuation + (1-nAtten));
 	#endif
 	
+	bool face = facing > 0; // True if on front face, False if on back face
+	face = IsInMirror() ? !face : face; // Faces are inverted in a mirror
+
+	if (!face) { // Invert Normals based on face
+		i.ntb[0] = -i.ntb[0];
+		i.ntb[1] = -i.ntb[1];
+		i.ntb[2] = -i.ntb[2];
+	}
+	//The above handles inverting fixing lighting on back faces and in mirrors.
+
 	TextureUV t = (TextureUV)0; // Populate UVs
 	InitializeTextureUVs(i, t);
 	
@@ -118,7 +127,7 @@ float4 frag (
 	o.worldPos = i.worldPos;
 	o.color = i.color.rgb;
 	o.isOutline = i.color.a;
-	//o.screenUV = calcScreenUVs(i.screenPos, i.distanceToOrigin);
+	o.screenUV = calcScreenUVs(i.screenPos);
 	
 	float4 col = XSLighting_BRDF_Toon(o);
 	calcAlpha(o);

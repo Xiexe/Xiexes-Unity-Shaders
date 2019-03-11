@@ -12,7 +12,6 @@ struct VertexInput
 	float4 color : COLOR;
 };
 
-
 struct VertexOutput
 {	
 	#if defined(Geometry)
@@ -28,11 +27,10 @@ struct VertexOutput
 	float4 worldPos : TEXCOORD5;
 	float4 color : TEXCOORD6;
 	float3 normal : TEXCOORD8;
-	//float4 screenPos : TEXCOORD9;
+	float4 screenPos : TEXCOORD9;
 	//float distanceToOrigin : TEXCOORD10;
 	SHADOW_COORDS(7)
 };
-
 
 #if defined(Geometry)
 	struct v2g
@@ -45,7 +43,7 @@ struct VertexOutput
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
 		float3 normal : TEXCOORD8;
-		//float4 screenPos : TEXCOORD9;
+		float4 screenPos : TEXCOORD9;
 		//float distanceToOrigin : TEXCOORD10;
 		SHADOW_COORDS(7)
 	};
@@ -58,7 +56,7 @@ struct VertexOutput
 		float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
-		//float4 screenPos : TEXCOORD8;
+		float4 screenPos : TEXCOORD8;
 		//float distanceToOrigin : TEXCOORD9;
 		SHADOW_COORDS(7)
 	};
@@ -86,7 +84,7 @@ struct XSLighting
 	half3 color;
 	half alpha;
 	float isOutline;
-	//float2 screenUV;
+	float2 screenUV;
 };
 
 struct TextureUV
@@ -132,18 +130,19 @@ sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
 
-half4 _Color, _ShadowColor, _ShadowRim, 
+half4 _Color, _ShadowRim, 
 	_OutlineColor, _SSColor, _OcclusionColor,
 	_EmissionColor;
 
 half _Cutoff;
 
+half _Saturation;
 half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;
-half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY;
+half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _SpecularAlbedoTint;
 
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness;
-half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness;
+half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness;
 
 half _SSDistortion, _SSPower, _SSScale;
 half _SSSRange, _SSSSharpness;
