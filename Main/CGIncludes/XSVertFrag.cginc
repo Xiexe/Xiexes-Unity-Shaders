@@ -97,7 +97,10 @@ float4 frag (
 	bool face = facing > 0; // True if on front face, False if on back face
 	face = IsInMirror() ? !face : face; // Faces are inverted in a mirror
 
-	if (!face) { // Invert Normals based on face
+	if (!face) // Invert Normals based on face
+	{ 
+		if(i.color.a > 0.99) { discard; }//Discard outlines front face always. This way cull off and outlines can be enabled.
+
 		i.ntb[0] = -i.ntb[0];
 		i.ntb[1] = -i.ntb[1];
 		i.ntb[2] = -i.ntb[2];
@@ -108,16 +111,16 @@ float4 frag (
 	InitializeTextureUVs(i, t);
 	
 	XSLighting o = (XSLighting)0; //Populate Lighting Struct
-	o.albedo = tex2D(_MainTex, t.albedoUV) * _Color;
-	o.specularMap = tex2D(_SpecularMap, t.specularMapUV);
-	o.metallicGlossMap = tex2D(_MetallicGlossMap, t.metallicGlossMapUV);
-	o.detailMask = tex2D(_DetailMask, t.detailMaskUV);
-	o.normalMap = tex2D(_BumpMap, t.normalMapUV);
-	o.detailNormal = tex2D(_DetailNormalMap, t.detailNormalUV);
-	o.thickness = tex2D(_ThicknessMap, t.thicknessMapUV);
-	o.occlusion = tex2D(_OcclusionMap, t.occlusionUV);
-	o.reflectivityMask = tex2D(_ReflectivityMask, t.reflectivityMaskUV);
-	o.emissionMap = tex2D(_EmissionMap, t.emissionMapUV) * _EmissionColor;
+	o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color;
+	o.specularMap = UNITY_SAMPLE_TEX2D_SAMPLER(_SpecularMap, _MainTex, t.specularMapUV);
+	o.metallicGlossMap = UNITY_SAMPLE_TEX2D_SAMPLER(_MetallicGlossMap, _MainTex, t.metallicGlossMapUV);
+	o.detailMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DetailMask, _MainTex, t.detailMaskUV);
+	o.normalMap = UNITY_SAMPLE_TEX2D_SAMPLER(_BumpMap, _MainTex, t.normalMapUV);
+	o.detailNormal = UNITY_SAMPLE_TEX2D_SAMPLER(_DetailNormalMap, _MainTex, t.detailNormalUV);
+	o.thickness = UNITY_SAMPLE_TEX2D_SAMPLER(_ThicknessMap, _MainTex, t.thicknessMapUV);
+	o.occlusion = UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap, _MainTex, t.occlusionUV);
+	o.reflectivityMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectivityMask, _MainTex, t.reflectivityMaskUV);
+	o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV) * _EmissionColor;
 
 	o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
 	o.attenuation = attenuation;
@@ -128,7 +131,7 @@ float4 frag (
 	o.color = i.color.rgb;
 	o.isOutline = i.color.a;
 	o.screenUV = calcScreenUVs(i.screenPos);
-	
+
 	float4 col = XSLighting_BRDF_Toon(o);
 	calcAlpha(o);
 	return float4(col.rgb, o.alpha);

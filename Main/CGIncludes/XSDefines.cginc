@@ -116,16 +116,16 @@ struct DotProducts
 	half svdn;
 };
 
-sampler2D _MainTex; half4 _MainTex_ST;
-sampler2D _BumpMap; half4 _BumpMap_ST;
-sampler2D _DetailNormalMap; half4 _DetailNormalMap_ST;
-sampler2D _DetailMask; half4 _DetailMask_ST;
-sampler2D _SpecularMap; half4 _SpecularMap_ST;
-sampler2D _MetallicGlossMap; half4 _MetallicGlossMap_ST;
-sampler2D _ReflectivityMask; half4 _ReflectivityMask_ST;
-sampler2D _ThicknessMap; half4 _ThicknessMap_ST;
-sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
-sampler2D _EmissionMap; half4 _EmissionMap_ST;
+UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_BumpMap); half4 _BumpMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_DetailNormalMap); half4 _DetailNormalMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_DetailMask); half4 _DetailMask_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_SpecularMap); half4 _SpecularMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_MetallicGlossMap); half4 _MetallicGlossMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_ReflectivityMask); half4 _ReflectivityMask_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_ThicknessMap); half4 _ThicknessMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_OcclusionMap); half4 _OcclusionMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
 sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;

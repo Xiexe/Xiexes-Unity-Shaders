@@ -90,7 +90,7 @@
 		{
 			Ref [_Stencil]
 			Comp [_StencilComp]
-			Pass [StencilOp]
+			Pass [_StencilOp]
 		}
 		Pass
 		{
