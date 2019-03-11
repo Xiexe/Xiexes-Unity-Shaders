@@ -154,6 +154,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 
 				float3 indirectSpecular;
 				float interpolator = unity_SpecCube0_BoxMin.w;
+				bool no_probe = unity_SpecCube0_HDR.a == 0 && probe0.a == 0;
 				
 				UNITY_BRANCH
 				if (interpolator < 0.99999) {
@@ -161,12 +162,18 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 					half4 probe1 = UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0, reflectionUV2, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
 					half3 probe1sample = DecodeHDR(probe1, unity_SpecCube1_HDR);
 					indirectSpecular = lerp(probe1sample, probe0sample, interpolator);
+					no_probe = unity_SpecCube1_HDR.a == 0 && probe1.a == 0;
 				}
 				else {
 					indirectSpecular = probe0sample;
 				}
 
-				if (any(indirectSpecular) < 0.1)
+				UNITY_BRANCH
+				if (no_probe)
+				{
+					indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)) * lightAvg;
+				}
+				else if (any(indirectSpecular) < 0.1)
 				{
 					indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)) * lightAvg;
 				}
