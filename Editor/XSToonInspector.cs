@@ -14,71 +14,73 @@ public class XSToonInspector : ShaderGUI
 
 	//Assign all properties as null at first to stop hundreds of warnings spamming the log when script gets compiled.
 	//If they aren't we get warnings, because assigning with reflection seems to make Unity think that the properties never actually get used. 
-	MaterialProperty _Culling = null;
-	MaterialProperty _MainTex = null;
-	MaterialProperty _Saturation = null;
-	MaterialProperty _Color = null;
-	MaterialProperty _Cutoff = null;
-	MaterialProperty _BumpMap = null;
-	MaterialProperty _BumpScale = null;
-	MaterialProperty _DetailNormalMap = null;
-	MaterialProperty _DetailMask = null;
-	MaterialProperty _DetailNormalMapScale = null;
-	MaterialProperty _ReflectionMode = null;
-	MaterialProperty _MetallicGlossMap = null;
-	MaterialProperty _BakedCubemap = null;
-	MaterialProperty _Matcap = null;
-	MaterialProperty _ReflectivityMask = null;
-	MaterialProperty _Metallic = null;
-	MaterialProperty _Glossiness = null;
-	MaterialProperty _EmissionMap = null;
-	MaterialProperty _EmissionColor = null;
-	MaterialProperty _RimIntensity = null;
-	MaterialProperty _RimRange = null;
-	MaterialProperty _RimThreshold = null;
-	MaterialProperty _RimSharpness = null;
-	MaterialProperty _SpecMode = null;
-	MaterialProperty _SpecularStyle = null;
-	MaterialProperty _SpecularMap = null;
-	MaterialProperty _SpecularIntensity = null;
-	MaterialProperty _SpecularArea = null;
-	MaterialProperty _AnisotropicAX = null;
-	MaterialProperty _AnisotropicAY = null;
-	MaterialProperty _Ramp = null;
-	MaterialProperty _ShadowRim = null;
-	MaterialProperty _ShadowRimRange = null;
-	MaterialProperty _ShadowRimThreshold = null;
-	MaterialProperty _ShadowRimSharpness = null;
-	MaterialProperty _OcclusionMap = null;
-	MaterialProperty _OcclusionColor = null;
-	MaterialProperty _ThicknessMap = null;
-	MaterialProperty _SSColor = null;
-	MaterialProperty _SSDistortion = null;
-	MaterialProperty _SSPower = null;
-	MaterialProperty _SSScale = null;
-	MaterialProperty _SSSRange = null;
-	MaterialProperty _SSSSharpness = null;
-	//MaterialProperty _HalftoneDotSize = null;
-	//MaterialProperty _HalftoneDotAmount = null;
-	//MaterialProperty _HalftoneLineAmount = null;
-	MaterialProperty _UVSetAlbedo = null;
-	MaterialProperty _UVSetNormal = null;
-	MaterialProperty _UVSetDetNormal = null;
-	MaterialProperty _UVSetDetMask = null;
-	MaterialProperty _UVSetMetallic = null;
-	MaterialProperty _UVSetSpecular = null;
-	MaterialProperty _UVSetReflectivity = null;
-	MaterialProperty _UVSetThickness = null;
-	MaterialProperty _UVSetOcclusion = null;
-	MaterialProperty _UVSetEmission = null;
-	MaterialProperty _Stencil = null;
-	MaterialProperty _StencilComp = null;
-	MaterialProperty _StencilOp = null;
-	MaterialProperty _OutlineWidth = null;
-	MaterialProperty _OutlineColor = null;
-	MaterialProperty _ShadowSharpness = null;
-	MaterialProperty _AdvMode = null;
-
+	//
+		MaterialProperty _Culling = null;
+		MaterialProperty _MainTex = null;
+		MaterialProperty _Saturation = null;
+		MaterialProperty _Color = null;
+		MaterialProperty _Cutoff = null;
+		MaterialProperty _BumpMap = null;
+		MaterialProperty _BumpScale = null;
+		MaterialProperty _DetailNormalMap = null;
+		MaterialProperty _DetailMask = null;
+		MaterialProperty _DetailNormalMapScale = null;
+		MaterialProperty _ReflectionMode = null;
+		MaterialProperty _MetallicGlossMap = null;
+		MaterialProperty _BakedCubemap = null;
+		MaterialProperty _Matcap = null;
+		MaterialProperty _ReflectivityMask = null;
+		MaterialProperty _Metallic = null;
+		MaterialProperty _Glossiness = null;
+		MaterialProperty _EmissionMap = null;
+		MaterialProperty _EmissionColor = null;
+		MaterialProperty _RimIntensity = null;
+		MaterialProperty _RimRange = null;
+		MaterialProperty _RimThreshold = null;
+		MaterialProperty _RimSharpness = null;
+		MaterialProperty _SpecMode = null;
+		MaterialProperty _SpecularStyle = null;
+		MaterialProperty _SpecularMap = null;
+		MaterialProperty _SpecularIntensity = null;
+		MaterialProperty _SpecularArea = null;
+		MaterialProperty _AnisotropicAX = null;
+		MaterialProperty _AnisotropicAY = null;
+		MaterialProperty _SpecularAlbedoTint = null;
+		MaterialProperty _Ramp = null;
+		MaterialProperty _ShadowRim = null;
+		MaterialProperty _ShadowRimRange = null;
+		MaterialProperty _ShadowRimThreshold = null;
+		MaterialProperty _ShadowRimSharpness = null;
+		MaterialProperty _OcclusionMap = null;
+		MaterialProperty _OcclusionColor = null;
+		MaterialProperty _ThicknessMap = null;
+		MaterialProperty _SSColor = null;
+		MaterialProperty _SSDistortion = null;
+		MaterialProperty _SSPower = null;
+		MaterialProperty _SSScale = null;
+		MaterialProperty _SSSRange = null;
+		MaterialProperty _SSSSharpness = null;
+		//MaterialProperty _HalftoneDotSize = null;
+		//MaterialProperty _HalftoneDotAmount = null;
+		//MaterialProperty _HalftoneLineAmount = null;
+		MaterialProperty _UVSetAlbedo = null;
+		MaterialProperty _UVSetNormal = null;
+		MaterialProperty _UVSetDetNormal = null;
+		MaterialProperty _UVSetDetMask = null;
+		MaterialProperty _UVSetMetallic = null;
+		MaterialProperty _UVSetSpecular = null;
+		MaterialProperty _UVSetReflectivity = null;
+		MaterialProperty _UVSetThickness = null;
+		MaterialProperty _UVSetOcclusion = null;
+		MaterialProperty _UVSetEmission = null;
+		MaterialProperty _Stencil = null;
+		MaterialProperty _StencilComp = null;
+		MaterialProperty _StencilOp = null;
+		MaterialProperty _OutlineWidth = null;
+		MaterialProperty _OutlineColor = null;
+		MaterialProperty _ShadowSharpness = null;
+		MaterialProperty _AdvMode = null;
+	//
 	static bool showMainSettings = true;
 	static bool showNormalMapSettings = false;
 	static bool showShadows = true;
@@ -191,11 +193,11 @@ public class XSToonInspector : ShaderGUI
 			{
 				materialEditor.ShaderProperty(_SpecMode, new GUIContent("Specular Mode", "Specular Mode."));
 				materialEditor.ShaderProperty(_SpecularStyle, new GUIContent("Specular Style", "Specular Style."));
-				materialEditor.TexturePropertySingleLine(new GUIContent("Specular Map", "Specular Map"), _SpecularMap);
+				materialEditor.TexturePropertySingleLine(new GUIContent("Specular Map(R,G,B)", "Specular Map. Red channel controls Intensity, Green controls how much specular is tinted by Albedo, and Blue controls Smoothness (Only for Blinn-Phong, and GGX)."), _SpecularMap);
 				materialEditor.TextureScaleOffsetProperty(_SpecularMap);
 				materialEditor.ShaderProperty(_UVSetSpecular, new GUIContent("UV Set", "The UV set to use for the Specular Map"), 2);
 				materialEditor.ShaderProperty(_SpecularIntensity, new GUIContent("Specular Intensity", "Specular Intensity."), 2);
-
+				materialEditor.ShaderProperty(_SpecularAlbedoTint, new GUIContent("Specular Albedo Tint", "How much the specular highlight should derive color from the albedo of the object."), 2);
 				if (_SpecMode.floatValue == 0 || _SpecMode.floatValue == 2)
 				{
 					materialEditor.ShaderProperty(_SpecularArea, new GUIContent("Specular Area", "Specular Area."), 2);
@@ -240,6 +242,10 @@ public class XSToonInspector : ShaderGUI
 					materialEditor.TexturePropertySingleLine(new GUIContent("Reflectivity Mask", "Mask for reflections."), _ReflectivityMask);
 					materialEditor.TextureScaleOffsetProperty(_ReflectivityMask);
 					materialEditor.ShaderProperty(_UVSetReflectivity, new GUIContent("UV Set", "The UV set to use for the Reflectivity Mask"), 2);
+				}
+				if(_ReflectionMode.floatValue == 3)
+				{
+					material.SetFloat("_Metallic", 0);
 				}
 			}
 

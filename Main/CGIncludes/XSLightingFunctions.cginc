@@ -99,37 +99,42 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 
 half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half4 metallicSmoothness, half ax, half ay)
 {	
-	lightCol = (lightCol + indirectDiffuse.xyzz);
 	float specularIntensity = _SpecularIntensity * i.specularMap.r;
-
+	half3 specular = half3(0,0,0);
+	half smoothness = max(0.01, (_SpecularArea * i.specularMap.b));
+	smoothness *= 1.7 - 0.7 * smoothness;
+	
 	if(_SpecMode == 0)
 	{
-		half reflectionUntouched = saturate(pow(d.rdv, _SpecularArea * 128));
+		half reflectionUntouched = saturate(pow(d.rdv, smoothness * 128));
 		//float dotHalftone = 1-DotHalftone(i, reflectionUntouched);
-		float specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * lightCol * (_SpecularArea * 2) ;
-		return specular * i.attenuation * i.albedo;
+		specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * (_SpecularArea * 2) ;
+		specular *= i.attenuation;
 	}
 	else if(_SpecMode == 1)
 	{
 		half smooth = saturate(D_GGXAnisotropic(d.tdh, d.bdh, d.ndh, ax, ay));
 		half sharp = round(smooth) * 2 * 0.5;
-		float specular = lerp(smooth, sharp, _SpecularStyle) * lightCol * specularIntensity;
-		return specular * i.attenuation * i.albedo;
+		specular = lerp(smooth, sharp, _SpecularStyle) * specularIntensity;
+		specular *= i.attenuation;
 	}
-	else
+	else if(_SpecMode == 2)
 	{
-		float sndl = saturate(d.ndl);	
-		float roughness = 1-(_SpecularArea);
-		float V = SmithJointGGXVisibilityTerm(sndl, d.vdn, roughness);
-		float F = F_Schlick(float3(0.0, 0.0, 0.0), d.ldh);
-		float D = XSGGXTerm(d.ndh, roughness*roughness);
+		half sndl = saturate(d.ndl);	
+		half roughness = 1-smoothness;
+		half V = SmithJointGGXVisibilityTerm(sndl, d.vdn, roughness);
+		half F = F_Schlick(half3(0.0, 0.0, 0.0), d.ldh);
+		half D = XSGGXTerm(d.ndh, roughness*roughness);
 
-		float reflection = V * D * UNITY_PI;
-		float smooth = (max(0, reflection * sndl) * F * i.attenuation) * lightCol * specularIntensity;
-		float sharp = round(smooth);
-		float specular = lerp(smooth, sharp, _SpecularStyle);
-		return specular * i.attenuation;
+		half reflection = V * D * UNITY_PI;
+		half smooth = (max(0, reflection * sndl) * F * i.attenuation) * specularIntensity;
+		half sharp = round(smooth);
+		specular = lerp(smooth, sharp, _SpecularStyle);
 	}
+	specular *= lightCol;
+	float3 tintedAlbedoSpecular = specular * i.albedo;
+	specular = lerp(specular, tintedAlbedoSpecular, _SpecularAlbedoTint * i.specularMap.g); // Should specular highlight be tinted based on the albedo of the object?
+	return specular;
 }
 
 half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothness, half3 reflDir, half3 indirectLight, float3 viewDir, half4 ramp)
@@ -161,7 +166,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 					indirectSpecular = probe0sample;
 				}
 
-				if (any(indirectSpecular) == 0)
+				if (any(indirectSpecular) < 0.1)
 				{
 					indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)) * lightAvg;
 				}

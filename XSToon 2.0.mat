@@ -100,6 +100,7 @@ Material:
     - _ShadowRimThreshold: 0.1
     - _ShadowSharpness: 0.5
     - _SpecMode: 0
+    - _SpecularAlbedoTint: 1
     - _SpecularArea: 0.5
     - _SpecularIntensity: 0
     - _SpecularStyle: 0

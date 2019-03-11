@@ -38,6 +38,7 @@
 		_SpecularArea("Specular Smoothness", Range(0,1)) = 0.5
 		_AnisotropicAX("Anisotropic X", Range(0,1)) = 0.25
 		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
+		_SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
 		
 		_Ramp("Shadow Ramp", 2D) = "white" {}
 		_ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5

@@ -139,7 +139,7 @@ half _Cutoff;
 half _Saturation;
 half _Metallic, _Glossiness;
 half _BumpScale, _DetailNormalMapScale;
-half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY;
+half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _SpecularAlbedoTint;
 
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness;
