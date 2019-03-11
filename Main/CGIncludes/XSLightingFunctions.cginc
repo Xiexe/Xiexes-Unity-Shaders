@@ -132,13 +132,13 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 	}
 }
 
-half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothness, half3 reflDir, half3 indirectLight, float3 viewDir)
+half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothness, half3 reflDir, half3 indirectLight, float3 viewDir, half4 ramp)
 {	//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
 		half3 spec = half3(0,0,0);
 
 		//Indirect specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light. 
-		#if defined(UNITY_PASS_FORWARDBASE) 
-			half lightAvg = (indirectLight.r + indirectLight.g + indirectLight.b + _LightColor0) / 4;
+		#if defined(UNITY_PASS_FORWARDBASE)
+			half lightAvg = (indirectLight.r + indirectLight.g + indirectLight.b + _LightColor0.r + _LightColor0.g + _LightColor0.b) / 6;
 
 			UNITY_BRANCH
 			if(_ReflectionMode == 0) // PBR
@@ -183,8 +183,8 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 				spec = tex2Dlod(_Matcap, float4(remapUV, 0, (metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)));
 				spec *= min(lightAvg,1);
 			}
-
-			spec *= i.reflectivityMask;
+			spec = lerp(spec, spec * ramp, metallicSmoothness.w); // should only not see shadows on a perfect mirror.
+			spec *= i.reflectivityMask.r;
 		#endif
 	return spec;
 }
@@ -213,29 +213,26 @@ half3 calcIndirectDiffuse()
 	return ShadeSH9(float4(0, 0, 0, 1)); // We don't care about anything other than the color from GI, so only feed in 0,0,0, rather than the normal
 }
 
-half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol) 
+half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol, float4 ramp) 
 {	
 	float4 diffuse; 
-	half4 ramp = calcRamp(i, d);
 	half4 indirect = indirectDiffuse.xyzz;
 	diffuse = ramp * i.attenuation * lightCol + indirect;
-	//diffuse *= i.attenuation + indirect;
-
 	return i.albedo * diffuse;
 }
 
 //Subsurface Scattering - Based on a 2011 GDC Conference from by Colin Barre-Bresebois & Marc Bouchard
 //Modified by Xiexe
-	float4 calcSubsurfaceScattering(XSLighting i, DotProducts d, float3 lightDir, float3 viewDir, float3 normal, float4 lightCol, float3 indirectDiffuse)
-	{	
-		d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
-		float attenuation = saturate(i.attenuation * d.ndl);
-		float3 H = normalize(lightDir + normal * _SSDistortion);
-		float VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
-		float3 I = _SSColor * (VdotH + indirectDiffuse) * attenuation * i.thickness * _SSScale;
-		float4 SSS = float4(lightCol.rgb * I * i.albedo.rgb, 1);
-		SSS = max(0, SSS); // Make sure it doesn't go NaN
+float4 calcSubsurfaceScattering(XSLighting i, DotProducts d, float3 lightDir, float3 viewDir, float3 normal, float4 lightCol, float3 indirectDiffuse)
+{	
+	d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
+	float attenuation = saturate(i.attenuation * d.ndl);
+	float3 H = normalize(lightDir + normal * _SSDistortion);
+	float VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
+	float3 I = _SSColor * (VdotH + indirectDiffuse) * attenuation * i.thickness * _SSScale;
+	float4 SSS = float4(lightCol.rgb * I * i.albedo.rgb, 1);
+	SSS = max(0, SSS); // Make sure it doesn't go NaN
 
-		return SSS;
-	}
+	return SSS;
+}
 //
