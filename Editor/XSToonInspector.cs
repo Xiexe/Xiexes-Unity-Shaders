@@ -153,7 +153,7 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
 				materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
 				materialEditor.ShaderProperty(_ShadowRimSharpness, new GUIContent("Sharpness", "Sharpness of the Shadow Rim"), 2);
-				XSStyles.callGradientEditor();
+				XSStyles.callGradientEditor(material);
 			}
 
 			if (isOutlined)
