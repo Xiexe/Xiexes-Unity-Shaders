@@ -70,11 +70,8 @@ half4 calcMetallicSmoothness(XSLighting i)
 {
 	half roughness = 1-(_Glossiness * i.metallicGlossMap.a);
 	roughness *= 1.7 - 0.7 * roughness;
-
 	half metallic = i.metallicGlossMap.r * _Metallic;
-	half reflectionMask = 1-i.metallicGlossMap.b;
-
-	return half4(metallic, 0, reflectionMask, roughness);
+	return half4(metallic, 0, 0, roughness);
 }
 
 half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse)

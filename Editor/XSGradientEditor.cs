@@ -38,7 +38,6 @@ public class XSGradientEditor : EditorWindow
     {
 
 
-
         if (gradient == null)
         {
             gradient = new Gradient();
@@ -47,6 +46,16 @@ public class XSGradientEditor : EditorWindow
         {
             oldGradient = new Gradient();
         }
+
+        if (focusedMat != null && gradient != null)
+        {
+            XSStyles.ShurikenHeader("Current Material: " + focusedMat.name);
+        }
+        else
+        {
+            XSStyles.ShurikenHeader("Current Material: None");
+        }
+
         SerializedObject serializedGradient = new SerializedObject(this);
         SerializedProperty colorGradient = serializedGradient.FindProperty("gradient");
         EditorGUILayout.PropertyField(colorGradient, true, null);
@@ -95,8 +104,6 @@ public class XSGradientEditor : EditorWindow
 
             if (focusedMat != null)
             {
-                // focusedMat = (Material)EditorGUILayout.ObjectField("Material:", focusedMat, typeof(Material), false);
-                GUILayout.Label("Current Material: " + focusedMat.name);
                 if (changed)
                 {
                     if (focusedMat.HasProperty("_Ramp"))
@@ -115,8 +122,6 @@ public class XSGradientEditor : EditorWindow
                         focusedMat.SetTexture("_Ramp", tex);
                     }
                 }
-            } else {
-                GUILayout.Label("Current Material: None");
             }
 
             XSStyles.Separator();
@@ -144,7 +149,7 @@ public class XSGradientEditor : EditorWindow
             }
         }
 
-        XSStyles.HelpBox("You can use this to create a custom shadow ramp. \nYou must save the asset with the save button to apply changes. \n\n - Click the Gradient box. \n - Choose resolution. \n - Save. \n - Drag texture into slot.", MessageType.Info);
+        XSStyles.HelpBox("You can use this to create a custom shadow ramp in realtime. \nIf you do not save, the ramp will be reverted back to what it was previously. \n\n - Click the Gradient box. \n - Choose resolution of the texture. \n - Save.", MessageType.Info);
     }
 
     void OnDestroy()
