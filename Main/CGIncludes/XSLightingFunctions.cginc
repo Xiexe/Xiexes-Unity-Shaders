@@ -105,7 +105,7 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 	{
 		half reflectionUntouched = saturate(pow(d.rdv, smoothness * 128));
 		//float dotHalftone = 1-DotHalftone(i, reflectionUntouched);
-		specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * (_SpecularArea * 2) ;
+		specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * (_SpecularArea + 0.5);
 		specular *= i.attenuation;
 	}
 	else if(_SpecMode == 1)

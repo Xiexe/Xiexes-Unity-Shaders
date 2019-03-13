@@ -90,8 +90,6 @@ float4 frag (
 	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
 	#if defined(DIRECTIONAL)
 		attenuation = lerp(attenuation, round(attenuation), _ShadowSharpness);
-		half nAtten = pow(1-attenuation, 5); // Take 1-Atten as a mask to clean up left over artifacts from self shadowing.
-		attenuation = saturate(attenuation + (1-nAtten));
 	#endif
 	
 	bool face = facing > 0; // True if on front face, False if on back face

@@ -6,10 +6,10 @@ void calcNormal(inout XSLighting i)
 	float3 detNMap = UnpackNormal(i.detailNormal);
 	detNMap.xy *= _DetailNormalMapScale * i.detailMask.r;
 
-	half3 blendedNormal = half3(nMap.xy*detNMap.z + detNMap.xy*nMap.z, nMap.z*detNMap.z);
+	half3 blendedNormal = BlendNormals(nMap, detNMap);
 
 	half3 calcedNormal = half3(i.bitangent * blendedNormal.r +
-								i.tangent * -blendedNormal.g +
+								i.tangent * blendedNormal.g +
 								i.normal * blendedNormal.b);
 	
 	calcedNormal = normalize(calcedNormal);
@@ -159,8 +159,6 @@ void calcAlpha(inout XSLighting i)
 		clip(i.albedo.a - _Cutoff);
 	#endif
 }
-
-
 
 
 // Halftone functions, finish implementing later.. Not correct right now.

@@ -86,7 +86,7 @@
 	{
 		Tags { "RenderType"="Opaque" "Queue"="Geometry" }
 		Cull [_Culling]
-				Stencil 
+		Stencil 
 		{
 			Ref [_Stencil]
 			Comp [_StencilComp]
