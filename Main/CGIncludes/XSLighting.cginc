@@ -23,7 +23,7 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     d.ldh = DotClamped(lightDir, halfVector);
     d.svdn = abs(dot(stereoViewDir, i.normal));
 
-    i.albedo.rgb *= (1-metallicSmoothness.x); 
+    i.albedo.rgb *= (1-metallicSmoothness.x);
     half3 indirectDiffuse = calcIndirectDiffuse();
     half4 lightCol = calcLightCol(lightEnv, indirectDiffuse);
     
@@ -39,7 +39,7 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
 
 	half4 col;
     col = diffuse * shadowRim;
-    col += indirectSpecular.xyzz;
+    calcReflectionBlending(col, indirectSpecular.xyzz);
     col += directSpecular.xyzz;
     col += rimLight;
     col += subsurface;

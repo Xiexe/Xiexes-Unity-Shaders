@@ -26,12 +26,14 @@ public class XSToonInspector : ShaderGUI
 		MaterialProperty _DetailMask = null;
 		MaterialProperty _DetailNormalMapScale = null;
 		MaterialProperty _ReflectionMode = null;
+		MaterialProperty _ReflectionBlendMode = null;
 		MaterialProperty _MetallicGlossMap = null;
 		MaterialProperty _BakedCubemap = null;
 		MaterialProperty _Matcap = null;
 		MaterialProperty _ReflectivityMask = null;
 		MaterialProperty _Metallic = null;
 		MaterialProperty _Glossiness = null;
+		MaterialProperty _Reflectivity = null;
 		MaterialProperty _EmissionMap = null;
 		MaterialProperty _EmissionColor = null;
 		MaterialProperty _RimIntensity = null;
@@ -213,6 +215,7 @@ public class XSToonInspector : ShaderGUI
 			if (showReflection)
 			{
 				materialEditor.ShaderProperty(_ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
+				materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
 				if (_ReflectionMode.floatValue == 0) // PBR
 				{
 					materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
@@ -236,12 +239,14 @@ public class XSToonInspector : ShaderGUI
 					materialEditor.TexturePropertySingleLine(new GUIContent("Matcap", "Matcap Texture"), _Matcap);
 					materialEditor.ShaderProperty(_Glossiness, new GUIContent("Matcap Blur", "Matcap blur, blurs the Matcap, set to 1 for full clarity"), 2);
 					material.SetFloat("_Metallic", 0);
+					material.SetTexture("_MetallicGlossMap", null);
 				}
 				if (_ReflectionMode.floatValue != 3)
 				{
 					materialEditor.TexturePropertySingleLine(new GUIContent("Reflectivity Mask", "Mask for reflections."), _ReflectivityMask);
 					materialEditor.TextureScaleOffsetProperty(_ReflectivityMask);
 					materialEditor.ShaderProperty(_UVSetReflectivity, new GUIContent("UV Set", "The UV set to use for the Reflectivity Mask"), 2);
+					materialEditor.ShaderProperty(_Reflectivity, new GUIContent("Reflectivity", "The strength of the reflections."), 2);
 				}
 				if(_ReflectionMode.floatValue == 3)
 				{

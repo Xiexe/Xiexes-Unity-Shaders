@@ -38,7 +38,7 @@ struct VertexOutput
 		float4 pos : CLIP_POS;
 		float4 vertex : SV_POSITION;
 		float2 uv : TEXCOORD0;
-		float2 uv1 : TEXCROORD1;
+		float2 uv1 : TEXCOORD1;
 		float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
@@ -52,7 +52,7 @@ struct VertexOutput
 	{
 		float4 pos : SV_POSITION;
 		float2 uv : TEXCOORD0;
-		float2 uv1 : TEXCROORD1;
+		float2 uv1 : TEXCOORD1;
 		float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
 		float4 worldPos : TEXCOORD5;
 		float4 color : TEXCOORD6;
@@ -137,7 +137,7 @@ half4 _Color, _ShadowRim,
 half _Cutoff;
 
 half _Saturation;
-half _Metallic, _Glossiness;
+half _Metallic, _Glossiness, _Reflectivity;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _SpecularAlbedoTint;
 
@@ -148,7 +148,7 @@ half _SSDistortion, _SSPower, _SSScale;
 half _SSSRange, _SSSSharpness;
 half _OutlineWidth;
 
-int _SpecMode, _SpecularStyle, _ReflectionMode;
+int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode;
 
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
 	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
