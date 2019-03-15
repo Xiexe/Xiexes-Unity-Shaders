@@ -52,6 +52,7 @@
 		_OcclusionMap("Occlusion", 2D) = "white" {}
 		_OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
+		_OutlineMask("Outline Mask", 2D) = "white" {}
 		_OutlineWidth("Outline Width", Range(0, 5)) = 1
 		_OutlineColor("Outline Color", Color) = (0,0,0,1)
 

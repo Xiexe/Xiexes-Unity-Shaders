@@ -29,10 +29,11 @@ VertexOutput vert (VertexInput v)
 	{
 		g2f o;
 
-		for (int i = 2; i >= 0; i--)
+		for (int i = 2; i >= 0; i--) //Outlines
 		{	
 			float4 worldPos = (mul(unity_ObjectToWorld, IN[i].vertex));
-			float3 outlineWidth = (_OutlineWidth) * .01;
+			half outlineWidthMask = tex2Dlod(_OutlineMask, float4(IN[i].uv, 0, 0));
+			float3 outlineWidth = outlineWidthMask * _OutlineWidth * .01;
 			outlineWidth *= min(distance(worldPos, _WorldSpaceCameraPos) * 3, 1);
 			float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].normal) * outlineWidth, 1);
 			
@@ -55,7 +56,7 @@ VertexOutput vert (VertexInput v)
 		}
 		tristream.RestartStrip();
 		
-		for (int ii = 0; ii < 3; ii++)
+		for (int ii = 0; ii < 3; ii++) //Main mesh
 		{
 			o.pos = UnityObjectToClipPos(IN[ii].vertex);
 			o.worldPos = IN[ii].worldPos;

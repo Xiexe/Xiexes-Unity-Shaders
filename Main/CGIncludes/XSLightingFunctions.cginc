@@ -173,7 +173,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 			else if(_ReflectionMode == 1) //Baked Cubemap
 			{	
 				half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
-				half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
+				half3 metallicColor = indirectSpecular * lerp(0.1,i.diffuseColor.rgb, metallicSmoothness.x);
 				spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
 				spec *= min(lightAvg,1);
 			}

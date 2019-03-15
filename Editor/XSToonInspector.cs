@@ -78,6 +78,7 @@ public class XSToonInspector : ShaderGUI
 		MaterialProperty _Stencil = null;
 		MaterialProperty _StencilComp = null;
 		MaterialProperty _StencilOp = null;
+		MaterialProperty _OutlineMask = null;
 		MaterialProperty _OutlineWidth = null;
 		MaterialProperty _OutlineColor = null;
 		MaterialProperty _ShadowSharpness = null;
@@ -163,6 +164,7 @@ public class XSToonInspector : ShaderGUI
 				showOutlines = XSStyles.ShurikenFoldout("Outlines", showOutlines);
 				if (showOutlines)
 				{
+					materialEditor.TexturePropertySingleLine(new GUIContent("Outline Mask", "Outline width mask, black will make the outline minimum width."), _OutlineMask);
 					materialEditor.ShaderProperty(_OutlineWidth, new GUIContent("Outline Width", "Width of the Outlines"));
 					XSStyles.constrainedShaderProperty(materialEditor, _OutlineColor, new GUIContent("Outline Color", "Color of the outlines"), 0);
 				}

@@ -101,6 +101,7 @@ struct TextureUV
 	half2 occlusionUV;
 	half2 reflectivityMaskUV;
 	half2 emissionMapUV;
+	half2 outlineMaskUV;
 };
 
 struct DotProducts
@@ -126,6 +127,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_ReflectivityMask); half4 _ReflectivityMask_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ThicknessMap); half4 _ThicknessMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_OcclusionMap); half4 _OcclusionMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
+sampler2D _OutlineMask;
 sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
