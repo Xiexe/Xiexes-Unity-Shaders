@@ -105,7 +105,7 @@
 			#pragma geometry geom
 			#pragma fragment frag
 			#pragma multi_compile_fwdbase 
-			#pragma multi_compile UNITY_PASS_FORWARDBASE
+			#define UNITY_PASS_FORWARDBASE
 			#define Dithered
 			#define Geometry
 
@@ -128,7 +128,7 @@
 			#pragma geometry geom
 			#pragma fragment frag
 			#pragma multi_compile_fwdadd_fullshadows
-			#pragma multi_compile UNITY_PASS_FORWARDADD
+			#define UNITY_PASS_FORWARDADD
 			#define Dithered
 			#define Geometry
 			
@@ -150,7 +150,7 @@
 			#pragma fragment fragShadowCaster
 			#pragma target 3.0
 			#pragma multi_compile_shadowcaster
-			#pragma multi_compile UNITY_PASS_SHADOWCASTER
+			#define UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 			#define Dithered
 

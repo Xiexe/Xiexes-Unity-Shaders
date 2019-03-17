@@ -108,7 +108,7 @@
 			#pragma fragment frag
 
 			#pragma multi_compile_fwdbase 
-			#pragma multi_compile UNITY_PASS_FORWARDBASE
+			#define UNITY_PASS_FORWARDBASE
 
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -132,7 +132,7 @@
 			#pragma fragment frag
 
 			#pragma multi_compile_fwdadd_fullshadows
-			#pragma multi_compile UNITY_PASS_FORWARDADD
+			#define UNITY_PASS_FORWARDADD
 			
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -152,7 +152,7 @@
 			#pragma fragment fragShadowCaster
 
 			#pragma multi_compile_shadowcaster
-			#pragma multi_compile UNITY_PASS_SHADOWCASTER
+			#define UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
 			#include "../CGIncludes/XSShadowCaster.cginc"
