@@ -3,14 +3,14 @@
 
 // Do dithering for alpha blended shadows on SM3+/desktop, and Dithered transparency;
 // on lesser systems do simple alpha-tested shadows
-#if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask)
+#if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask) || defined(Transparent)
     #if !((SHADER_TARGET < 30) || defined (SHADER_API_MOBILE) || defined(SHADER_API_D3D11_9X) || defined (SHADER_API_PSP2) || defined (SHADER_API_PSM))
         #define UNITY_STANDARD_USE_DITHER_MASK 1
     #endif
 #endif
 
 // Need to output UVs in shadow caster, since we need to sample texture and do clip/dithering based on it
-#if defined(Cutout) || defined(AlphaToMask) || defined(AlphaBlend) || defined(Dithered)
+#if defined(Cutout) || defined(AlphaToMask) || defined(AlphaBlend) || defined(Dithered) || defined(Transparent)
     #define UNITY_STANDARD_USE_SHADOW_UVS 1
 #endif
 
@@ -70,13 +70,19 @@ half4 fragShadowCaster(
 ) : SV_Target
 {
     #if defined(UNITY_STANDARD_USE_SHADOW_UVS)
-        half alpha = tex2D(_MainTex, i.tex).a * _Color.a;
-    
+        half alpha = 1;
+        
+        #if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask)
+            alpha = tex2D(_MainTex, i.tex).a * _Color.a;
+        #else
+            alpha = _Color.a;
+        #endif
+
 		#if defined(Cutout)
 			clip(alpha - _Cutoff);
 		#endif
-	
-    	#if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask)
+
+    	#if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask) || defined(Transparent)
 			#if defined(UNITY_STANDARD_USE_DITHER_MASK)
 				half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy*0.25,alpha*0.9375)).a;
 				clip(alphaRef - 0.01);
