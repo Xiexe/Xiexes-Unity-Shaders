@@ -70,11 +70,8 @@ half4 calcMetallicSmoothness(XSLighting i)
 {
 	half roughness = 1-(_Glossiness * i.metallicGlossMap.a);
 	roughness *= 1.7 - 0.7 * roughness;
-
-	half metallic = i.metallicGlossMap.r * _Metallic;
-	half reflectionMask = 1-i.metallicGlossMap.b;
-
-	return half4(metallic, 0, reflectionMask, roughness);
+	half metallic = lerp(0, i.metallicGlossMap.r * _Metallic, i.reflectivityMask.r);
+	return half4(metallic, 0, 0, roughness);
 }
 
 half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse)
@@ -82,9 +79,6 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 	half rimIntensity = saturate((1-d.svdn) * pow(d.ndl, _RimThreshold));
 	rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
 	half4 rim = (rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz) * i.albedo * i.attenuation);
-	// float dotHalftone = 1-DotHalftone(i, rimIntensity);
-	// rim *= dotHalftone;
-	
 	return rim;
 }
 
@@ -108,7 +102,7 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 	{
 		half reflectionUntouched = saturate(pow(d.rdv, smoothness * 128));
 		//float dotHalftone = 1-DotHalftone(i, reflectionUntouched);
-		specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * (_SpecularArea * 2) ;
+		specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * (_SpecularArea + 0.5);
 		specular *= i.attenuation;
 	}
 	else if(_SpecMode == 1)
@@ -168,7 +162,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 					indirectSpecular = probe0sample;
 				}
 
-				if (any(indirectSpecular) < 0.1)
+				if (!any(indirectSpecular))
 				{
 					indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)) * lightAvg;
 				}
@@ -179,7 +173,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 			else if(_ReflectionMode == 1) //Baked Cubemap
 			{	
 				half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
-				half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
+				half3 metallicColor = indirectSpecular * lerp(0.1,i.diffuseColor.rgb, metallicSmoothness.x);
 				spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
 				spec *= min(lightAvg,1);
 			}
@@ -232,14 +226,31 @@ half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 li
 //Modified by Xiexe
 float4 calcSubsurfaceScattering(XSLighting i, DotProducts d, float3 lightDir, float3 viewDir, float3 normal, float4 lightCol, float3 indirectDiffuse)
 {	
-	d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
-	float attenuation = saturate(i.attenuation * d.ndl);
-	float3 H = normalize(lightDir + normal * _SSDistortion);
-	float VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
-	float3 I = _SSColor * (VdotH + indirectDiffuse) * attenuation * i.thickness * _SSScale;
-	float4 SSS = float4(lightCol.rgb * I * i.albedo.rgb, 1);
-	SSS = max(0, SSS); // Make sure it doesn't go NaN
+	UNITY_BRANCH
+	if(any(_SSColor.rgb)) // Skip all the SSS stuff if the color is 0.
+	{
+		d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
+		float attenuation = saturate(i.attenuation * d.ndl);
+		float3 H = normalize(lightDir + normal * _SSDistortion);
+		float VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
+		float3 I = _SSColor * (VdotH + indirectDiffuse) * attenuation * i.thickness * _SSScale;
+		float4 SSS = float4(lightCol.rgb * I * i.albedo.rgb, 1);
+		SSS = max(0, SSS); // Make sure it doesn't go NaN
 
-	return SSS;
+		return SSS;
+	}
+	else
+	{
+		return 0;
+	}
 }
-//
+
+void calcReflectionBlending(inout float4 col, float3 indirectSpecular)
+{
+	if(_ReflectionBlendMode == 0) // Additive
+		col += indirectSpecular.xyzz;
+	else if(_ReflectionBlendMode == 1) //Multiplicitive
+		col *= indirectSpecular.xyzz;
+	else if(_ReflectionBlendMode == 2) //Subtractive
+		col -= indirectSpecular.xyzz;
+}

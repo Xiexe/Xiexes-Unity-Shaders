@@ -29,10 +29,11 @@ VertexOutput vert (VertexInput v)
 	{
 		g2f o;
 
-		for (int i = 2; i >= 0; i--)
+		for (int i = 2; i >= 0; i--) //Outlines
 		{	
 			float4 worldPos = (mul(unity_ObjectToWorld, IN[i].vertex));
-			float3 outlineWidth = (_OutlineWidth) * .01;
+			half outlineWidthMask = tex2Dlod(_OutlineMask, float4(IN[i].uv, 0, 0));
+			float3 outlineWidth = outlineWidthMask * _OutlineWidth * .01;
 			outlineWidth *= min(distance(worldPos, _WorldSpaceCameraPos) * 3, 1);
 			float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].normal) * outlineWidth, 1);
 			
@@ -55,7 +56,7 @@ VertexOutput vert (VertexInput v)
 		}
 		tristream.RestartStrip();
 		
-		for (int ii = 0; ii < 3; ii++)
+		for (int ii = 0; ii < 3; ii++) //Main mesh
 		{
 			o.pos = UnityObjectToClipPos(IN[ii].vertex);
 			o.worldPos = IN[ii].worldPos;
@@ -90,8 +91,6 @@ float4 frag (
 	UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
 	#if defined(DIRECTIONAL)
 		attenuation = lerp(attenuation, round(attenuation), _ShadowSharpness);
-		half nAtten = pow(1-attenuation, 5); // Take 1-Atten as a mask to clean up left over artifacts from self shadowing.
-		attenuation = saturate(attenuation + (1-nAtten));
 	#endif
 	
 	bool face = facing > 0; // True if on front face, False if on back face
@@ -119,7 +118,7 @@ float4 frag (
 	o.detailNormal = UNITY_SAMPLE_TEX2D_SAMPLER(_DetailNormalMap, _MainTex, t.detailNormalUV);
 	o.thickness = UNITY_SAMPLE_TEX2D_SAMPLER(_ThicknessMap, _MainTex, t.thicknessMapUV);
 	o.occlusion = UNITY_SAMPLE_TEX2D_SAMPLER(_OcclusionMap, _MainTex, t.occlusionUV);
-	o.reflectivityMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectivityMask, _MainTex, t.reflectivityMaskUV);
+	o.reflectivityMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectivityMask, _MainTex, t.reflectivityMaskUV) * _Reflectivity;
 	o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV) * _EmissionColor;
 
 	o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.

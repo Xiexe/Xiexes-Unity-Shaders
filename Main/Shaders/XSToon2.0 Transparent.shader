@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0_Outlined"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0_Transparent"
 {
 	Properties
 	{	
@@ -16,7 +16,7 @@
 		_DetailNormalMapScale("Detail Normal Scale", Range(-2,2)) = 1.0
 
 		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 3
-		[Enum(Additive,0,Multiply,1,Subtract,2)] _ReflectionBlendMode("Reflection Blend Mode", Int) = 0
+		[Enum(Additive,0,Multiply,1,Subtract,2)] _ReflectionBlendMode("Reflection Blend Mode", Int) = 0		
 		_MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
 		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
 		_Matcap("Matcap", 2D) = "black" {}
@@ -39,8 +39,8 @@
 		_SpecularIntensity("Specular Intensity", Float) = 0
 		_SpecularArea("Specular Smoothness", Range(0,1)) = 0.5
 		_AnisotropicAX("Anisotropic X", Range(0,1)) = 0.25
-		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75
-		_SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1  
+		_AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
+		_SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
 		
 		_Ramp("Shadow Ramp", 2D) = "white" {}
 		_ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
@@ -87,28 +87,27 @@
 	
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+		Tags { "RenderType"="Transparent" "Queue"="Transparent" }
 		Cull [_Culling]
-		Stencil 
+				Stencil 
 		{
 			Ref [_Stencil]
 			Comp [_StencilComp]
 			Pass [_StencilOp]
 		}
+		Blend SrcAlpha OneMinusSrcAlpha
+		ZWrite Off
 		Pass
 		{
 			Name "FORWARD"
 			Tags { "LightMode" = "ForwardBase" }
 			
 			CGPROGRAM
-			#define Geometry
-
 			#pragma vertex vert
-			#pragma geometry geom
 			#pragma fragment frag
-
 			#pragma multi_compile_fwdbase 
 			#define UNITY_PASS_FORWARDBASE
+			#define Transparent
 
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -122,17 +121,14 @@
 		{
 			Name "FWDADD"
 			Tags { "LightMode" = "ForwardAdd" }
-			Blend One One
+			Blend SrcAlpha One
 
 			CGPROGRAM
-			#define Geometry
-
 			#pragma vertex vert
-			#pragma geometry geom
 			#pragma fragment frag
-
 			#pragma multi_compile_fwdadd_fullshadows
 			#define UNITY_PASS_FORWARDADD
+			#define Transparent
 			
 			#include "../CGIncludes/XSDefines.cginc"
 			#include "../CGIncludes/XSHelperFunctions.cginc"
@@ -150,15 +146,16 @@
 			CGPROGRAM
 			#pragma vertex vertShadowCaster
 			#pragma fragment fragShadowCaster
-
+			#pragma target 3.0
 			#pragma multi_compile_shadowcaster
 			#define UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
+			#define Transparent
 
 			#include "../CGIncludes/XSShadowCaster.cginc"
 			ENDCG
 		}
 	}
-	Fallback "Diffuse"
+	Fallback "Transparent/Diffuse"
 	CustomEditor "XSToonInspector"
 }

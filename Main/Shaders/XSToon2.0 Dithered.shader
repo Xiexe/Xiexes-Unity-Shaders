@@ -16,12 +16,14 @@
 		_DetailNormalMapScale("Detail Normal Scale", Range(-2,2)) = 1.0
 
 		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 3
+		[Enum(Additive,0,Multiply,1,Subtract,2)] _ReflectionBlendMode("Reflection Blend Mode", Int) = 0		
 		_MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
 		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
 		_Matcap("Matcap", 2D) = "black" {}
 		_ReflectivityMask("Reflection Mask" , 2D) = "white" {}
 		_Metallic("Metallic", Range(0,1)) = 0
 		_Glossiness("Smoothness", Range(0,1)) = 0
+		_Reflectivity("Reflectivity", Range(0,1)) = 1
 
 		_EmissionMap("Emission Map", 2D) = "white" {}
 		[HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
@@ -50,6 +52,7 @@
 		_OcclusionMap("Occlusion", 2D) = "white" {}
 		_OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
+		_OutlineMask("Outline Mask", 2D) = "white" {}
 		_OutlineWidth("Outline Width", Range(0, 5)) = 1
 		_OutlineColor("Outline Color", Color) = (0,0,0,1)
 
@@ -101,7 +104,7 @@
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile_fwdbase 
-			#pragma multi_compile UNITY_PASS_FORWARDBASE
+			#define UNITY_PASS_FORWARDBASE
 			#define Dithered
 
 			#include "../CGIncludes/XSDefines.cginc"
@@ -122,7 +125,7 @@
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma multi_compile_fwdadd_fullshadows
-			#pragma multi_compile UNITY_PASS_FORWARDADD
+			#define UNITY_PASS_FORWARDADD
 			#define Dithered
 			
 			#include "../CGIncludes/XSDefines.cginc"
@@ -143,7 +146,7 @@
 			#pragma fragment fragShadowCaster
 			#pragma target 3.0
 			#pragma multi_compile_shadowcaster
-			#pragma multi_compile UNITY_PASS_SHADOWCASTER
+			#define UNITY_PASS_SHADOWCASTER
 			#pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 			#define Dithered
 

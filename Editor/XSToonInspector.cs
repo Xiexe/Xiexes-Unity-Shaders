@@ -26,12 +26,14 @@ public class XSToonInspector : ShaderGUI
 		MaterialProperty _DetailMask = null;
 		MaterialProperty _DetailNormalMapScale = null;
 		MaterialProperty _ReflectionMode = null;
+		MaterialProperty _ReflectionBlendMode = null;
 		MaterialProperty _MetallicGlossMap = null;
 		MaterialProperty _BakedCubemap = null;
 		MaterialProperty _Matcap = null;
 		MaterialProperty _ReflectivityMask = null;
 		MaterialProperty _Metallic = null;
 		MaterialProperty _Glossiness = null;
+		MaterialProperty _Reflectivity = null;
 		MaterialProperty _EmissionMap = null;
 		MaterialProperty _EmissionColor = null;
 		MaterialProperty _RimIntensity = null;
@@ -76,6 +78,7 @@ public class XSToonInspector : ShaderGUI
 		MaterialProperty _Stencil = null;
 		MaterialProperty _StencilComp = null;
 		MaterialProperty _StencilOp = null;
+		MaterialProperty _OutlineMask = null;
 		MaterialProperty _OutlineWidth = null;
 		MaterialProperty _OutlineColor = null;
 		MaterialProperty _ShadowSharpness = null;
@@ -153,7 +156,7 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
 				materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
 				materialEditor.ShaderProperty(_ShadowRimSharpness, new GUIContent("Sharpness", "Sharpness of the Shadow Rim"), 2);
-				XSStyles.callGradientEditor();
+				XSStyles.callGradientEditor(material);
 			}
 
 			if (isOutlined)
@@ -161,6 +164,7 @@ public class XSToonInspector : ShaderGUI
 				showOutlines = XSStyles.ShurikenFoldout("Outlines", showOutlines);
 				if (showOutlines)
 				{
+					materialEditor.TexturePropertySingleLine(new GUIContent("Outline Mask", "Outline width mask, black will make the outline minimum width."), _OutlineMask);
 					materialEditor.ShaderProperty(_OutlineWidth, new GUIContent("Outline Width", "Width of the Outlines"));
 					XSStyles.constrainedShaderProperty(materialEditor, _OutlineColor, new GUIContent("Outline Color", "Color of the outlines"), 0);
 				}
@@ -215,6 +219,7 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.ShaderProperty(_ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
 				if (_ReflectionMode.floatValue == 0) // PBR
 				{
+					materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
 					materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel"), _MetallicGlossMap);
 					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
@@ -224,6 +229,7 @@ public class XSToonInspector : ShaderGUI
 				}
 				else if (_ReflectionMode.floatValue == 1) //Baked cube
 				{
+					materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
 					materialEditor.TexturePropertySingleLine(new GUIContent("Baked Cubemap", "Baked cubemap."), _BakedCubemap);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel"), _MetallicGlossMap);
 					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
@@ -233,19 +239,23 @@ public class XSToonInspector : ShaderGUI
 				}
 				else if (_ReflectionMode.floatValue == 2) //Matcap
 				{
+					materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
 					materialEditor.TexturePropertySingleLine(new GUIContent("Matcap", "Matcap Texture"), _Matcap);
 					materialEditor.ShaderProperty(_Glossiness, new GUIContent("Matcap Blur", "Matcap blur, blurs the Matcap, set to 1 for full clarity"), 2);
 					material.SetFloat("_Metallic", 0);
+					material.SetTexture("_MetallicGlossMap", null);
 				}
 				if (_ReflectionMode.floatValue != 3)
 				{
 					materialEditor.TexturePropertySingleLine(new GUIContent("Reflectivity Mask", "Mask for reflections."), _ReflectivityMask);
 					materialEditor.TextureScaleOffsetProperty(_ReflectivityMask);
 					materialEditor.ShaderProperty(_UVSetReflectivity, new GUIContent("UV Set", "The UV set to use for the Reflectivity Mask"), 2);
+					materialEditor.ShaderProperty(_Reflectivity, new GUIContent("Reflectivity", "The strength of the reflections."), 2);
 				}
 				if(_ReflectionMode.floatValue == 3)
 				{
 					material.SetFloat("_Metallic", 0);
+					material.SetFloat("_ReflectionBlendMode", 0);
 				}
 			}
 

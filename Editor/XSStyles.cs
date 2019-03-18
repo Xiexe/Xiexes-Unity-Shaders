@@ -6,7 +6,7 @@ using System.IO;
 [InitializeOnLoad]
 public class XSStyles : MonoBehaviour
 {
-    public static string ver = "2.0";
+    public static string ver = "2.0.2";
 
     //Help URLs
     public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";
@@ -19,7 +19,7 @@ public class XSStyles : MonoBehaviour
     public static string sssURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.j2nk83f6azph";
     public static string outlineURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.jpaf9t25in8p";
 
-    public static string[] patrons = {"Salt Queen", "Q", "NepsyNeptune", "Kurisu", "CrusaderArts", "Kurome .", "Pikachu Electricmouse", "Selivaria", "Trejkaz/Hakanai", "Viridios"};
+    public static string[] patrons = {"Salt Queen", "Q", "NepsyNeptune", "Kurisu", "CrusaderArts", "Kurome .", "Pikachu Electricmouse", "Selivaria", "Trejkaz/Hakanai", "Viridios", "Tupper", "TheArchitect"};
 
     public static string uiPath;
 
@@ -87,13 +87,14 @@ public class XSStyles : MonoBehaviour
     }
 
     //GUI Buttons
-    static public void callGradientEditor()
+    static public void callGradientEditor(Material focusedMat = null)
     {
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
         GUI.skin = null;
         if (GUILayout.Button("Open Gradient Editor", GUILayout.Width(200), GUILayout.Height(20)))
         {
+            XSGradientEditor.focusedMat = focusedMat;
             XSGradientEditor.Init();
         }
         GUILayout.FlexibleSpace();
