@@ -44,7 +44,7 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     col += rimLight;
     col += subsurface;
     col *= occlusion;
-    col += lerp(i.emissionMap, i.emissionMap * diffuse, _EmissionColor.a);
+    col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionColor.a);
 
 	col = lerp(dot(col, grayscaleVec), col, _Saturation);
 

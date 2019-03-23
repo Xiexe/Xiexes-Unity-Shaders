@@ -219,7 +219,8 @@ half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 li
 	float4 diffuse; 
 	half4 indirect = indirectDiffuse.xyzz;
 	diffuse = ramp * i.attenuation * lightCol + indirect;
-	return i.albedo * diffuse;
+	diffuse = i.albedo * diffuse;
+	return diffuse;	
 }
 
 //Subsurface Scattering - Based on a 2011 GDC Conference from by Colin Barre-Bresebois & Marc Bouchard

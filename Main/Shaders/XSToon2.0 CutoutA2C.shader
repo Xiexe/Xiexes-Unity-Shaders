@@ -1,6 +1,6 @@
 ﻿Shader "Xiexe/Toon2.0/XSToon2.0_CutoutA2C"
 {
-	Properties
+Properties
 	{	
 		[Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
 		_MainTex("Texture", 2D) = "white" {}
