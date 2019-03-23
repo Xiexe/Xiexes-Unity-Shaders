@@ -8,11 +8,12 @@ public class XSGradientEditor : EditorWindow
 
     public Gradient gradient;
     public Gradient oldGradient;
-    // resolution presets
+
     public static Texture shadowRamp;
     public string finalFilePath;
 
-	static public bool isLinear = true;
+	static public bool isLinear = false;
+    static public bool manualMaterial = false;
     public enum Resolutions
     {
         Tiny64x8 = 64,
@@ -89,6 +90,12 @@ public class XSGradientEditor : EditorWindow
         int height = 8;
 
         isLinear = GUILayout.Toggle(isLinear, "Make Linear Texture");
+        manualMaterial = GUILayout.Toggle(manualMaterial, "Manual Material");
+
+        if(manualMaterial == true)
+        {
+            focusedMat = (Material)EditorGUILayout.ObjectField(new GUIContent("", ""), focusedMat, typeof(Material), true);
+        }
 
         if (gradient != null)
         {
@@ -148,7 +155,6 @@ public class XSGradientEditor : EditorWindow
                 }
             }
         }
-
         XSStyles.HelpBox("You can use this to create a custom shadow ramp in realtime. \nIf you do not save, the ramp will be reverted back to what it was previously. \n\n - Click the Gradient box. \n - Choose resolution of the texture. \n - Save.", MessageType.Info);
     }
 

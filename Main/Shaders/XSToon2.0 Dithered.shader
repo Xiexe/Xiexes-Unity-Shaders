@@ -1,6 +1,6 @@
 ﻿Shader "Xiexe/Toon2.0/XSToon2.0_Dithered"
 {
-	Properties
+Properties
 	{	
 		[Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
 		_MainTex("Texture", 2D) = "white" {}
@@ -16,7 +16,7 @@
 		_DetailNormalMapScale("Detail Normal Scale", Range(-2,2)) = 1.0
 
 		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 3
-		[Enum(Additive,0,Multiply,1,Subtract,2)] _ReflectionBlendMode("Reflection Blend Mode", Int) = 0		
+		[Enum(Additive,0,Multiply,1,Subtract,2)] _ReflectionBlendMode("Reflection Blend Mode", Int) = 0
 		_MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
 		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
 		_Matcap("Matcap", 2D) = "black" {}

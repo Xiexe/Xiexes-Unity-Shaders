@@ -1,5 +1,6 @@
 void calcNormal(inout XSLighting i)
 {
+	
 	half3 nMap = UnpackNormal(i.normalMap);
 	nMap.xy *= _BumpScale;
 
@@ -8,9 +9,14 @@ void calcNormal(inout XSLighting i)
 
 	half3 blendedNormal = BlendNormals(nMap, detNMap);
 
-	half3 calcedNormal = half3(i.bitangent * blendedNormal.r +
-								i.tangent * blendedNormal.g +
-								i.normal * blendedNormal.b);
+	half3 tspace0 = half3(i.tangent.x, i.bitangent.x, i.normal.x);
+	half3 tspace1 = half3(i.tangent.y, i.bitangent.y, i.normal.y);
+	half3 tspace2 = half3(i.tangent.z, i.bitangent.z, i.normal.z);
+
+	half3 calcedNormal;
+	calcedNormal.x = dot(tspace0, blendedNormal);
+	calcedNormal.y = dot(tspace1, blendedNormal);
+	calcedNormal.z = dot(tspace2, blendedNormal);
 	
 	calcedNormal = normalize(calcedNormal);
 	half3 bumpedTangent = (cross(i.bitangent, calcedNormal));
@@ -163,12 +169,7 @@ void calcAlpha(inout XSLighting i)
 		clip(i.albedo.a - _Cutoff);
 	#endif
 }
-
-
 // Halftone functions, finish implementing later.. Not correct right now.
-// //Half tone functions
-
-
 // float2 rotateUV(float2 uv, float rotation)
 // {
 //     float mid = 0.5;
