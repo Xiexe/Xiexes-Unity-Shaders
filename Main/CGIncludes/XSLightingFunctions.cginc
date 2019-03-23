@@ -33,6 +33,16 @@
 		float aniso = 1.0 / (roughnessT * roughnessB * f * f);
 		return aniso;
 	}
+
+	float3 calcReflView(float3 viewDir, float3 normal)
+	{
+		return reflect(-viewDir, normal);
+	}
+	
+	float3 calcReflLight(float3 lightDir, float3 normal)
+	{
+		return reflect(lightDir, normal);
+	}
 //
 
 // Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
@@ -254,4 +264,24 @@ void calcReflectionBlending(inout float4 col, float3 indirectSpecular)
 		col *= indirectSpecular.xyzz;
 	else if(_ReflectionBlendMode == 2) //Subtractive
 		col -= indirectSpecular.xyzz;
+}
+
+void calcClearcoat(inout float4 col, XSLighting i, DotProducts d, float3 untouchedNormal, float3 indirectDiffuse, float3 lightCol, float3 viewDir, float3 lightDir, float4 ramp)
+{
+	UNITY_BRANCH
+	if(_ClearCoat != 0)
+	{
+		float clearcoatSmoothness = 1-(_ClearcoatSmoothness * i.metallicGlossMap.g);
+		float clearcoatStrength = _ClearcoatStrength * i.metallicGlossMap.b;
+
+        half3 reflView = calcReflView(viewDir, untouchedNormal);
+        half3 reflLight = calcReflLight(lightDir, untouchedNormal);
+		float rdv = saturate( dot( reflLight, float4(-viewDir, 0) ));
+        half3 clearcoatIndirect = calcIndirectSpecular(i, d, float4(0, 0, 0, clearcoatSmoothness), reflView, indirectDiffuse, viewDir, ramp);
+        half3 clearcoatDirect = saturate(pow(rdv, clearcoatSmoothness * 256)) * lightCol * clearcoatSmoothness;
+
+		half3 clearcoat = (clearcoatIndirect + clearcoatDirect) * clearcoatStrength;
+		clearcoat = lerp(0, clearcoat, 1-dot(viewDir, untouchedNormal));
+		col += clearcoat.xyzz;
+	}
 }

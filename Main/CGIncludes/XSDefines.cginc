@@ -139,7 +139,7 @@ half4 _Color, _ShadowRim,
 half _Cutoff;
 
 half _Saturation;
-half _Metallic, _Glossiness, _Reflectivity;
+half _Metallic, _Glossiness, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _SpecularAlbedoTint;
 
@@ -150,7 +150,7 @@ half _SSDistortion, _SSPower, _SSScale;
 half _SSSRange, _SSSSharpness;
 half _OutlineWidth;
 
-int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode;
+int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
 	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,

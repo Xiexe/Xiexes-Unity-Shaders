@@ -34,6 +34,9 @@ public class XSToonInspector : ShaderGUI
 		MaterialProperty _Metallic = null;
 		MaterialProperty _Glossiness = null;
 		MaterialProperty _Reflectivity = null;
+		MaterialProperty _ClearCoat = null;
+		MaterialProperty _ClearcoatStrength = null;
+		MaterialProperty _ClearcoatSmoothness = null;
 		MaterialProperty _EmissionMap = null;
 		MaterialProperty _EmissionColor = null;
 		MaterialProperty _RimIntensity = null;
@@ -217,25 +220,34 @@ public class XSToonInspector : ShaderGUI
 			if (showReflection)
 			{
 				materialEditor.ShaderProperty(_ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
+
+				
+
 				if (_ReflectionMode.floatValue == 0) // PBR
 				{
 					materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
+					materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
 					materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel"), _MetallicGlossMap);
 					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
 					materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the MetallicSmoothness Map"), 2);
 					materialEditor.ShaderProperty(_Metallic, new GUIContent("Metallic", "Metallic, set to 1 if using metallic map"), 2);
 					materialEditor.ShaderProperty(_Glossiness, new GUIContent("Smoothness", "Smoothness, set to 1 if using metallic map"), 2);
+					materialEditor.ShaderProperty(_ClearcoatSmoothness, new GUIContent("Clearcoat Smoothness", "Smoothness of the clearcoat."), 2);
+					materialEditor.ShaderProperty(_ClearcoatStrength, new GUIContent("Clearcoat Reflectivity", "The strength of the clearcoat reflection."), 2);
 				}
 				else if (_ReflectionMode.floatValue == 1) //Baked cube
 				{
 					materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
+					materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
 					materialEditor.TexturePropertySingleLine(new GUIContent("Baked Cubemap", "Baked cubemap."), _BakedCubemap);
 					materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel"), _MetallicGlossMap);
 					materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
 					materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the MetallicSmoothness Map"), 2);
 					materialEditor.ShaderProperty(_Metallic, new GUIContent("Metallic", "Metallic, set to 1 if using metallic map"), 2);
 					materialEditor.ShaderProperty(_Glossiness, new GUIContent("Smoothness", "Smoothness, set to 1 if using metallic map"), 2);
+					materialEditor.ShaderProperty(_ClearcoatSmoothness, new GUIContent("Clearcoat Smoothness", "Smoothness of the clearcoat."), 2);
+					materialEditor.ShaderProperty(_ClearcoatStrength, new GUIContent("Clearcoat Reflectivity", "The strength of the clearcoat reflection."), 2);
 				}
 				else if (_ReflectionMode.floatValue == 2) //Matcap
 				{
