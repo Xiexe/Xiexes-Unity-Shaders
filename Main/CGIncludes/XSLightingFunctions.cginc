@@ -271,13 +271,13 @@ void calcClearcoat(inout float4 col, XSLighting i, DotProducts d, float3 untouch
 	UNITY_BRANCH
 	if(_ClearCoat != 0)
 	{
-		float clearcoatSmoothness = 1-(_ClearcoatSmoothness * i.metallicGlossMap.g);
+		float clearcoatSmoothness = _ClearcoatSmoothness * i.metallicGlossMap.g;
 		float clearcoatStrength = _ClearcoatStrength * i.metallicGlossMap.b;
 
         half3 reflView = calcReflView(viewDir, untouchedNormal);
         half3 reflLight = calcReflLight(lightDir, untouchedNormal);
 		float rdv = saturate( dot( reflLight, float4(-viewDir, 0) ));
-        half3 clearcoatIndirect = calcIndirectSpecular(i, d, float4(0, 0, 0, clearcoatSmoothness), reflView, indirectDiffuse, viewDir, ramp);
+        half3 clearcoatIndirect = calcIndirectSpecular(i, d, float4(0, 0, 0, 1-clearcoatSmoothness), reflView, indirectDiffuse, viewDir, ramp);
         half3 clearcoatDirect = saturate(pow(rdv, clearcoatSmoothness * 256)) * lightCol * clearcoatSmoothness;
 
 		half3 clearcoat = (clearcoatIndirect + clearcoatDirect) * clearcoatStrength;
