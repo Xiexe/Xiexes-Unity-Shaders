@@ -111,16 +111,13 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 	if(_SpecMode == 0)
 	{
 		half reflectionUntouched = saturate(pow(d.rdv, smoothness * 128));
-		//float dotHalftone = 1-DotHalftone(i, reflectionUntouched);
 		specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * (_SpecularArea + 0.5);
-		specular *= i.attenuation;
 	}
 	else if(_SpecMode == 1)
 	{
 		half smooth = saturate(D_GGXAnisotropic(d.tdh, d.bdh, d.ndh, ax, ay));
 		half sharp = round(smooth) * 2 * 0.5;
 		specular = lerp(smooth, sharp, _SpecularStyle) * specularIntensity;
-		specular *= i.attenuation;
 	}
 	else if(_SpecMode == 2)
 	{
@@ -135,8 +132,9 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 		half sharp = round(smooth);
 		specular = lerp(smooth, sharp, _SpecularStyle);
 	}
+	specular *= i.attenuation;
 	specular *= lightCol;
-	float3 tintedAlbedoSpecular = specular * i.albedo;
+	float3 tintedAlbedoSpecular = specular * i.diffuseColor;
 	specular = lerp(specular, tintedAlbedoSpecular, _SpecularAlbedoTint * i.specularMap.g); // Should specular highlight be tinted based on the albedo of the object?
 	return specular;
 }
@@ -271,6 +269,7 @@ void calcClearcoat(inout float4 col, XSLighting i, DotProducts d, float3 untouch
 	UNITY_BRANCH
 	if(_ClearCoat != 0)
 	{
+		untouchedNormal = normalize(untouchedNormal);
 		float clearcoatSmoothness = _ClearcoatSmoothness * i.metallicGlossMap.g;
 		float clearcoatStrength = _ClearcoatStrength * i.metallicGlossMap.b;
 
@@ -281,7 +280,7 @@ void calcClearcoat(inout float4 col, XSLighting i, DotProducts d, float3 untouch
         half3 clearcoatDirect = saturate(pow(rdv, clearcoatSmoothness * 256)) * lightCol * clearcoatSmoothness;
 
 		half3 clearcoat = (clearcoatIndirect + clearcoatDirect) * clearcoatStrength;
-		clearcoat = lerp(0, clearcoat, 1-dot(viewDir, untouchedNormal));
+		clearcoat = lerp(clearcoat * 0.5, clearcoat, saturate(pow(1-dot(viewDir, untouchedNormal), 0.8)) );
 		col += clearcoat.xyzz;
 	}
 }
