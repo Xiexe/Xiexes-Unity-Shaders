@@ -41,7 +41,7 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
 
 	half4 col;
     col = diffuse * shadowRim;
-    calcReflectionBlending(col, indirectSpecular.xyzz);
+    calcReflectionBlending(i, col, indirectSpecular.xyzz);
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
     col += directSpecular.xyzz;
     col += rimLight;

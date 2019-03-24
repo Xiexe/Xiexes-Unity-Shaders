@@ -49,7 +49,7 @@
 half3 calcLightDir(XSLighting i)
 {
 	half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
-	lightDir *= i.attenuation * dot(_LightColor0, grayscaleVec);//Use only probe direction in shadows by masking out the light dir with attenuation.
+	// lightDir *= i.attenuation * dot(_LightColor0, grayscaleVec);//Use only probe direction in shadows by masking out the light dir with attenuation.
 
 	half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
 	lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
@@ -132,8 +132,7 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 		half sharp = round(smooth);
 		specular = lerp(smooth, sharp, _SpecularStyle);
 	}
-	specular *= i.attenuation;
-	specular *= lightCol;
+	specular *= i.attenuation * lightCol;
 	float3 tintedAlbedoSpecular = specular * i.diffuseColor;
 	specular = lerp(specular, tintedAlbedoSpecular, _SpecularAlbedoTint * i.specularMap.g); // Should specular highlight be tinted based on the albedo of the object?
 	return specular;
@@ -183,17 +182,25 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 				half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
 				half3 metallicColor = indirectSpecular * lerp(0.1,i.diffuseColor.rgb, metallicSmoothness.x);
 				spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
-				spec *= min(lightAvg,1);
+				
+				if(_ReflectionBlendMode != 1)
+				{
+					spec *= min(lightAvg,1);
+				}
 			}
 			else if (_ReflectionMode == 2) //Matcap
 			{	
 				float3 upVector = float3(0,1,0);
 				float2 remapUV = matcapSample(upVector, viewDir, i.normal);
-				spec = tex2Dlod(_Matcap, float4(remapUV, 0, (metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS)));
-				spec *= min(lightAvg,1);
+				spec = tex2Dlod(_Matcap, float4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS)));
+				
+				if(_ReflectionBlendMode != 1)
+				{
+					spec *= min(lightAvg,1);
+				}
+
 			}
 			spec = lerp(spec, spec * ramp, metallicSmoothness.w); // should only not see shadows on a perfect mirror.
-			spec *= i.reflectivityMask.r;
 		#endif
 	return spec;
 }
@@ -254,14 +261,14 @@ float4 calcSubsurfaceScattering(XSLighting i, DotProducts d, float3 lightDir, fl
 	}
 }
 
-void calcReflectionBlending(inout float4 col, float3 indirectSpecular)
+void calcReflectionBlending(XSLighting i, inout float4 col, float3 indirectSpecular)
 {
 	if(_ReflectionBlendMode == 0) // Additive
-		col += indirectSpecular.xyzz;
+		col += indirectSpecular.xyzz * i.reflectivityMask.r;
 	else if(_ReflectionBlendMode == 1) //Multiplicitive
-		col *= indirectSpecular.xyzz;
+		col = lerp(col, col * indirectSpecular.xyzz, i.reflectivityMask.r);
 	else if(_ReflectionBlendMode == 2) //Subtractive
-		col -= indirectSpecular.xyzz;
+		col -= indirectSpecular.xyzz * i.reflectivityMask.r;
 }
 
 void calcClearcoat(inout float4 col, XSLighting i, DotProducts d, float3 untouchedNormal, float3 indirectDiffuse, float3 lightCol, float3 viewDir, float3 lightDir, float4 ramp)
@@ -277,7 +284,7 @@ void calcClearcoat(inout float4 col, XSLighting i, DotProducts d, float3 untouch
         half3 reflLight = calcReflLight(lightDir, untouchedNormal);
 		float rdv = saturate( dot( reflLight, float4(-viewDir, 0) ));
         half3 clearcoatIndirect = calcIndirectSpecular(i, d, float4(0, 0, 0, 1-clearcoatSmoothness), reflView, indirectDiffuse, viewDir, ramp);
-        half3 clearcoatDirect = saturate(pow(rdv, clearcoatSmoothness * 256)) * lightCol * clearcoatSmoothness;
+        half3 clearcoatDirect = saturate(pow(rdv, clearcoatSmoothness * 256)) * i.attenuation * lightCol;
 
 		half3 clearcoat = (clearcoatIndirect + clearcoatDirect) * clearcoatStrength;
 		clearcoat = lerp(clearcoat * 0.5, clearcoat, saturate(pow(1-dot(viewDir, untouchedNormal), 0.8)) );
