@@ -279,7 +279,7 @@ void calcClearcoat(inout float4 col, XSLighting i, DotProducts d, float3 untouch
 		untouchedNormal = normalize(untouchedNormal);
 		float clearcoatSmoothness = _ClearcoatSmoothness * i.metallicGlossMap.g;
 		float clearcoatStrength = _ClearcoatStrength * i.metallicGlossMap.b;
-
+		
         half3 reflView = calcReflView(viewDir, untouchedNormal);
         half3 reflLight = calcReflLight(lightDir, untouchedNormal);
 		float rdv = saturate( dot( reflLight, float4(-viewDir, 0) ));

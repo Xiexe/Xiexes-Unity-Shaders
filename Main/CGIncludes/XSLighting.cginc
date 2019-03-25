@@ -37,16 +37,16 @@ half4 BRDF_XSLighting(XSLighting i)
     half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);
     half4 subsurface = calcSubsurfaceScattering(i, d, lightDir, viewDir, i.normal, lightCol, indirectDiffuse);
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
-    half4 occlusion = lerp(_OcclusionColor, 1, i.occlusion);
-
+    half4 occlusion = lerp(_OcclusionColor, 1, i.occlusion.r);
+    
 	half4 col;
     col = diffuse * shadowRim;
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
-    calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
     col += directSpecular.xyzz;
     col += rimLight;
     col += subsurface;
     col *= occlusion;
+    calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
     col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionColor.a);
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline);
