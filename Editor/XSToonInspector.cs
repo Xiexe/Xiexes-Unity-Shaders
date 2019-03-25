@@ -153,6 +153,7 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.TexturePropertySingleLine(new GUIContent("Occlusion Map", "Occlusion Map, used to darken areas on the model artifically."), _OcclusionMap);
 				XSStyles.constrainedShaderProperty(materialEditor, _OcclusionColor, new GUIContent("Occlusion Tint", "Occlusion shadow tint."), 2);
 				materialEditor.ShaderProperty(_UVSetOcclusion, new GUIContent("UV Set", "The UV set to use for the Occlusion Texture"), 2);
+				materialEditor.TextureScaleOffsetProperty(_OcclusionMap);
 
 				GUILayout.Space(5);
 				XSStyles.constrainedShaderProperty(materialEditor, _ShadowRim, new GUIContent("Shadow Rim", "Shadow Rim Color. Set to white to disable."), 0);

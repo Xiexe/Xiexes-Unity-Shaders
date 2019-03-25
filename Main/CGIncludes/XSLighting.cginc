@@ -1,4 +1,4 @@
-half4 XSLighting_BRDF_Toon(XSLighting i)
+half4 BRDF_XSLighting(XSLighting i)
 {   
     float3 untouchedNormal = i.normal;
     calcNormal(i);
@@ -9,7 +9,6 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     half3 stereoViewDir = calcStereoViewDir(i.worldPos);
     half4 metallicSmoothness = calcMetallicSmoothness(i);
     half3 halfVector = normalize(lightDir + viewDir);
-
     half3 reflView = calcReflView(viewDir, i.normal);
     half3 reflLight = calcReflLight(lightDir, i.normal);
 
@@ -24,8 +23,9 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     d.ldh = DotClamped(lightDir, halfVector);
     d.svdn = abs(dot(stereoViewDir, i.normal));
     
-
     i.albedo.rgb *= (1-metallicSmoothness.x);
+    i.albedo.rgb = lerp( dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation );
+
     half3 indirectDiffuse = calcIndirectDiffuse();
     half4 lightCol = calcLightCol(lightEnv, indirectDiffuse);
     
@@ -37,7 +37,7 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);
     half4 subsurface = calcSubsurfaceScattering(i, d, lightDir, viewDir, i.normal, lightCol, indirectDiffuse);
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
-    half4 occlusion = lerp(1, _OcclusionColor, 1-i.occlusion);
+    half4 occlusion = lerp(_OcclusionColor, 1, i.occlusion);
 
 	half4 col;
     col = diffuse * shadowRim;
@@ -49,9 +49,6 @@ half4 XSLighting_BRDF_Toon(XSLighting i)
     col *= occlusion;
     col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionColor.a);
 
-	col = lerp(dot(col, grayscaleVec), col, _Saturation);
-
     float4 finalColor = lerp(col, outlineColor, i.isOutline);
-
 	return finalColor;
 }
