@@ -24,7 +24,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 2800000, guid: 0c540c5cf863ea743b3091ace3a20e07, type: 3}
-        m_Scale: {x: 50, y: 50}
+        m_Scale: {x: 20, y: 20}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
         m_Texture: {fileID: 0}
@@ -84,8 +84,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _AdvMode: 0
-    - _AnisotropicAX: 0.669
-    - _AnisotropicAY: 0.192
+    - _AnisotropicAX: 1
+    - _AnisotropicAY: 0.33
     - _BumpScale: 0.5
     - _ClearCoat: 1
     - _ClearcoatSmoothness: 0.907
@@ -128,11 +128,11 @@ Material:
     - _ShadowRimThreshold: 0.1
     - _ShadowSharpness: 0
     - _SmoothnessTextureChannel: 0
-    - _SpecMode: 0
+    - _SpecMode: 1
     - _SpecularAlbedoTint: 0
     - _SpecularArea: 0.031
     - _SpecularHighlights: 1
-    - _SpecularIntensity: 1
+    - _SpecularIntensity: 0.5
     - _SpecularStyle: 0
     - _SrcBlend: 1
     - _Stencil: 0
@@ -140,6 +140,7 @@ Material:
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
+    - _TilingMode: 1
     - _UVSec: 0
     - _UVSetAlbedo: 0
     - _UVSetDetMask: 0

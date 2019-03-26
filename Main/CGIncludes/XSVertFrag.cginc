@@ -106,8 +106,15 @@ float4 frag (
 	//The above handles inverting fixing lighting on back faces and in mirrors.
 
 	TextureUV t = (TextureUV)0; // Populate UVs
-	InitializeTextureUVs(i, t);
-	
+	if(_TilingMode != 1)
+	{
+		InitializeTextureUVs(i, t);
+	}
+	else
+	{
+		InitializeTextureUVsMerged(i, t);
+	}
+
 	XSLighting o = (XSLighting)0; //Populate Lighting Struct
 	o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color;
 	o.specularMap = UNITY_SAMPLE_TEX2D_SAMPLER(_SpecularMap, _MainTex, t.specularMapUV);

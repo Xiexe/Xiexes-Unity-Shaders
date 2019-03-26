@@ -15,6 +15,7 @@ public class XSToonInspector : ShaderGUI
 	//Assign all properties as null at first to stop hundreds of warnings spamming the log when script gets compiled.
 	//If they aren't we get warnings, because assigning with reflection seems to make Unity think that the properties never actually get used. 
 	//
+		MaterialProperty _TilingMode = null;
 		MaterialProperty _Culling = null;
 		MaterialProperty _MainTex = null;
 		MaterialProperty _Saturation = null;
@@ -127,6 +128,9 @@ public class XSToonInspector : ShaderGUI
 			}
 
 			XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
+				materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
+				materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
+				materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
 
 			showMainSettings = XSStyles.ShurikenFoldout("Main Settings", showMainSettings);
 			if (showMainSettings)
@@ -139,8 +143,7 @@ public class XSToonInspector : ShaderGUI
 				materialEditor.ShaderProperty(_UVSetAlbedo, new GUIContent("UV Set", "The UV set to use for the Albedo Texture"), 2);
 				materialEditor.TextureScaleOffsetProperty(_MainTex);
 				materialEditor.ShaderProperty(_Saturation, new GUIContent("Saturation", "Controls saturation of the final output from the shader."));
-				materialEditor.ShaderProperty(_Culling, _Culling.displayName);
-				materialEditor.ShaderProperty(_AdvMode, "Shader Mode");
+
 			}
 
 			showShadows = XSStyles.ShurikenFoldout("Shadows", showShadows);

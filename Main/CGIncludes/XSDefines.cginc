@@ -152,6 +152,7 @@ half _OutlineWidth;
 
 int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 
+int _TilingMode;
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
 	_UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
 	_UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
