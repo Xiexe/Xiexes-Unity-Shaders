@@ -72,7 +72,7 @@ half4 fragShadowCaster(
     #if defined(UNITY_STANDARD_USE_SHADOW_UVS)
         half alpha = 1;
         
-        #if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask)
+        #if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask) || defined(Cutout)
             alpha = tex2D(_MainTex, i.tex).a * _Color.a;
         #else
             alpha = _Color.a;

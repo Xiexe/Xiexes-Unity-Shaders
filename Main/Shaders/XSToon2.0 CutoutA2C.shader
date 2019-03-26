@@ -1,7 +1,8 @@
 ﻿Shader "Xiexe/Toon2.0/XSToon2.0_CutoutA2C"
 {
-Properties
+	Properties
 	{	
+		[Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
 		[Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
 		_MainTex("Texture", 2D) = "white" {}
 		_Saturation("Main Texture Saturation", Range(0,10)) = 1
@@ -16,6 +17,7 @@ Properties
 		_DetailNormalMapScale("Detail Normal Scale", Range(-2,2)) = 1.0
 
 		[Enum(PBR(Unity Metallic Standard),0,Baked Cubemap,1,Matcap,2,Off,3)] _ReflectionMode ("Reflection Mode", Int) = 3
+		[Enum(Disabled,0, Enabled, 1)]_ClearCoat("ClearCoat", Int) = 0
 		[Enum(Additive,0,Multiply,1,Subtract,2)] _ReflectionBlendMode("Reflection Blend Mode", Int) = 0
 		_MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
 		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
@@ -24,6 +26,8 @@ Properties
 		_Metallic("Metallic", Range(0,1)) = 0
 		_Glossiness("Smoothness", Range(0,1)) = 0
 		_Reflectivity("Reflectivity", Range(0,1)) = 1
+		_ClearcoatStrength("Clearcoat Reflectivity", Range(0, 1)) = 1
+		_ClearcoatSmoothness("Clearcoat Smoothness", Range(0, 1)) = 0.8
 
 		_EmissionMap("Emission Map", 2D) = "white" {}
 		[HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)

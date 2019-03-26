@@ -15,11 +15,10 @@ VertexOutput vert (VertexInput v)
 	o.ntb[2] = bitangent;
 	o.uv = v.uv;
 	o.uv1 = v.uv1;
-	o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
+	o.color = float4(v.color.rgb, 0); // store if outline in alpha channel of vertex colors | 0 = not an outline
 	o.normal = v.normal;
 	o.screenPos = ComputeScreenPos(o.pos);
-	//o.distanceToOrigin = distance( _WorldSpaceCameraPos, mul(unity_ObjectToWorld, float4(0,0,0,1) ));
-	TRANSFER_SHADOW(o);
+	UNITY_TRANSFER_SHADOW(o, o.uv);
 	return o;
 }
 
@@ -29,7 +28,8 @@ VertexOutput vert (VertexInput v)
 	{
 		g2f o;
 
-		for (int i = 2; i >= 0; i--) //Outlines
+		//Outlines loop
+		for (int i = 2; i >= 0; i--)
 		{	
 			float4 worldPos = (mul(unity_ObjectToWorld, IN[i].vertex));
 			half outlineWidthMask = tex2Dlod(_OutlineMask, float4(IN[i].uv, 0, 0));
@@ -44,33 +44,32 @@ VertexOutput vert (VertexInput v)
 			o.ntb[2] = IN[i].ntb[2];
 			o.uv = IN[i].uv;
 			o.uv1 = IN[i].uv1;
-			o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors
+			o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors | 1 = is an outline
 			o.screenPos = ComputeScreenPos(o.pos);
-			//o.distanceToOrigin = IN[i].distanceToOrigin;
 
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
-				o._ShadowCoord = IN[i]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here because it expects vertex shader inputs
+				o._ShadowCoord = IN[i]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here
 			#endif
 
 			tristream.Append(o);
 		}
 		tristream.RestartStrip();
 		
-		for (int ii = 0; ii < 3; ii++) //Main mesh
+		//Main Mesh loop
+		for (int j = 0; j < 3; j++)
 		{
-			o.pos = UnityObjectToClipPos(IN[ii].vertex);
-			o.worldPos = IN[ii].worldPos;
-			o.ntb[0] = IN[ii].ntb[0];
-			o.ntb[1] = IN[ii].ntb[1];
-			o.ntb[2] = IN[ii].ntb[2];
-			o.uv = IN[ii].uv;
-			o.uv1 = IN[ii].uv1;
-			o.color = float4(1,1,1,0); // store if outline in alpha channel of vertex colors
+			o.pos = UnityObjectToClipPos(IN[j].vertex);
+			o.worldPos = IN[j].worldPos;
+			o.ntb[0] = IN[j].ntb[0];
+			o.ntb[1] = IN[j].ntb[1];
+			o.ntb[2] = IN[j].ntb[2];
+			o.uv = IN[j].uv;
+			o.uv1 = IN[j].uv1;
+			o.color = float4(IN[j].color.rgb,0); // store if outline in alpha channel of vertex colors | 0 = not an outline
 			o.screenPos = ComputeScreenPos(o.pos);
-			//o.distanceToOrigin = IN[ii].distanceToOrigin;
 
 			#if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
-				o._ShadowCoord = IN[ii]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here because it expects vertex shader inputs
+				o._ShadowCoord = IN[j]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here
 			#endif
 
 			tristream.Append(o);
@@ -107,8 +106,15 @@ float4 frag (
 	//The above handles inverting fixing lighting on back faces and in mirrors.
 
 	TextureUV t = (TextureUV)0; // Populate UVs
-	InitializeTextureUVs(i, t);
-	
+	if(_TilingMode != 1)
+	{
+		InitializeTextureUVs(i, t);
+	}
+	else
+	{
+		InitializeTextureUVsMerged(i, t);
+	}
+
 	XSLighting o = (XSLighting)0; //Populate Lighting Struct
 	o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color;
 	o.specularMap = UNITY_SAMPLE_TEX2D_SAMPLER(_SpecularMap, _MainTex, t.specularMapUV);
@@ -131,7 +137,7 @@ float4 frag (
 	o.isOutline = i.color.a;
 	o.screenUV = calcScreenUVs(i.screenPos);
 
-	float4 col = XSLighting_BRDF_Toon(o);
+	float4 col = BRDF_XSLighting(o);
 	calcAlpha(o);
 	return float4(col.rgb, o.alpha);
 }

@@ -67,6 +67,27 @@ void InitializeTextureUVs(
 	t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);	
 }
 
+void InitializeTextureUVsMerged(
+	#if defined(Geometry)
+		in g2f i,
+	#else
+		in VertexOutput i, 
+	#endif
+		inout TextureUV t)
+{	
+	half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
+	t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
+	t.normalMapUV = t.albedoUV;
+	t.emissionMapUV = t.albedoUV;
+	t.metallicGlossMapUV = t.albedoUV;
+	t.occlusionUV = t.albedoUV;
+	t.detailNormalUV = t.albedoUV;
+	t.detailMaskUV = t.albedoUV;
+	t.specularMapUV = t.albedoUV;
+	t.thicknessMapUV = t.albedoUV;
+	t.reflectivityMaskUV = t.albedoUV;
+}
+
 bool IsInMirror()
 {
     return unity_CameraProjection[2][0] != 0.f || unity_CameraProjection[2][1] != 0.f;
