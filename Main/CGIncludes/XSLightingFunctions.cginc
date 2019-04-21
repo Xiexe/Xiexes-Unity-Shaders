@@ -141,14 +141,12 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothness, half3 reflDir, half3 indirectLight, float3 viewDir, half4 ramp)
 {	//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
 		half3 spec = half3(0,0,0);
+		half lightAvg = (indirectLight.r + indirectLight.g + indirectLight.b ) / 3;
 
-		//Indirect specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light. 
-		#if defined(UNITY_PASS_FORWARDBASE)
-			half lightAvg = (indirectLight.r + indirectLight.g + indirectLight.b + _LightColor0.r + _LightColor0.g + _LightColor0.b) / 6;
-
-			UNITY_BRANCH
-			if(_ReflectionMode == 0) // PBR
-			{
+		UNITY_BRANCH
+		if(_ReflectionMode == 0) // PBR
+		{
+			#if defined(UNITY_PASS_FORWARDBASE) //Indirect PBR specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light. 
 				float3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
 				half4 probe0 = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflectionUV1, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
 				half3 probe0sample = DecodeHDR(probe0, unity_SpecCube0_HDR);
@@ -176,39 +174,41 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
 
 				half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
 				spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
+			#endif
+		}
+		else if(_ReflectionMode == 1) //Baked Cubemap
+		{	
+			half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
+			half3 metallicColor = indirectSpecular * lerp(0.1,i.diffuseColor.rgb, metallicSmoothness.x);
+			spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
+			
+			if(_ReflectionBlendMode != 1)
+			{
+				spec *= i.attenuation + lightAvg;
 			}
-			else if(_ReflectionMode == 1) //Baked Cubemap
-			{	
-				half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
-				half3 metallicColor = indirectSpecular * lerp(0.1,i.diffuseColor.rgb, metallicSmoothness.x);
-				spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
-				
-				if(_ReflectionBlendMode != 1)
-				{
-					spec *= min(lightAvg,1);
-				}
+		}
+		else if (_ReflectionMode == 2) //Matcap
+		{	
+			float3 upVector = float3(0,1,0);
+			float2 remapUV = matcapSample(upVector, viewDir, i.normal);
+			spec = tex2Dlod(_Matcap, float4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS)));
+			
+			if(_ReflectionBlendMode != 1)
+			{
+				spec *= i.attenuation + lightAvg;
 			}
-			else if (_ReflectionMode == 2) //Matcap
-			{	
-				float3 upVector = float3(0,1,0);
-				float2 remapUV = matcapSample(upVector, viewDir, i.normal);
-				spec = tex2Dlod(_Matcap, float4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS)));
-				
-				if(_ReflectionBlendMode != 1)
-				{
-					spec *= min(lightAvg,1);
-				}
-
-			}
-			spec = lerp(spec, spec * ramp, metallicSmoothness.w); // should only not see shadows on a perfect mirror.
-		#endif
+		}
+		spec = lerp(spec, spec * ramp, metallicSmoothness.w); // should only not see shadows on a perfect mirror.
 	return spec;
 }
 
 half4 calcOutlineColor(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol)
 {
-	float3 outlineColor = _OutlineColor * saturate(i.attenuation * d.ndl) * lightCol.xyz;
-	outlineColor += indirectDiffuse * _OutlineColor;
+	float3 outlineColor = float3(0,0,0);
+	#if defined(Geometry)
+		outlineColor = _OutlineColor * saturate(i.attenuation * d.ndl) * lightCol.xyz;
+		outlineColor += indirectDiffuse * _OutlineColor;
+	#endif
 
 	return float4(outlineColor,1);
 }

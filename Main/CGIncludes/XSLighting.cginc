@@ -25,6 +25,7 @@ half4 BRDF_XSLighting(XSLighting i)
     
     i.albedo.rgb *= (1-metallicSmoothness.x);
     i.albedo.rgb = lerp( dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation );
+    i.diffuseColor.rgb = lerp( dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation );
 
     half3 indirectDiffuse = calcIndirectDiffuse();
     half4 lightCol = calcLightCol(lightEnv, indirectDiffuse);
@@ -36,9 +37,10 @@ half4 BRDF_XSLighting(XSLighting i)
     half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflView, indirectDiffuse, viewDir, ramp);
     half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);
     half4 subsurface = calcSubsurfaceScattering(i, d, lightDir, viewDir, i.normal, lightCol, indirectDiffuse);
-    half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
     half4 occlusion = lerp(_OcclusionColor, 1, i.occlusion.r);
-    
+    half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
+
+
 	half4 col;
     col = diffuse * shadowRim;
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
