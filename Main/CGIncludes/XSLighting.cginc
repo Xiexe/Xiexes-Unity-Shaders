@@ -1,9 +1,9 @@
 half4 BRDF_XSLighting(XSLighting i)
-{   
+{
     float3 untouchedNormal = i.normal;
     calcNormal(i);
     
-    int lightEnv = int(any(_WorldSpaceLightPos0.xyz));
+    bool lightEnv = any(_WorldSpaceLightPos0.xyz);
     half3 lightDir = calcLightDir(i);
     half3 viewDir = calcViewDir(i.worldPos);
     half3 stereoViewDir = calcStereoViewDir(i.worldPos);
@@ -29,7 +29,7 @@ half4 BRDF_XSLighting(XSLighting i)
 
     half3 indirectDiffuse = calcIndirectDiffuse();
     half4 lightCol = calcLightCol(lightEnv, indirectDiffuse);
-    
+
     half4 ramp = calcRamp(i,d);
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
     half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse);
@@ -41,16 +41,15 @@ half4 BRDF_XSLighting(XSLighting i)
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
 
 
-	half4 col;
+    half4 col;
     col = diffuse * shadowRim;
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
-    col += directSpecular.xyzz;
-    col += rimLight;
+    col += max(directSpecular.xyzz, rimLight);
     col += subsurface;
     col *= occlusion;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
     col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionColor.a);
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline);
-	return finalColor;
+    return finalColor;
 }
