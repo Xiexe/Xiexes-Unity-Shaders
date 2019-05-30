@@ -118,7 +118,7 @@ float2 calcScreenUVs(float4 screenPos)
 {
 	float2 uv = screenPos / (screenPos.w + 0.0000000001); //0.0x1 Stops division by 0 warning in console.
 	#if UNITY_SINGLE_PASS_STEREO
-		uv.xy *= float2(_ScreenParams.x * 2, _ScreenParams.y);
+		uv.xy *= float2(_ScreenParams.x * 2, _ScreenParams.y);	
 	#else
 		uv.xy *= _ScreenParams.xy;
 	#endif
@@ -190,7 +190,7 @@ void calcAlpha(inout XSLighting i)
 		clip(i.albedo.a - _Cutoff);
 	#endif
 }
-// Halftone functions, finish implementing later.. Not correct right now.
+// //Halftone functions, finish implementing later.. Not correct right now.
 // float2 rotateUV(float2 uv, float rotation)
 // {
 //     float mid = 0.5;
@@ -200,7 +200,6 @@ void calcAlpha(inout XSLighting i)
 //     );
 // }
 
-
 // float DotHalftone(XSLighting i, float scalar) //Scalar can be anything from attenuation to a dot product
 // {
 // 	bool inMirror = IsInMirror();
@@ -209,9 +208,9 @@ void calcAlpha(inout XSLighting i)
 // 		uv *= 2;
 // 	#endif
 	
-//     float2 nearest = 2 * frac(_HalftoneDotAmount * uv) - 1;
+//     float2 nearest = 2 * frac(100 * uv) - 1;
 //     float dist = length(nearest);
-// 	float dotSize = _HalftoneDotSize * scalar;
+// 	float dotSize = 10 * scalar;
 //     float dotMask = step(dotSize, dist);
 
 // 	return dotMask;
@@ -236,4 +235,4 @@ void calcAlpha(inout XSLighting i)
 
 // 	return saturate(lineMask);
 // }
-// //
+//

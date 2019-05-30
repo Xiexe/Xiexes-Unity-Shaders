@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using UnityEditor;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 
 public class XSUpdater : EditorWindow
@@ -13,21 +13,22 @@ public class XSUpdater : EditorWindow
         XSUpdater window = EditorWindow.GetWindow<XSUpdater>(true, "XSToon: Docs & Updater", true);
         window.minSize = new Vector2(400, 300);
         window.maxSize = new Vector2(401, 501);
-
-
     }
 
-
-
+    private static string[] patrons = {};
+    private static string path;
+    
     static int tab = 0;
-    static string url = "https://api.github.com/repos/Xiexe/Xiexes-Unity-Shaders/releases/latest";
+    static string updateUrl = "https://api.github.com/repos/Xiexe/Xiexes-Unity-Shaders/releases/latest";
     static string docsURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE";
+    static string patronsURL = "https://raw.githubusercontent.com/Xiexe/thefoxden/master/assets/patronlist/patronlist.txt";
+    
     static UnityWebRequest www;
-
     static string changelog;
     static string publishdate;
     static string curVer;
     static string downloadLink;
+    bool hasCalledPatronlist = false;
     static bool showInfo = false;
     Vector2 scrollPos;
 
@@ -51,7 +52,7 @@ public class XSUpdater : EditorWindow
                         XSStyles.SeparatorThin();
                         if (GUILayout.Button("Check for Updates"))
                         {
-                            req();
+                            req(updateUrl);
                             EditorApplication.update += changelogEditorUpdate;
                             showInfo = true;
                         }
@@ -87,15 +88,22 @@ public class XSUpdater : EditorWindow
 
                 case 2:
                     //show Patrons
-                    XSStyles.doLabel("Thank you to my patreon supporters, and the people who have helped me along the way, you guys are great!");
+
+                    XSStyles.doLabel("Thank you to my patreon supporters, and the people who have helped me along the way, you guys are great!\n Note: You must be in the Discord server to show on this list.");
                     XSStyles.SeparatorThin();
-                    XSStyles.doLabel("Patrons as of " + XSStyles.ver);
+                    XSStyles.doLabel("Current Patrons");
                     XSStyles.SeparatorThin();
                     scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-                        for(int i = 0; i < XSStyles.patrons.Length; i++)
-                        {
-                            XSStyles.doLabel(" - " + XSStyles.patrons[i]);
-                        }
+                    if(!hasCalledPatronlist)
+                    {      
+                        hasCalledPatronlist = true; 
+                        req(patronsURL);
+                        EditorApplication.update += EditorUpdate;
+                    }
+                    for(int i = 0; i < patrons.Length; i++)
+                    {
+                        XSStyles.doLabel(" - " + patrons[i]);
+                    }
                     EditorGUILayout.EndScrollView();
 
                     XSStyles.SeparatorThin();
@@ -113,11 +121,10 @@ public class XSUpdater : EditorWindow
        
     }
 
-
-    static void req()
+    static void req(string url)
     {
         www = UnityWebRequest.Get(url);
-        www.Send();
+        www.SendWebRequest();
         //Debug.Log("Checking for updates...");
     }
     static void EditorUpdate()
@@ -128,8 +135,10 @@ public class XSUpdater : EditorWindow
         if (www.isNetworkError)
             Debug.Log(www.error);
         else
-            updateHandler(www.downloadHandler.text);         
-                
+        {
+           patrons = www.downloadHandler.text.Split('\n');
+           Debug.Log("Fetching Patron list of: " + patrons.Length);
+        }       
         EditorApplication.update -= EditorUpdate;
     }
 

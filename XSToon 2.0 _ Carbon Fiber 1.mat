@@ -128,11 +128,11 @@ Material:
     - _ShadowRimThreshold: 0.1
     - _ShadowSharpness: 0
     - _SmoothnessTextureChannel: 0
-    - _SpecMode: 1
+    - _SpecMode: 0
     - _SpecularAlbedoTint: 0
-    - _SpecularArea: 0.031
+    - _SpecularArea: 0.18
     - _SpecularHighlights: 1
-    - _SpecularIntensity: 0.5
+    - _SpecularIntensity: 1
     - _SpecularStyle: 0
     - _SrcBlend: 1
     - _Stencil: 0

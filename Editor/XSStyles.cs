@@ -6,7 +6,7 @@ using System.IO;
 [InitializeOnLoad]
 public class XSStyles : MonoBehaviour
 {
-    public static string ver = "2.0.4";
+    public static string ver = "2.0.5";
 
     //Help URLs
     public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";
@@ -19,9 +19,8 @@ public class XSStyles : MonoBehaviour
     public static string sssURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.j2nk83f6azph";
     public static string outlineURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.jpaf9t25in8p";
 
-    public static string[] patrons = {"Salt Queen", "Q", "NepsyNeptune", "Kurisu", "CrusaderArts", "Kurome .", "Pikachu Electricmouse", "Selivaria", "Trejkaz/Hakanai", "Viridios", "Tupper", "TheArchitect"};
-
     public static string uiPath;
+    private static string patronpath;
 
     public static class Styles
     {
@@ -261,97 +260,89 @@ public class XSStyles : MonoBehaviour
         }
     }
 
-	public static void openDocumentation(int Width, int Height)
-	{
-		GUILayout.BeginHorizontal();
-		GUILayout.FlexibleSpace();
-		if (GUILayout.Button("Documentation", GUILayout.Width(Width), GUILayout.Height(Height)))
-		{
-			Application.OpenURL(mainURL);
-		}
-		GUILayout.FlexibleSpace();
-		GUILayout.EndHorizontal();
-	}
+    public static void openInfoPanel(int Width, int Height)
+    {
+        GUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        if (GUILayout.Button("Updater | Documentation", GUILayout.Width(Width), GUILayout.Height(Height)))
+        {
+            XSUpdater.Init();
+        }
+        GUILayout.FlexibleSpace();
+        GUILayout.EndHorizontal();
+    }
 
-	private static Rect DrawShuriken(string title, Vector2 contentOffset, int HeaderHeight)
-	{
-		var style = new GUIStyle("ShurikenModuleTitle");
-		style.font = new GUIStyle(EditorStyles.boldLabel).font;
-		style.border = new RectOffset(15, 7, 4, 4);
-		style.fixedHeight = HeaderHeight;
-		style.contentOffset = contentOffset;
-		var rect = GUILayoutUtility.GetRect(16f, HeaderHeight, style);
+    private static Rect DrawShuriken(string title, Vector2 contentOffset, int HeaderHeight)
+    {
+        var style = new GUIStyle("ShurikenModuleTitle");
+        style.font = new GUIStyle(EditorStyles.boldLabel).font;
+        style.border = new RectOffset(15, 7, 4, 4);
+        style.fixedHeight = HeaderHeight;
+        style.contentOffset = contentOffset;
+        var rect = GUILayoutUtility.GetRect(16f, HeaderHeight, style);
 
-		GUI.Box(rect, title, style);
-		return rect;
-	}
+        GUI.Box(rect, title, style);
+        return rect;
+    }
 
-	private static Rect DrawShurikenCenteredTitle(string title, Vector2 contentOffset, int HeaderHeight)
-	{
-		var style = new GUIStyle("ShurikenModuleTitle");
-		style.font = new GUIStyle(EditorStyles.boldLabel).font;
-		style.border = new RectOffset(15, 7, 4, 4);
-		style.fixedHeight = HeaderHeight;
-		style.contentOffset = contentOffset;
-		style.alignment = TextAnchor.MiddleCenter;
-		var rect = GUILayoutUtility.GetRect(16f, HeaderHeight, style);
+    private static Rect DrawShurikenCenteredTitle(string title, Vector2 contentOffset, int HeaderHeight)
+    {
+        var style = new GUIStyle("ShurikenModuleTitle");
+        style.font = new GUIStyle(EditorStyles.boldLabel).font;
+        style.border = new RectOffset(15, 7, 4, 4);
+        style.fixedHeight = HeaderHeight;
+        style.contentOffset = contentOffset;
+        style.alignment = TextAnchor.MiddleCenter;
+        var rect = GUILayoutUtility.GetRect(16f, HeaderHeight, style);
 
-		GUI.Box(rect, title, style);
-		return rect;
-	}
+        GUI.Box(rect, title, style);
+        return rect;
+    }
 
-	public static bool ShurikenFoldout(string title, bool display)
-	{
-		var rect = DrawShuriken(title, new Vector2(20f, -2f), 22);
-		var e = Event.current;
-		var toggleRect = new Rect(rect.x + 4f, rect.y + 2f, 13f, 13f);
-		if (e.type == EventType.Repaint)
-		{
-			EditorStyles.foldout.Draw(toggleRect, false, false, display, false);
-		}
-		if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition))
-		{
-			display = !display;
-			e.Use();
-		}
-		return display;
-	}
+    public static bool ShurikenFoldout(string title, bool display)
+    {
+        var rect = DrawShuriken(title, new Vector2(20f, -2f), 22);
+        var e = Event.current;
+        var toggleRect = new Rect(rect.x + 4f, rect.y + 2f, 13f, 13f);
+        if (e.type == EventType.Repaint)
+        {
+            EditorStyles.foldout.Draw(toggleRect, false, false, display, false);
+        }
+        if (e.type == EventType.MouseDown && rect.Contains(e.mousePosition))
+        {
+            display = !display;
+            e.Use();
+        }
+        return display;
+    }
 
-	public static void ShurikenHeader(string title)
-	{
-		DrawShuriken(title, new Vector2(6f, -2f), 22);
-	}
+    public static void ShurikenHeader(string title)
+    {
+        DrawShuriken(title, new Vector2(6f, -2f), 22);
+    }
 
-	public static void ShurikenHeaderCentered(string title)
-	{
-		DrawShurikenCenteredTitle(title, new Vector2(0f, -2f), 22);
-	}
+    public static void ShurikenHeaderCentered(string title)
+    {
+        DrawShurikenCenteredTitle(title, new Vector2(0f, -2f), 22);
+    }
 
-	public static void constrainedShaderProperty(MaterialEditor materialEditor, MaterialProperty prop, GUIContent style, int tabSize)
-	{
-		EditorGUILayout.BeginHorizontal(GUILayout.MaxWidth(30));
-			materialEditor.ShaderProperty(prop, style, tabSize);
-		EditorGUILayout.EndHorizontal();
-	}
+    public static void constrainedShaderProperty(MaterialEditor materialEditor, MaterialProperty prop, GUIContent style, int tabSize)
+    {
+        EditorGUILayout.BeginHorizontal(GUILayout.MaxWidth(30));
+            materialEditor.ShaderProperty(prop, style, tabSize);
+        EditorGUILayout.EndHorizontal();
+    }
 
-	public static void DoFooter()
-	{
-		//GUILayout.Label(XSStyles.Styles.version, new GUIStyle(EditorStyles.centeredGreyMiniLabel)
-		//{
-		//	alignment = TextAnchor.MiddleCenter,
-		//	wordWrap = true,
-		//	fontSize = 12
-		//});
+    public static void DoFooter()
+    {
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+            XSStyles.discordButton(70, 30);
+            XSStyles.patreonButton(70, 30);
+            XSStyles.githubButton(70, 30);
+        GUILayout.FlexibleSpace();
+        EditorGUILayout.EndHorizontal();
 
-		EditorGUILayout.BeginHorizontal();
-		GUILayout.FlexibleSpace();
-		XSStyles.discordButton(70, 30);
-		GUILayout.Space(2);
-		XSStyles.patreonButton(70, 30);
-		XSStyles.githubButton(70, 30);
-		GUILayout.FlexibleSpace();
-		EditorGUILayout.EndHorizontal();
-
-		XSStyles.openDocumentation(200, 20);
-	}
+        XSStyles.openInfoPanel(200, 20);
+    }
 }
