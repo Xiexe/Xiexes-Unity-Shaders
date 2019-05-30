@@ -30,6 +30,7 @@ struct VertexOutput
 	float4 screenPos : TEXCOORD9;
 	//float distanceToOrigin : TEXCOORD10;
 	SHADOW_COORDS(7)
+    UNITY_FOG_COORDS(10)
 };
 
 #if defined(Geometry)
@@ -46,6 +47,7 @@ struct VertexOutput
 		float4 screenPos : TEXCOORD9;
 		//float distanceToOrigin : TEXCOORD10;
 		SHADOW_COORDS(7)
+        UNITY_FOG_COORDS(10)
 	};
 
 	struct g2f
@@ -59,6 +61,7 @@ struct VertexOutput
 		float4 screenPos : TEXCOORD8;
 		//float distanceToOrigin : TEXCOORD9;
 		SHADOW_COORDS(7)
+        UNITY_FOG_COORDS(9)
 	};
 #endif
 
@@ -134,10 +137,10 @@ samplerCUBE _BakedCubemap;
 
 half4 _Color, _ShadowRim, 
 	_OutlineColor, _SSColor, _OcclusionColor,
-	_EmissionColor;
+	_EmissionColor, _MatcapTint, _RimColor;
 
 half _Cutoff;
-
+half _EmissionToDiffuse;
 half _Saturation;
 half _Metallic, _Glossiness, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
 half _BumpScale, _DetailNormalMapScale;

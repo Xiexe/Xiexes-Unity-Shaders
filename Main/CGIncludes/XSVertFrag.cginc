@@ -1,6 +1,6 @@
 VertexOutput vert (VertexInput v)
 {
-    VertexOutput o;
+    VertexOutput o = (VertexOutput)0;
     #if defined(Geometry)
         o.vertex = v.vertex;
     #endif
@@ -19,6 +19,7 @@ VertexOutput vert (VertexInput v)
     o.normal = v.normal;
     o.screenPos = ComputeScreenPos(o.pos);
     UNITY_TRANSFER_SHADOW(o, o.uv);
+    UNITY_TRANSFER_FOG(o, o.pos);
     return o;
 }
 
@@ -50,7 +51,7 @@ VertexOutput vert (VertexInput v)
             #if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
                 o._ShadowCoord = IN[i]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here
             #endif
-
+            UNITY_TRANSFER_FOG(o, o.pos);
             tristream.Append(o);
         }
         tristream.RestartStrip();
@@ -71,7 +72,7 @@ VertexOutput vert (VertexInput v)
             #if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
                 o._ShadowCoord = IN[j]._ShadowCoord; //Can't use TRANSFER_SHADOW() or UNITY_TRANSFER_SHADOW() macros here, could use custom versions of them
             #endif
-
+            UNITY_TRANSFER_FOG(o, o.pos);
             tristream.Append(o);
         }
         tristream.RestartStrip();
@@ -138,5 +139,6 @@ float4 frag (
 
     float4 col = BRDF_XSLighting(o);
     calcAlpha(o);
+    UNITY_APPLY_FOG(i.fogCoord, col);
     return float4(col.rgb, o.alpha);
 }

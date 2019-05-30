@@ -48,7 +48,10 @@ half4 BRDF_XSLighting(XSLighting i)
     col += subsurface;
     col *= occlusion;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
-    col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionColor.a);
+    
+    #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass
+        col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse);
+    #endif
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline);
     return finalColor;

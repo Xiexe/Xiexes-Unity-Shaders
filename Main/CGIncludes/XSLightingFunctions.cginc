@@ -88,7 +88,7 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
     half rimIntensity = saturate((1-d.svdn) * pow(d.ndl, _RimThreshold));
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
     half4 rim = (rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz) * i.albedo * i.attenuation);
-    return rim;
+    return rim * _RimColor;
 }
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
@@ -190,7 +190,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
         {	
             float3 upVector = float3(0,1,0);
             float2 remapUV = matcapSample(upVector, viewDir, i.normal);
-            spec = tex2Dlod(_Matcap, float4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS)));
+            spec = tex2Dlod(_Matcap, float4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS))) * _MatcapTint;
             
             if(_ReflectionBlendMode != 1)
             {
