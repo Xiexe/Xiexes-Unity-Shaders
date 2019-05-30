@@ -22,6 +22,7 @@
 		_MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
 		_BakedCubemap("Baked Cubemap", CUBE) = "black" {}
 		_Matcap("Matcap", 2D) = "black" {}
+		_MatcapTint("Matcap Tint", Color) = (1,1,1,1)
 		_ReflectivityMask("Reflection Mask" , 2D) = "white" {}
 		_Metallic("Metallic", Range(0,1)) = 0
 		_Glossiness("Smoothness", Range(0,1)) = 0
@@ -32,6 +33,7 @@
 		_EmissionMap("Emission Map", 2D) = "white" {}
 		[HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
 
+		_RimColor("Rimlight Tint", Color) = (1,1,1,1)
 		_RimIntensity("Rimlight Intensity", Float) = 0
 		_RimRange("Rim Range", Range(0,1)) = 0.7
 		_RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
