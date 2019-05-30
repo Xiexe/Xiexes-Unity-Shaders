@@ -40,7 +40,6 @@ half4 BRDF_XSLighting(XSLighting i)
     half4 occlusion = lerp(_OcclusionColor, 1, i.occlusion.r);
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
 
-
     half4 col;
     col = diffuse * shadowRim;
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
@@ -48,8 +47,8 @@ half4 BRDF_XSLighting(XSLighting i)
     col += subsurface;
     col *= occlusion;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
-    
-    #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass
+
+    #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
         col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse);
     #endif
 

@@ -1,4 +1,6 @@
 
+// Upgrade NOTE: excluded shader from DX11, OpenGL ES 2.0 because it uses unsized arrays
+#pragma exclude_renderers d3d11 gles
 
 //Helper Functions for Reflections
     half3 XSFresnelTerm (half3 F0, half cosA)
@@ -68,11 +70,35 @@ half4 calcLightCol(bool lightEnv, float3 indirectDiffuse)
     //If we don't have a directional light or realtime light in the scene, we can derive light color from a slightly
     //Modified indirect color. 
     half4 lightCol = _LightColor0; 
-
+    //lightCol += unity_LightColor[0].rgb;
+    
     if(lightEnv != 1)
         lightCol = indirectDiffuse.xyzz * 0.2; 
 
     return lightCol;	
+}
+
+void XSShade4VertexLightsAtten(float3 worldPos, float3 normal, inout float4 vertexAtten)
+{
+    float4 toLightX = unity_4LightPosX0 - worldPos.x;
+    float4 toLightY = unity_4LightPosY0 - worldPos.y;
+    float4 toLightZ = unity_4LightPosZ0 - worldPos.z;
+
+    float4 lengthSq = 0;
+    lengthSq += toLightX * toLightX;
+    lengthSq += toLightY * toLightY;
+    lengthSq += toLightZ * toLightZ;
+    lengthSq = max(lengthSq, 0.000001);
+    
+    float4 ndl = 0;
+    ndl += toLightX * normal.x;
+    ndl += toLightY * normal.y;
+    ndl += toLightZ * normal.z;
+
+    float4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
+    atten = atten*atten; // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect.
+
+    vertexAtten = atten * ndl;
 }
 
 half4 calcMetallicSmoothness(XSLighting i)

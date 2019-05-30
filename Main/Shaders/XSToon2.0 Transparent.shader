@@ -113,6 +113,7 @@
             #pragma vertex vert
             #pragma fragment frag
             
+            #pragma multi_compile _ VERTEXLIGHT_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase 
             #define UNITY_PASS_FORWARDBASE
