@@ -27,7 +27,12 @@ half4 BRDF_XSLighting(XSLighting i)
     i.albedo.rgb = lerp( dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation );
     i.diffuseColor.rgb = lerp( dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation );
 
-    half3 indirectDiffuse = calcIndirectDiffuse();
+    #if defined(VERTEXLIGHT_ON)
+        half3 indirectDiffuse = calcIndirectDiffuse() + XSShade4VertexLightsAtten(i.worldPos, i.normal);   
+    #else
+        half3 indirectDiffuse = calcIndirectDiffuse();
+    #endif
+
     half4 lightCol = calcLightCol(lightEnv, indirectDiffuse);
 
     half4 ramp = calcRamp(i,d);
