@@ -115,7 +115,11 @@
             #pragma multi_compile _ VERTEXLIGHT_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase 
-            #define UNITY_PASS_FORWARDBASE
+            
+            #ifndef UNITY_PASS_FORWARDBASE
+                #define UNITY_PASS_FORWARDBASE
+            #endif
+            
             #define Dithered
             #define Geometry
 
@@ -140,7 +144,9 @@
             
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
-            #define UNITY_PASS_FORWARDADD
+            #ifndef UNITY_PASS_FORWARDADD
+                 #define UNITY_PASS_FORWARDADD
+            #endif
             #define Dithered
             #define Geometry
             
@@ -162,7 +168,9 @@
             #pragma fragment fragShadowCaster
             #pragma target 3.0
             #pragma multi_compile_shadowcaster
-            #define UNITY_PASS_SHADOWCASTER
+            #ifndef UNITY_PASS_SHADOWCASTER
+                #define UNITY_PASS_SHADOWCASTER
+            #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
             #define Dithered
 

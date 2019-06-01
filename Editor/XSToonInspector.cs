@@ -153,7 +153,7 @@ public class XSToonInspector : ShaderGUI
             if (showShadows)
             {
                 materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right, or Down to Up"), _Ramp);
-                materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Only affects recieved shadows and self shadows. Does not affect shadow ramp. You need a realtime directional light with shadows to see changes from this!"));
+                materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
 
                 GUILayout.Space(5);
                 materialEditor.TexturePropertySingleLine(new GUIContent("Occlusion Map", "Occlusion Map, used to darken areas on the model artifically."), _OcclusionMap);
@@ -218,8 +218,8 @@ public class XSToonInspector : ShaderGUI
                 }
                 else
                 {
-                    materialEditor.ShaderProperty(_AnisotropicAX, new GUIContent("Anisotropic Width", "Anisotropic Width"), 2);
-                    materialEditor.ShaderProperty(_AnisotropicAY, new GUIContent("Anisotropic Height", "Anisotropic Height"), 2);
+                    materialEditor.ShaderProperty(_AnisotropicAX, new GUIContent("Anisotropic Width", "Anisotropic Width, makes anistropic relfections more horizontal"), 2);
+                    materialEditor.ShaderProperty(_AnisotropicAY, new GUIContent("Anisotropic Height", "Anisotropic Height, makes anistropic relfections more vertical"), 2);
                 }
             }
 
@@ -237,7 +237,7 @@ public class XSToonInspector : ShaderGUI
                     materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
                     materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel. \nIf Clearcoat is enabled, Clearcoat Smoothness on Green Channel, Clearcoat Reflectivity on Blue Channel."), _MetallicGlossMap);
                     materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
-                    materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the MetallicSmoothness Map"), 2);
+                    materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the Metallic Smoothness Map"), 2);
                     materialEditor.ShaderProperty(_Metallic, new GUIContent("Metallic", "Metallic, set to 1 if using metallic map"), 2);
                     materialEditor.ShaderProperty(_Glossiness, new GUIContent("Smoothness", "Smoothness, set to 1 if using metallic map"), 2);
                     materialEditor.ShaderProperty(_ClearcoatSmoothness, new GUIContent("Clearcoat Smoothness", "Smoothness of the clearcoat."), 2);
@@ -284,9 +284,9 @@ public class XSToonInspector : ShaderGUI
             if (showEmission)
             {
                 materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map", "Emissive map. White to black, unless you want multiple colors."), _EmissionMap, _EmissionColor);
-                materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
-                materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
                 materialEditor.TextureScaleOffsetProperty(_EmissionMap);
+                materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
+                materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
             }
 
             showRimlight = XSStyles.ShurikenFoldout("Rimlight", showRimlight);

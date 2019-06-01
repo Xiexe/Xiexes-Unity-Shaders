@@ -114,7 +114,7 @@ float3 XSShade4VertexLightsAtten(float3 worldPos, float3 normal)
     lightColor.rgb += unity_LightColor[2] * atten.z;
     lightColor.rgb += unity_LightColor[3] * atten.w;
 
-    return lightColor;
+    return lightColor * 2; //Multiply by 2 to make up for lost brightness after fixing attenuation
 }
 
 half4 calcMetallicSmoothness(XSLighting i)
@@ -126,7 +126,7 @@ half4 calcMetallicSmoothness(XSLighting i)
 }
 
 half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse)
-{	
+{
     half rimIntensity = saturate((1-d.svdn) * pow(d.ndl, _RimThreshold));
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
     half4 rim = (rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz) * i.albedo * i.attenuation);
@@ -143,7 +143,7 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 }
 
 half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half4 metallicSmoothness, half ax, half ay)
-{	
+{
     float specularIntensity = _SpecularIntensity * i.specularMap.r;
     half3 specular = half3(0,0,0);
     half smoothness = max(0.01, (_SpecularArea * i.specularMap.b));
@@ -180,7 +180,7 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
 }
 
 half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothness, half3 reflDir, half3 indirectLight, float3 viewDir, half4 ramp)
-{	//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
+{//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
         half3 spec = half3(0,0,0);
         half lightAvg = (indirectLight.r + indirectLight.g + indirectLight.b + _LightColor0.r + _LightColor0.g + _LightColor0.b) / 6;
 
@@ -267,12 +267,15 @@ half4 calcRamp(XSLighting i, DotProducts d)
 }
 
 half3 calcIndirectDiffuse()
-{
-    return ShadeSH9(float4(0, 0, 0, 1)); // We don't care about anything other than the color from GI, so only feed in 0,0,0, rather than the normal
+{// We don't care about anything other than the color from probes for toon lighting.
+    
+    // half3 indirectDiffuse = ShadeSH9(float4(0, 0, 0, 1)); //Leaving in case the below isn't actually correct
+    half3 indirectDiffuse = float3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w); //More optimized than doing a ShadeSH9 call
+    return indirectDiffuse;
 }
 
 half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 lightCol, float4 ramp) 
-{	
+{
     float4 diffuse; 
     half4 indirect = indirectDiffuse.xyzz;
     diffuse = ramp * i.attenuation * lightCol + indirect;
@@ -283,7 +286,7 @@ half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 li
 //Subsurface Scattering - Based on a 2011 GDC Conference from by Colin Barre-Bresebois & Marc Bouchard
 //Modified by Xiexe
 float4 calcSubsurfaceScattering(XSLighting i, DotProducts d, float3 lightDir, float3 viewDir, float3 normal, float4 lightCol, float3 indirectDiffuse)
-{	
+{
     UNITY_BRANCH
     if(any(_SSColor.rgb)) // Skip all the SSS stuff if the color is 0.
     {

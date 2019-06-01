@@ -117,7 +117,10 @@
             #pragma multi_compile _ VERTEXLIGHT_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase 
-            #define UNITY_PASS_FORWARDBASE
+            
+            #ifndef UNITY_PASS_FORWARDBASE
+                #define UNITY_PASS_FORWARDBASE
+            #endif
 
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -142,7 +145,9 @@
 
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
-            #define UNITY_PASS_FORWARDADD
+            #ifndef UNITY_PASS_FORWARDADD
+                 #define UNITY_PASS_FORWARDADD
+            #endif
             
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -162,7 +167,9 @@
             #pragma fragment fragShadowCaster
 
             #pragma multi_compile_shadowcaster
-            #define UNITY_PASS_SHADOWCASTER
+            #ifndef UNITY_PASS_SHADOWCASTER
+                #define UNITY_PASS_SHADOWCASTER
+            #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
             #include "../CGIncludes/XSShadowCaster.cginc"
