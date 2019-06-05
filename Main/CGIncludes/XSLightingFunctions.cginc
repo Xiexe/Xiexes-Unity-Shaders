@@ -43,33 +43,48 @@
     }
 //
 
+half3 getVertexLightsDir(XSLighting i)
+{
+    half3 toLightX = half3(unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x);
+    half3 toLightY = half3(unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y);
+    half3 toLightZ = half3(unity_4LightPosX0.z, unity_4LightPosY0.z, unity_4LightPosZ0.z);
+    half3 toLightW = half3(unity_4LightPosX0.w, unity_4LightPosY0.w, unity_4LightPosZ0.w);
+
+    half3 dirX = toLightX - i.worldPos;
+    half3 dirY = toLightY - i.worldPos;
+    half3 dirZ = toLightZ - i.worldPos;
+    half3 dirW = toLightW - i.worldPos;
+    
+    dirX *= length(toLightX);
+    dirY *= length(toLightY);
+    dirZ *= length(toLightZ);
+    dirW *= length(toLightW);
+
+    half3 dir = (dirX + dirY + dirZ + dirW);
+    return normalize(dir); //Has to be normalized before feeding into LightDir, otherwise you end up with some weird behavior.
+}
+
 // Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
 half3 calcLightDir(XSLighting i)
-{
+{   
     half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
 
     half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
     lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
+    
+    #if defined(VERTEXLIGHT_ON)
+        half3 vertexDir = getVertexLightsDir(i);
+        lightDir = (lightDir + probeLightDir + vertexDir);
+    #endif
 
-        #if !defined(POINT) && !defined(SPOT) // if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
-            if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0 && ((_LightColor0.r+_LightColor0.g+_LightColor0.b) / 3) < 0.1)
-            {
-                lightDir = float4(1, 1, 1, 0);
-            }
-        #endif
+    #if !defined(POINT) && !defined(SPOT) && !defined(VERTEXLIGHT_ON) // if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
+        if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0 && length(lightDir) < 0.1)
+        {
+            lightDir = float4(1, 1, 1, 0);
+        }
+    #endif
 
     return normalize(lightDir);
-}
-
-half3 getVertexLightsDir(XSLighting i)
-{
-    float4 toLightX = unity_4LightPosX0 - i.worldPos.xyzz;
-    float4 toLightY = unity_4LightPosY0 - i.worldPos.yyzz;
-    float4 toLightZ = unity_4LightPosZ0 - i.worldPos.zyzz;
-
-    half3 lightDirAvg = normalize(toLightX + toLightY + toLightZ);
-
-    return lightDirAvg;
 }
 
 half4 calcLightCol(bool lightEnv, float3 indirectDiffuse)
@@ -81,7 +96,7 @@ half4 calcLightCol(bool lightEnv, float3 indirectDiffuse)
     if(lightEnv != 1)
         lightCol = indirectDiffuse.xyzz * 0.2; 
 
-    return lightCol;	
+    return lightCol;
 }
 
 float3 XSShade4VertexLightsAtten(float3 worldPos, float3 normal)
@@ -95,26 +110,17 @@ float3 XSShade4VertexLightsAtten(float3 worldPos, float3 normal)
     lengthSq += toLightX * toLightX;
     lengthSq += toLightY * toLightY;
     lengthSq += toLightZ * toLightZ;
-    lengthSq = max(lengthSq, 0.000001);
-    
-    // ndl
-    float4 ndl = 0;
-    ndl += toLightX * normal.x;
-    ndl += toLightY * normal.y;
-    ndl += toLightZ * normal.z;
-    ndl = ndl * 0.5 + 0.5;
-    ndl = lerp(smoothstep(0.3, 1, ndl),smoothstep(0.5, 0.51, ndl), _ShadowSharpness); //match to our realtime shadows
 
     float4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
     atten = atten*atten; // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect.
-    atten *= ndl;
+    atten = saturate(atten);
     
     lightColor.rgb += unity_LightColor[0] * atten.x;
     lightColor.rgb += unity_LightColor[1] * atten.y;
     lightColor.rgb += unity_LightColor[2] * atten.z;
     lightColor.rgb += unity_LightColor[3] * atten.w;
 
-    return lightColor * 2; //Multiply by 2 to make up for lost brightness after fixing attenuation
+    return lightColor;
 }
 
 half4 calcMetallicSmoothness(XSLighting i)
@@ -127,15 +133,18 @@ half4 calcMetallicSmoothness(XSLighting i)
 
 half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse)
 {
-    half rimIntensity = saturate((1-d.svdn) * pow(d.ndl, _RimThreshold));
+    half rimIntensity = saturate((1-d.svdn));// * pow(d.ndl, _RimThreshold));
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
-    half4 rim = (rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz) * i.albedo * i.attenuation);
-    return rim * _RimColor;
+    half4 rim = rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz);
+    #if !defined(UNITY_PASS_FORWARDBASE)
+        rim *= i.attenuation;
+    #endif
+    return rim * _RimColor * i.diffuseColor.xyzz;
 }
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 {
-    half rimIntensity = saturate((1-d.svdn) * pow(-d.ndl, _ShadowRimThreshold * 2));
+    half rimIntensity = saturate((1-d.svdn));// * pow(-d.ndl, _ShadowRimThreshold * 2));
     rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
     half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * 0.1), rimIntensity);
 
@@ -162,7 +171,7 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indi
     }
     else if(_SpecMode == 2)
     {
-        half sndl = saturate(d.ndl);	
+        half sndl = saturate(d.ndl);
         half roughness = 1-smoothness;
         half V = SmithJointGGXVisibilityTerm(sndl, d.vdn, roughness);
         half F = F_Schlick(half3(0.0, 0.0, 0.0), d.ldh);
@@ -219,7 +228,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
             #endif
         }
         else if(_ReflectionMode == 1) //Baked Cubemap
-        {	
+        {
             half3 indirectSpecular = texCUBElod(_BakedCubemap, float4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
             half3 metallicColor = indirectSpecular * lerp(0.1,i.diffuseColor.rgb, metallicSmoothness.x);
             spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
@@ -230,7 +239,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, float4 metallicSmoothnes
             }
         }
         else if (_ReflectionMode == 2) //Matcap
-        {	
+        {
             float3 upVector = float3(0,1,0);
             float2 remapUV = matcapSample(upVector, viewDir, i.normal);
             spec = tex2Dlod(_Matcap, float4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS))) * _MatcapTint;
@@ -280,7 +289,7 @@ half4 calcDiffuse(XSLighting i, DotProducts d, float3 indirectDiffuse, float4 li
     half4 indirect = indirectDiffuse.xyzz;
     diffuse = ramp * i.attenuation * lightCol + indirect;
     diffuse = i.albedo * diffuse;
-    return diffuse;	
+    return diffuse;
 }
 
 //Subsurface Scattering - Based on a 2011 GDC Conference from by Colin Barre-Bresebois & Marc Bouchard

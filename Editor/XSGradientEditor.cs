@@ -199,7 +199,7 @@ public class XSGradientEditor : EditorWindow
             texture.mipmapEnabled = false;
             texture.textureCompression = TextureImporterCompression.Uncompressed;
 
-            texture.sRGBTexture = isLinear;
+            texture.sRGBTexture = !isLinear;
 
             texture.SaveAndReimport();
             AssetDatabase.Refresh();
