@@ -11,6 +11,7 @@ half4 BRDF_XSLighting(XSLighting i)
     half3 halfVector = normalize(lightDir + viewDir);
     half3 reflView = calcReflView(viewDir, i.normal);
     half3 reflLight = calcReflLight(lightDir, i.normal);
+    
 
     DotProducts d = (DotProducts)0;
     d.ndl = dot(i.normal, lightDir);
@@ -33,7 +34,10 @@ half4 BRDF_XSLighting(XSLighting i)
         half3 indirectDiffuse = calcIndirectDiffuse();
     #endif
 
-    half4 lightCol = calcLightCol(lightEnv, indirectDiffuse);
+    half4 lightCol = half4(0,0,0,0);
+    calcLightCol(lightEnv, indirectDiffuse, lightCol);
+
+    half lightAvg = (indirectDiffuse.r + indirectDiffuse.g + indirectDiffuse.b + lightCol.r + lightCol.g + lightCol.b) / 6;
 
     half4 ramp = calcRamp(i,d);
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
@@ -52,10 +56,7 @@ half4 BRDF_XSLighting(XSLighting i)
     col += subsurface;
     col *= occlusion;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
-
-    #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
-        col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse);
-    #endif
+    col += calcEmission(i, lightAvg);
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline);
     return finalColor;

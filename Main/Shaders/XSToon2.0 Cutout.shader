@@ -1,6 +1,6 @@
 ﻿Shader "Xiexe/Toon2.0/XSToon2.0_Cutout"
 {
-    Properties
+   Properties
     {	
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
@@ -30,9 +30,11 @@
         _ClearcoatStrength("Clearcoat Reflectivity", Range(0, 1)) = 1
         _ClearcoatSmoothness("Clearcoat Smoothness", Range(0, 1)) = 0.8
 
+        [Enum(Yes,0, No,1)] _ScaleWithLight("Emission Scale w/ Light", Int) = 1
         _EmissionMap("Emission Map", 2D) = "white" {}
         [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         _EmissionToDiffuse("Emission Tint To Diffuse", Range(0,1)) = 0
+        _ScaleWithLightSensitivity("Scaling Sensitivity", Range(0,1)) = 1 
 
         _RimColor("Rimlight Tint", Color) = (1,1,1,1)
         _RimIntensity("Rimlight Intensity", Float) = 0

@@ -40,6 +40,8 @@ public class XSToonInspector : ShaderGUI
         MaterialProperty _ClearcoatStrength = null;
         MaterialProperty _ClearcoatSmoothness = null;
         MaterialProperty _EmissionMap = null;
+        MaterialProperty _ScaleWithLight = null;
+        MaterialProperty _ScaleWithLightSensitivity = null;
         MaterialProperty _EmissionColor = null;
         MaterialProperty _EmissionToDiffuse = null;
         MaterialProperty _RimColor = null;
@@ -228,8 +230,6 @@ public class XSToonInspector : ShaderGUI
             {
                 materialEditor.ShaderProperty(_ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
 
-                
-
                 if (_ReflectionMode.floatValue == 0) // PBR
                 {
                     materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
@@ -287,6 +287,11 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.TextureScaleOffsetProperty(_EmissionMap);
                 materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
                 materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
+
+                GUILayout.Space(5);
+                materialEditor.ShaderProperty(_ScaleWithLight, new GUIContent("Scale w/ Light", "Scales the emission intensity based on how dark or bright the environment is."));
+                if(_ScaleWithLight.floatValue == 0)
+                    materialEditor.ShaderProperty(_ScaleWithLightSensitivity, new GUIContent("Scaling Sensitivity", "How agressively the emission should scale with the light."));
             }
 
             showRimlight = XSStyles.ShurikenFoldout("Rimlight", showRimlight);

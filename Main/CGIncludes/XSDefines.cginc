@@ -143,7 +143,7 @@ half4 _Color, _ShadowRim,
     _EmissionColor, _MatcapTint, _RimColor;
 
 half _Cutoff;
-half _EmissionToDiffuse;
+half _EmissionToDiffuse, _ScaleWithLightSensitivity;
 half _Saturation;
 half _Metallic, _Glossiness, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
 half _BumpScale, _DetailNormalMapScale;
@@ -158,7 +158,7 @@ half _OutlineWidth;
 
 int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 
-int _TilingMode;
+int _TilingMode, _ScaleWithLight;
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
     _UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
