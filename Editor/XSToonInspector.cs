@@ -156,6 +156,21 @@ public class XSToonInspector : ShaderGUI
             if (showShadows)
             {
                 materialEditor.TexturePropertySingleLine(new GUIContent("Ramp Selection Mask", "A black to white mask that determins how far up on the multi ramp to sample. 0 for bottom, 1 for top, 0.5 for middle, 0.25, and 0.75 for mid bottom and mid top respectively."), _RampSelectionMask);
+                
+                if (_RampSelectionMask.textureValue != null) 
+                {
+                    string rampMaskPath = AssetDatabase.GetAssetPath(_RampSelectionMask.textureValue);
+                    TextureImporter ti = (TextureImporter)TextureImporter.GetAtPath(rampMaskPath);
+                    if (ti.sRGBTexture) 
+                    {
+                        if (XSStyles.HelpBoxWithButton(new GUIContent("This texture is not marked as Linear.", "This is recommended for the mask"), new GUIContent("Fix Now"))) {
+                            ti.sRGBTexture = false;
+                            AssetDatabase.ImportAsset(rampMaskPath, ImportAssetOptions.ForceUpdate);
+                            AssetDatabase.Refresh();
+                        }
+                    }
+                }
+                
                 materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right, or Down to Up"), _Ramp);
                 materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
 
