@@ -25,15 +25,15 @@ public class XSGradientEditor : EditorWindow
     public static Material focusedMat;
     private Material oldFocusedMat;
     private Texture oldTexture;
-
+    private string rampProperty;
 
     [MenuItem("Tools/Xiexe/XSToon/Gradient Editor")]
     // Use this for initialization
     static public void Init()
     {
         XSGradientEditor window = EditorWindow.GetWindow<XSGradientEditor>(false, "XSToon: Gradient Editor", true);
-        window.minSize = new Vector2(375, 195);
-        // window.maxSize = new Vector2(311, 181);
+        window.minSize = new Vector2(450, 390);
+        //window.maxSize = new Vector2(311, 181);
     }
 
     public void OnGUI()
@@ -85,7 +85,6 @@ public class XSGradientEditor : EditorWindow
             int new_ga = Mathf.Clamp(gradientAmount+1, 1, 5);
             if (new_ga > gradientAmount) {
                 gradientAmount = new_ga;
-                gradientAmount = new_ga;
                 Gradient[] grads = new Gradient[gradientAmount];
                 for (int i = 0; i < gradients.Length; i++)
                 {
@@ -104,7 +103,7 @@ public class XSGradientEditor : EditorWindow
             if (this.oldTexture != null)
             {
                 if (this.oldTexture == EditorGUIUtility.whiteTexture) this.oldTexture = null;
-                oldFocusedMat.SetTexture("_Ramp", this.oldTexture);
+                oldFocusedMat.SetTexture(rampProperty, this.oldTexture);
                 this.oldTexture = null;
             }
             oldFocusedMat = focusedMat;
@@ -116,7 +115,14 @@ public class XSGradientEditor : EditorWindow
 
         int width = (int)res;
         int height = 25;
-        height *= 5;
+        if (gradientAmount == 1) {
+            height = 8;
+        } else {
+            height *= 5;
+        }
+        if (tex == null) {
+            tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        }
 
         isLinear = GUILayout.Toggle(isLinear, "Make Linear Texture");
         manualMaterial = GUILayout.Toggle(manualMaterial, "Manual Material");
@@ -126,42 +132,57 @@ public class XSGradientEditor : EditorWindow
             focusedMat = (Material)EditorGUILayout.ObjectField(new GUIContent("", ""), focusedMat, typeof(Material), true);
         }
 
-        if (changed) {
+        if (focusedMat != null)
+        {
+            if (focusedMat.HasProperty("_Ramp"))
+            {
+                rampProperty = "_Ramp";
+            } else {
+                rampProperty = EditorGUILayout.TextField("Ramp Property Name", rampProperty);
+                if (!focusedMat.HasProperty(rampProperty)) {
+                    GUILayout.Label("Property not found!");
+                }
+            }
+        }
+
+        if (changed && !addGrads) {
             tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    // int wtf = (height-y)-1;
-                    int wtf = y;
-                    int gradNum = Mathf.FloorToInt(wtf/25f);
+                    int gradNum = Mathf.FloorToInt(y/25f);
                     if (gradNum >= gradientAmount) {
                         tex.SetPixel(x, y, Color.white);
                     } else {
                         if (gradients[gradNum] != null) {
-                            if (false) { // Vertical Blurring
-                                float time = (float)x / (float)width;
-                                Color grad0 = gradients[Mathf.Min(gradientAmount-1, gradNum+1)].Evaluate(time);
-                                Color grad1 = gradients[gradNum].Evaluate(time);
-                                Color grad2 = gradients[Mathf.Max(0, gradNum-1)].Evaluate(time);
-                                int o = 25*gradNum;
-                                o+=13;
-                                Color col1 = Color.Lerp(grad1, grad2, (o-(y+6))/25f);
-                                o = 25*(gradNum+1);
-                                o-=6;
-                                Color fincol = Color.Lerp(col1, grad0, ((y+6)-o)/25f);
-                                tex.SetPixel(x, y, fincol);
-                            } else {
                                 tex.SetPixel(x, y, gradients[gradNum].Evaluate((float)x / (float)width));
-                            }
                         } else {
-                            tex.SetPixel(x, y, Color.magenta);
+                            tex.SetPixel(x, y, Color.white);
                         }
                     }
-                    // tex.SetPixel(x, y, Color.Lerp(Color.black, Color.red, (float)x/width)+Color.Lerp(Color.black, Color.green, (float)y/height));
+                }
+            }
+            if (focusedMat != null)
+            {
+                if (focusedMat.HasProperty(rampProperty))
+                {
+                    if (this.oldTexture == null)
+                    {
+                        if (focusedMat.GetTexture(rampProperty) == null)
+                        {
+                            this.oldTexture = EditorGUIUtility.whiteTexture;
+                        } else {
+                            this.oldTexture = focusedMat.GetTexture(rampProperty);
+                        }
+                    }
+                    tex.wrapMode = TextureWrapMode.Clamp;
+                    tex.Apply(false, false);
+                    focusedMat.SetTexture(rampProperty, tex);
                 }
             }
         }
+
 
         XSStyles.Separator();
         if (GUILayout.Button("Save Ramp"))
@@ -179,19 +200,15 @@ public class XSGradientEditor : EditorWindow
                         Texture ramp = AssetDatabase.LoadAssetAtPath<Texture>(s);
                         if (ramp != null)
                         {
-                            focusedMat.SetTexture("_Ramp", ramp);
+                            focusedMat.SetTexture(rampProperty, ramp);
                             this.oldTexture = null;
                         }
                     }
                 }
             }
         }
-        tex.Apply(false, false);
-        Rect r = EditorGUILayout.GetControlRect();
-        r.height = 125f;
-        r.width = 512f;
-        GUI.DrawTexture(r, tex);
-        // XSStyles.HelpBox("You can use this to create a custom shadow ramp in realtime. \nIf you do not save, the ramp will be reverted back to what it was previously. \n\n - Click the Gradient box. \n - Choose resolution of the texture. \n - Save.", MessageType.Info);
+        XSStyles.HelpBox("You can use this to create a custom shadow ramp in realtime. \nIf you do not save, the ramp will be reverted back to what it was previously. \n\n - Click the Gradient box. \n - Choose resolution of the texture. \n - Save.", MessageType.Info);
+        XSStyles.HelpBox("Ramp textures support up to 5 ramps in one texture. That means you can have up to 5 ramps on a single material. You will need to author a ramp mask to choose which ramp to sample from. \n\nA texture that is fully black would sample from the bottom ramp, a texture that is fully white would sample from the top ramp, and a texture that is half gray would sample from the middle ramp. \n\n A quick tip would be that you can sample from each of the 5 ramps with 0, 0.25, 0.5, 0.75, and 1 on the texture. \n\nThe order of the gradients on the UI is the order that they will be on the texture.", MessageType.Info);
     }
 
     void OnDestroy()
@@ -204,7 +221,7 @@ public class XSGradientEditor : EditorWindow
                 {
                     this.oldTexture = null;
                 }
-                focusedMat.SetTexture("_Ramp", this.oldTexture);
+                focusedMat.SetTexture(rampProperty, this.oldTexture);
                 this.oldTexture = null;
             }
             focusedMat = null;
