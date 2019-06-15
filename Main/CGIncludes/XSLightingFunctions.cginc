@@ -148,7 +148,7 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 {
-    half rimIntensity = saturate((1-d.svdn)) * pow(-d.ndl, _ShadowRimThreshold * 2);
+    half rimIntensity = saturate((1-d.svdn)) * pow(1-d.ndl, _ShadowRimThreshold * 2);
     rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
     half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * 0.1), rimIntensity);
 
@@ -269,12 +269,11 @@ half4 calcOutlineColor(XSLighting i, DotProducts d, half3 indirectDiffuse, half4
 
 half4 calcRamp(XSLighting i, DotProducts d)
 {
-    //d.ndl = saturate(d.ndl);
     half remapRamp; 
     remapRamp = d.ndl * 0.5 + 0.5;
 
-    half4 ramp = tex2D( _Ramp, half2(remapRamp, remapRamp) );
-    
+    half4 ramp = tex2D( _Ramp, half2(remapRamp, i.rampMask.r) );
+
     return ramp;
 }
 

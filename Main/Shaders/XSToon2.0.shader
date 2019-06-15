@@ -51,6 +51,7 @@
         _AnisotropicAY("Anisotripic Y", Range(0,1)) = 0.75  
         _SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
         
+        _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
         _ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)

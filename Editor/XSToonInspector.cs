@@ -57,6 +57,7 @@ public class XSToonInspector : ShaderGUI
         MaterialProperty _AnisotropicAX = null;
         MaterialProperty _AnisotropicAY = null;
         MaterialProperty _SpecularAlbedoTint = null;
+        MaterialProperty _RampSelectionMask = null;
         MaterialProperty _Ramp = null;
         MaterialProperty _ShadowRim = null;
         MaterialProperty _ShadowRimRange = null;
@@ -154,6 +155,7 @@ public class XSToonInspector : ShaderGUI
             showShadows = XSStyles.ShurikenFoldout("Shadows", showShadows);
             if (showShadows)
             {
+                materialEditor.TexturePropertySingleLine(new GUIContent("Ramp Selection Mask", "A black to white mask that determins how far up on the multi ramp to sample. 0 for bottom, 1 for top, 0.5 for middle, 0.25, and 0.75 for mid bottom and mid top respectively."), _RampSelectionMask);
                 materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right, or Down to Up"), _Ramp);
                 materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
 
