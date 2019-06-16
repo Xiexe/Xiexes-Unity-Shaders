@@ -117,7 +117,6 @@ half3 XSShade4VertexLightsAtten(half3 worldPos, half3 normal)
 
     half4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
     atten = atten*atten; // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect.
-    atten = saturate(atten);
     
     lightColor.rgb += unity_LightColor[0] * atten.x;
     lightColor.rgb += unity_LightColor[1] * atten.y;
