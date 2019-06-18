@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System;
+using UnityEditorInternal;
 
 public class XSGradientEditor : EditorWindow
 {
-
-    public Gradient[] gradients;
-    public int gradientAmount = 1;
+    public List<int> gradients_index = new List<int>(new int[1] { 0 });
+    public List<Gradient> gradients = new List<Gradient>(5);
     public Texture2D tex;
 
     private string finalFilePath;
 
-	private bool isLinear = false;
+    private bool isLinear = false;
     private bool manualMaterial = false;
     private enum Resolutions
     {
@@ -25,7 +27,14 @@ public class XSGradientEditor : EditorWindow
     public static Material focusedMat;
     private Material oldFocusedMat;
     private Texture oldTexture;
-    private string rampProperty;
+    private string rampProperty = "_Ramp";
+    private ReorderableList grad_index_reorderable;
+    private bool reorder;
+    private static GUIContent iconToolbarPlus;
+    private static GUIContent iconToolbarMinus;
+    private static GUIStyle preButton;
+    private static GUIStyle buttonBackground;
+    private bool changed;
 
     [MenuItem("Tools/Xiexe/XSToon/Gradient Editor")]
     // Use this for initialization
@@ -38,11 +47,8 @@ public class XSGradientEditor : EditorWindow
 
     public void OnGUI()
     {
-        if (gradients == null) {
-            gradients = new Gradient[1];
-        }
-
-        if (focusedMat != null && gradients != null)
+        changed = false;
+        if (focusedMat != null)
         {
             XSStyles.ShurikenHeader("Current Material: " + focusedMat.name);
         }
@@ -51,51 +57,112 @@ public class XSGradientEditor : EditorWindow
             XSStyles.ShurikenHeader("Current Material: None");
         }
 
-        SerializedObject serializedGradients = new SerializedObject(this);
-        SerializedProperty colorGradients = serializedGradients.FindProperty("gradients");
-        for (int i = gradientAmount-1; i > -1; i--)
+        if (preButton == null)
         {
-            EditorGUILayout.PropertyField(colorGradients.GetArrayElementAtIndex(i), new GUIContent("Gradient " + Mathf.Abs(i-gradientAmount)), true, null);
+            iconToolbarPlus = EditorGUIUtility.IconContent("Toolbar Plus", "Add Gradient");
+            iconToolbarMinus = EditorGUIUtility.IconContent("Toolbar Minus", "Remove Gradient");
+            preButton = new GUIStyle("RL FooterButton");
+            buttonBackground = new GUIStyle("RL Header");
         }
-        bool changed = serializedGradients.ApplyModifiedProperties();
+
+        if (gradients.Count == 0)
+        { // init up there doesnt work
+            gradients.Add(new Gradient());
+            gradients.Add(new Gradient());
+            gradients.Add(new Gradient());
+            gradients.Add(new Gradient());
+            gradients.Add(new Gradient());
+        }
+
+        if (grad_index_reorderable == null)
+        {
+            grad_index_reorderable = new ReorderableList(gradients_index, typeof(int), true, false, false, false);
+            grad_index_reorderable.headerHeight = 0f;
+            grad_index_reorderable.footerHeight = 0f;
+            grad_index_reorderable.showDefaultBackground = true;
+
+            grad_index_reorderable.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+            {
+                Type editorGui = typeof(EditorGUI);
+                MethodInfo mi = editorGui.GetMethod("GradientField", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[2] { typeof(Rect), typeof(Gradient) }, null);
+                mi.Invoke(this, new object[2] { rect, gradients[gradients_index[index]] });
+                if (Event.current.type == EventType.Repaint)
+                {
+                    changed = true;
+                }
+            };
+
+            grad_index_reorderable.onChangedCallback = (ReorderableList list) =>
+            {
+                changed = true;
+            };
+        }
 
         GUILayout.BeginHorizontal();
         GUILayout.FlexibleSpace();
-        GUI.enabled = gradientAmount > 1;
-        bool minusGrads = GUILayout.Button("-", GUILayout.ExpandWidth(false));
-        GUI.enabled = gradientAmount < 5;
-        bool addGrads = GUILayout.Button("+", GUILayout.ExpandWidth(false));
-        GUI.enabled = true;
+        Rect r = EditorGUILayout.GetControlRect();
+        float rightEdge = r.xMax;
+        float leftEdge = rightEdge - 48f;
+        r = new Rect(leftEdge, r.y - 1f, rightEdge - leftEdge, r.height);
+        if (Event.current.type == EventType.Repaint) buttonBackground.Draw(r, false, false, false, false);
+        leftEdge += 18f;
+        EditorGUI.BeginDisabledGroup(gradients_index.Count == 5);
+        bool addE = GUI.Button(new Rect(leftEdge + 4, r.y, 25, 13), iconToolbarPlus, preButton);
+        EditorGUI.EndDisabledGroup();
+        EditorGUI.BeginDisabledGroup(gradients_index.Count == 1);
+        bool removeE = GUI.Button(new Rect(leftEdge - 19, r.y, 25, 13), iconToolbarMinus, preButton);
+        EditorGUI.EndDisabledGroup();
+
+        if (addE)
+        {
+            grad_index_reorderable.index++;
+            int wat = 0;
+            for (int i = 0; i < 5; i++)
+            {
+                if (!gradients_index.Contains(i))
+                {
+                    wat = i;
+                    break;
+                }
+            }
+            gradients_index.Add(wat);
+            changed = true;
+        }
+        if (removeE)
+        {
+            gradients_index.Remove(gradients_index[gradients_index.Count - 1]);
+            grad_index_reorderable.index--;
+            changed = true;
+        }
+
+        GUIStyle button = new GUIStyle(EditorStyles.miniButton);
+        button.normal = !reorder ? EditorStyles.miniButton.normal : EditorStyles.miniButton.onNormal;
+        if (GUILayout.Button("Reorder", button, GUILayout.ExpandWidth(false)))
+        {
+            reorder = !reorder;
+        }
         GUILayout.EndHorizontal();
 
-        if (minusGrads) {
-            int new_ga = Mathf.Clamp(gradientAmount-1, 1, 5);
-            if (new_ga < gradientAmount) {
-                gradientAmount = new_ga;
-                Gradient[] grads = new Gradient[gradientAmount];
-                for (int i = 0; i < grads.Length; i++)
-                {
-                    grads[i] = gradients[i];
-                }
-                gradients = grads;
-                changed = true;
-            }
+        SerializedObject serializedObject = new SerializedObject(this);
+        if (reorder)
+        {
+            grad_index_reorderable.DoLayoutList();
         }
-        if (addGrads) {
-            int new_ga = Mathf.Clamp(gradientAmount+1, 1, 5);
-            if (new_ga > gradientAmount) {
-                gradientAmount = new_ga;
-                Gradient[] grads = new Gradient[gradientAmount];
-                for (int i = 0; i < gradients.Length; i++)
-                {
-                    grads[i] = gradients[i];
-                }
-                gradients = grads;
-                changed = true;
+        else
+        {
+            SerializedProperty colorGradients = serializedObject.FindProperty("gradients");
+            for (int i = 0; i < gradients_index.Count; i++)
+            {
+                Rect _r = EditorGUILayout.GetControlRect();
+                _r.x += 16f;
+                _r.width -= 2f + 16f;
+                _r.height += 5f;
+                _r.y += 2f + (3f * i);
+                EditorGUI.PropertyField(_r, colorGradients.GetArrayElementAtIndex(gradients_index[i]), new GUIContent(""));
             }
+            GUILayout.Space(Mathf.Lerp(9f, 24f, gradients_index.Count / 5f));
         }
-
-        // bool changed = !CompareGradients(oldGradient, gradient);
+        if (serializedObject.ApplyModifiedProperties()) changed = true;
 
         if (oldFocusedMat != focusedMat)
         {
@@ -114,20 +181,30 @@ public class XSGradientEditor : EditorWindow
         if (oldRes != res) changed = true;
 
         int width = (int)res;
-        int height = 25;
-        if (gradientAmount == 1) {
+        int height = 30;
+        if (gradients_index.Count == 1)
+        {
             height = 8;
-        } else {
-            height *= 5;
         }
-        if (tex == null) {
+        else
+        {
+            height = 150;
+        }
+        if (tex == null)
+        {
             tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
         }
 
+        bool old_isLinear = isLinear;
         isLinear = GUILayout.Toggle(isLinear, "Make Linear Texture");
+        if (old_isLinear != isLinear)
+        {
+            changed = true;
+        }
+
         manualMaterial = GUILayout.Toggle(manualMaterial, "Manual Material");
 
-        if(manualMaterial)
+        if (manualMaterial)
         {
             focusedMat = (Material)EditorGUILayout.ObjectField(new GUIContent("", ""), focusedMat, typeof(Material), true);
         }
@@ -137,32 +214,20 @@ public class XSGradientEditor : EditorWindow
             if (focusedMat.HasProperty("_Ramp"))
             {
                 rampProperty = "_Ramp";
-            } else {
+            }
+            else
+            {
                 rampProperty = EditorGUILayout.TextField("Ramp Property Name", rampProperty);
-                if (!focusedMat.HasProperty(rampProperty)) {
+                if (!focusedMat.HasProperty(rampProperty))
+                {
                     GUILayout.Label("Property not found!");
                 }
             }
         }
 
-        if (changed && !addGrads) {
-            tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int gradNum = Mathf.FloorToInt(y/25f);
-                    if (gradNum >= gradientAmount) {
-                        tex.SetPixel(x, y, Color.white);
-                    } else {
-                        if (gradients[gradNum] != null) {
-                                tex.SetPixel(x, y, gradients[gradNum].Evaluate((float)x / (float)width));
-                        } else {
-                            tex.SetPixel(x, y, Color.white);
-                        }
-                    }
-                }
-            }
+        if (changed)
+        {
+            updateTexture(width, height);
             if (focusedMat != null)
             {
                 if (focusedMat.HasProperty(rampProperty))
@@ -172,7 +237,9 @@ public class XSGradientEditor : EditorWindow
                         if (focusedMat.GetTexture(rampProperty) == null)
                         {
                             this.oldTexture = EditorGUIUtility.whiteTexture;
-                        } else {
+                        }
+                        else
+                        {
                             this.oldTexture = focusedMat.GetTexture(rampProperty);
                         }
                     }
@@ -183,14 +250,14 @@ public class XSGradientEditor : EditorWindow
             }
         }
 
-
         XSStyles.Separator();
         if (GUILayout.Button("Save Ramp"))
         {
             finalFilePath = XSStyles.findAssetPath(finalFilePath);
-            string path = EditorUtility.SaveFilePanel("Save Ramp as PNG", finalFilePath + "/Textures/Shadow Ramps/Generated", "gradient.png", "png");
+            string path = EditorUtility.SaveFilePanel("Save Ramp as PNG", finalFilePath + "/Textures/Shadow Ramps/Generated", "gradient", "png");
             if (path.Length != 0)
             {
+                updateTexture(width, height);
                 bool success = GenTexture(tex, path);
                 if (success)
                 {
@@ -207,6 +274,7 @@ public class XSGradientEditor : EditorWindow
                 }
             }
         }
+
         XSStyles.HelpBox("You can use this to create a custom shadow ramp in realtime. \nIf you do not save, the ramp will be reverted back to what it was previously. \n\n - Click the Gradient box. \n - Choose resolution of the texture. \n - Save.", MessageType.Info);
         XSStyles.HelpBox("Ramp textures support up to 5 ramps in one texture. That means you can have up to 5 ramps on a single material. You will need to author a ramp mask to choose which ramp to sample from. \n\nA texture that is fully black would sample from the bottom ramp, a texture that is fully white would sample from the top ramp, and a texture that is half gray would sample from the middle ramp. \n\n A quick tip would be that you can sample from each of the 5 ramps with 0, 0.25, 0.5, 0.75, and 1 on the texture. \n\nThe order of the gradients on the UI is the order that they will be on the texture.", MessageType.Info);
     }
@@ -225,6 +293,43 @@ public class XSGradientEditor : EditorWindow
                 this.oldTexture = null;
             }
             focusedMat = null;
+        }
+    }
+
+    void updateTexture(int width, int height)
+    {
+        tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                if (height == 150)
+                {
+                    int gradNum = Mathf.FloorToInt(y / 30f);
+                    gradNum = Mathf.Abs(gradNum - 5) - 1;
+                    if (gradNum >= gradients_index.Count)
+                    {
+                        tex.SetPixel(x, y, Color.white);
+                    }
+                    else
+                    {
+                        if (gradients[gradients_index[gradNum]] != null)
+                        {
+                            Color grad_col = gradients[gradients_index[gradNum]].Evaluate((float)x / (float)width);
+                            tex.SetPixel(x, y, isLinear ? grad_col.gamma : grad_col);
+                        }
+                        else
+                        {
+                            tex.SetPixel(x, y, Color.white);
+                        }
+                    }
+                }
+                else
+                {
+                    Color grad_col = gradients[gradients_index[0]].Evaluate((float)x / (float)width);
+                    tex.SetPixel(x, y, isLinear ? grad_col.gamma : grad_col);
+                }
+            }
         }
     }
 
@@ -252,7 +357,7 @@ public class XSGradientEditor : EditorWindow
             texture.mipmapEnabled = false;
             texture.textureCompression = TextureImporterCompression.Uncompressed;
 
-            texture.sRGBTexture = !isLinear;
+            // texture.sRGBTexture = !isLinear; // We already do the conversion in tex.SetPixel
 
             texture.SaveAndReimport();
             AssetDatabase.Refresh();
@@ -267,46 +372,4 @@ public class XSGradientEditor : EditorWindow
         }
         return false;
     }
-
-    // From https://answers.unity.com/questions/621366/how-to-check-if-a-gradient-in-editor-has-been-chan.html
-    public static bool CompareGradients(Gradient gradient, Gradient otherGradient)
-    {
-        if (otherGradient.mode != gradient.mode)
-        {
-            return false;
-        }
-        // Compare the lengths before checking actual colors and alpha components
-        if (gradient.colorKeys.Length != otherGradient.colorKeys.Length ||
-            gradient.alphaKeys.Length != otherGradient.alphaKeys.Length)
-        {
-            return false;
-        }
-        
-        // Compare all the colors
-        for (int i = 0; i < gradient.colorKeys.Length; i++)
-        {
-            // Test if the color and alpha is the same
-            GradientColorKey key = gradient.colorKeys[i];
-            GradientColorKey otherKey = otherGradient.colorKeys[i];
-            if (key.color != otherKey.color || key.time != otherKey.time)
-            {
-                return false;
-            }
-        }
-        
-        // Compare all the alphas
-        for (int i = 0; i < gradient.alphaKeys.Length; i++)
-        {
-            // Test if the color and alpha is the same
-            GradientAlphaKey key = gradient.alphaKeys[i];
-            GradientAlphaKey otherKey = otherGradient.alphaKeys[i];
-            if (key.alpha != otherKey.alpha || key.time != otherKey.time)
-            {
-                return false;
-            }
-        }
-        
-        // They're the same
-        return true;
-     }
 }
