@@ -288,7 +288,7 @@ half4 calcDiffuse(XSLighting i, DotProducts d, half3 indirectDiffuse, half4 ligh
     half4 diffuse; 
     half4 indirect = indirectDiffuse.xyzz;
     diffuse = ramp * i.attenuation * lightCol + indirect;
-    diffuse = i.albedo * diffuse;
+    diffuse = i.albedo * i.color.xyzz * diffuse;
     return diffuse;
 }
 
