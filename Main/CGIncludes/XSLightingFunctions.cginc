@@ -89,8 +89,9 @@ half3 calcLightDir(XSLighting i)
 
 void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightColor)
 {
-    //If we don't have a directional light or realtime light in the scene, we can derive light color from a slightly
-    //Modified indirect color. 
+    //If we're in an environment with a realtime light, then we should use the light color, and indirect color raw.
+    //Otherwise, we can use the raw indirect color as the light color, and halve if for the indirect color. 
+    //This produces a result that looks very similar to realtime lighting.
     if(lightEnv)
     {
         lightColor = _LightColor0;
@@ -103,7 +104,7 @@ void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightC
     }
 }
 
-half3 XSShade4VertexLightsAtten(half3 worldPos, half3 normal)
+half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal)
 {
     half3 lightColor = 0;
     half4 toLightX = unity_4LightPosX0 - worldPos.x;
@@ -116,7 +117,7 @@ half3 XSShade4VertexLightsAtten(half3 worldPos, half3 normal)
     lengthSq += toLightZ * toLightZ;
 
     half4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
-    atten = atten*atten; // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect.
+    atten = atten*atten; // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect that Unity's normal integration of vertex lights has.
     
     lightColor.rgb += unity_LightColor[0] * atten.x;
     lightColor.rgb += unity_LightColor[1] * atten.y;

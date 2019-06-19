@@ -20,16 +20,16 @@ half4 BRDF_XSLighting(XSLighting i)
     d.tdh = dot(i.tangent, halfVector);
     d.bdh = dot(i.bitangent, halfVector);
     d.ndh = DotClamped(i.normal, halfVector);
-    d.rdv = saturate( dot( reflLight, float4(-viewDir, 0) ));
+    d.rdv = saturate(dot(reflLight, float4(-viewDir, 0)));
     d.ldh = DotClamped(lightDir, halfVector);
     d.svdn = abs(dot(stereoViewDir, i.normal));
     
     i.albedo.rgb *= (1-metallicSmoothness.x);
-    i.albedo.rgb = lerp( dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation );
-    i.diffuseColor.rgb = lerp( dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation );
+    i.albedo.rgb = lerp(dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation);
+    i.diffuseColor.rgb = lerp(dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation);
 
     #if defined(VERTEXLIGHT_ON)
-        half3 indirectDiffuse = calcIndirectDiffuse() + XSShade4VertexLightsAtten(i.worldPos, i.normal);   
+        half3 indirectDiffuse = calcIndirectDiffuse() + get4VertexLightsColFalloff(i.worldPos, i.normal);   
     #else
         half3 indirectDiffuse = calcIndirectDiffuse();
     #endif
