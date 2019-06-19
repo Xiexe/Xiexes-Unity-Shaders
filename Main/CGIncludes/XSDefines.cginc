@@ -80,6 +80,7 @@ struct XSLighting
     half4 thickness;
     half4 occlusion;
     half4 emissionMap;
+    half4 rampMask;
 
     half3 diffuseColor;
     half attenuation;
@@ -132,6 +133,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_MetallicGlossMap); half4 _MetallicGlossMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ReflectivityMask); half4 _ReflectivityMask_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ThicknessMap); half4 _ThicknessMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _Matcap;
@@ -143,7 +145,7 @@ half4 _Color, _ShadowRim,
     _EmissionColor, _MatcapTint, _RimColor;
 
 half _Cutoff;
-half _EmissionToDiffuse;
+half _EmissionToDiffuse, _ScaleWithLightSensitivity;
 half _Saturation;
 half _Metallic, _Glossiness, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
 half _BumpScale, _DetailNormalMapScale;
@@ -158,7 +160,7 @@ half _OutlineWidth;
 
 int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 
-int _TilingMode;
+int _TilingMode, _ScaleWithLight;
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
     _UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,

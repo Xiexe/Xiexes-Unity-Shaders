@@ -6,7 +6,7 @@ using System.IO;
 [InitializeOnLoad]
 public class XSStyles : MonoBehaviour
 {
-    public static string ver = "2.0.5";
+    public static string ver = "2.1.0";
 
     //Help URLs
     public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";
@@ -345,4 +345,25 @@ public class XSStyles : MonoBehaviour
 
         XSStyles.openInfoPanel(200, 20);
     }
+
+    public static bool HelpBoxWithButton(GUIContent messageContent, GUIContent buttonContent)
+    {
+        const float kButtonWidth = 60f;
+        const float kSpacing = 5f;
+        const float kButtonHeight = 20f;
+
+        // Reserve size of wrapped text
+        Rect contentRect = GUILayoutUtility.GetRect(messageContent, EditorStyles.helpBox);
+        // Reserve size of button
+        GUILayoutUtility.GetRect(1, kButtonHeight + kSpacing);
+
+        // Render background box with text at full height
+        contentRect.height += kButtonHeight + kSpacing;
+        GUI.Label(contentRect, messageContent, EditorStyles.helpBox);
+
+        // Button (align lower right)
+        Rect buttonRect = new Rect(contentRect.xMax - kButtonWidth - 4f, contentRect.yMax - kButtonHeight - 4f, kButtonWidth, kButtonHeight);
+        return GUI.Button(buttonRect, buttonContent);
+    }
+
 }

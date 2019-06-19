@@ -94,7 +94,10 @@ float4 frag (
     #endif
     
     bool face = facing > 0; // True if on front face, False if on back face
-    face = IsInMirror() ? !face : face; // Faces are inverted in a mirror // Fixed in new unity LTS update, remove when released
+    
+    //#if UNITY_VERSION != 201755
+        face = IsInMirror() ? !face : face; // Faces are inverted in a mirror // Fixed in new unity LTS update, remove when released
+    //#endif
 
     if (!face) // Invert Normals based on face
     { 
@@ -126,6 +129,7 @@ float4 frag (
     o.occlusion = tex2D(_OcclusionMap, t.occlusionUV);
     o.reflectivityMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectivityMask, _MainTex, t.reflectivityMaskUV) * _Reflectivity;
     o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV) * _EmissionColor;
+    o.rampMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RampSelectionMask, _MainTex, i.uv); // This texture doesn't need to ever be on a second uv channel, and doesn't need tiling, convince me otherwise.
 
     o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
     o.attenuation = attenuation;

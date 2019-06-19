@@ -11,6 +11,7 @@ half4 BRDF_XSLighting(XSLighting i)
     half3 halfVector = normalize(lightDir + viewDir);
     half3 reflView = calcReflView(viewDir, i.normal);
     half3 reflLight = calcReflLight(lightDir, i.normal);
+    
 
     DotProducts d = (DotProducts)0;
     d.ndl = dot(i.normal, lightDir);
@@ -19,16 +20,24 @@ half4 BRDF_XSLighting(XSLighting i)
     d.tdh = dot(i.tangent, halfVector);
     d.bdh = dot(i.bitangent, halfVector);
     d.ndh = DotClamped(i.normal, halfVector);
-    d.rdv = saturate( dot( reflLight, float4(-viewDir, 0) ));
+    d.rdv = saturate(dot(reflLight, float4(-viewDir, 0)));
     d.ldh = DotClamped(lightDir, halfVector);
     d.svdn = abs(dot(stereoViewDir, i.normal));
     
     i.albedo.rgb *= (1-metallicSmoothness.x);
-    i.albedo.rgb = lerp( dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation );
-    i.diffuseColor.rgb = lerp( dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation );
+    i.albedo.rgb = lerp(dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation);
+    i.diffuseColor.rgb = lerp(dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation);
 
-    half3 indirectDiffuse = calcIndirectDiffuse();
-    half4 lightCol = calcLightCol(lightEnv, indirectDiffuse);
+    #if defined(VERTEXLIGHT_ON)
+        half3 indirectDiffuse = calcIndirectDiffuse() + get4VertexLightsColFalloff(i.worldPos, i.normal);   
+    #else
+        half3 indirectDiffuse = calcIndirectDiffuse();
+    #endif
+
+    half4 lightCol = half4(0,0,0,0);
+    calcLightCol(lightEnv, indirectDiffuse, lightCol);
+
+    half lightAvg = (indirectDiffuse.r + indirectDiffuse.g + indirectDiffuse.b + lightCol.r + lightCol.g + lightCol.b) / 6;
 
     half4 ramp = calcRamp(i,d);
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
@@ -47,10 +56,7 @@ half4 BRDF_XSLighting(XSLighting i)
     col += subsurface;
     col *= occlusion;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
-
-    #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
-        col += lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse);
-    #endif
+    col += calcEmission(i, lightAvg);
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline);
     return finalColor;
