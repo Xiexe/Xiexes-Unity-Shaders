@@ -365,5 +365,4 @@ public class XSStyles : MonoBehaviour
         Rect buttonRect = new Rect(contentRect.xMax - kButtonWidth - 4f, contentRect.yMax - kButtonHeight - 4f, kButtonWidth, kButtonHeight);
         return GUI.Button(buttonRect, buttonContent);
     }
-
 }
