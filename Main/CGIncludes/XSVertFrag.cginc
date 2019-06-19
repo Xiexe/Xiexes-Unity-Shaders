@@ -94,10 +94,6 @@ float4 frag (
     #endif
     
     bool face = facing > 0; // True if on front face, False if on back face
-    
-    //#if UNITY_VERSION != 201755
-        face = IsInMirror() ? !face : face; // Faces are inverted in a mirror // Fixed in new unity LTS update, remove when released
-    //#endif
 
     if (!face) // Invert Normals based on face
     { 
