@@ -35,14 +35,18 @@ public class XSGradientEditor : EditorWindow
     private static GUIStyle preButton;
     private static GUIStyle buttonBackground;
     private bool changed;
+    private int loadGradIndex;
+    private XSMultiGradient xsmg;
+    private Vector2 scrollPos;
+
+    private bool dHelpText = false;
+    private bool dAdvanced = false;
 
     [MenuItem("Tools/Xiexe/XSToon/Gradient Editor")]
-    // Use this for initialization
     static public void Init()
     {
         XSGradientEditor window = EditorWindow.GetWindow<XSGradientEditor>(false, "XSToon: Gradient Editor", true);
         window.minSize = new Vector2(450, 390);
-        //window.maxSize = new Vector2(311, 181);
     }
 
     public void OnGUI()
@@ -66,7 +70,7 @@ public class XSGradientEditor : EditorWindow
         }
 
         if (gradients.Count == 0)
-        { // init up there doesnt work
+        {
             gradients.Add(new Gradient());
             gradients.Add(new Gradient());
             gradients.Add(new Gradient());
@@ -76,26 +80,7 @@ public class XSGradientEditor : EditorWindow
 
         if (grad_index_reorderable == null)
         {
-            grad_index_reorderable = new ReorderableList(gradients_index, typeof(int), true, false, false, false);
-            grad_index_reorderable.headerHeight = 0f;
-            grad_index_reorderable.footerHeight = 0f;
-            grad_index_reorderable.showDefaultBackground = true;
-
-            grad_index_reorderable.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
-            {
-                Type editorGui = typeof(EditorGUI);
-                MethodInfo mi = editorGui.GetMethod("GradientField", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[2] { typeof(Rect), typeof(Gradient) }, null);
-                mi.Invoke(this, new object[2] { rect, gradients[gradients_index[index]] });
-                if (Event.current.type == EventType.Repaint)
-                {
-                    changed = true;
-                }
-            };
-
-            grad_index_reorderable.onChangedCallback = (ReorderableList list) =>
-            {
-                changed = true;
-            };
+            makeReorderedList();
         }
 
         GUILayout.BeginHorizontal();
@@ -103,7 +88,7 @@ public class XSGradientEditor : EditorWindow
         Rect r = EditorGUILayout.GetControlRect();
         float rightEdge = r.xMax;
         float leftEdge = rightEdge - 48f;
-        r = new Rect(leftEdge, r.y - 1f, rightEdge - leftEdge, r.height);
+        r = new Rect(leftEdge, r.y, rightEdge - leftEdge, r.height);
         if (Event.current.type == EventType.Repaint) buttonBackground.Draw(r, false, false, false, false);
         leftEdge += 18f;
         EditorGUI.BeginDisabledGroup(gradients_index.Count == 5);
@@ -137,7 +122,7 @@ public class XSGradientEditor : EditorWindow
 
         GUIStyle button = new GUIStyle(EditorStyles.miniButton);
         button.normal = !reorder ? EditorStyles.miniButton.normal : EditorStyles.miniButton.onNormal;
-        if (GUILayout.Button("Reorder", button, GUILayout.ExpandWidth(false)))
+        if (GUILayout.Button(new GUIContent("Reorder", "Don't use Reorder if you want to undo a gradient change"), button, GUILayout.ExpandWidth(false)))
         {
             reorder = !reorder;
         }
@@ -151,16 +136,19 @@ public class XSGradientEditor : EditorWindow
         else
         {
             SerializedProperty colorGradients = serializedObject.FindProperty("gradients");
-            for (int i = 0; i < gradients_index.Count; i++)
+            if (colorGradients.arraySize == 5)
             {
-                Rect _r = EditorGUILayout.GetControlRect();
-                _r.x += 16f;
-                _r.width -= 2f + 16f;
-                _r.height += 5f;
-                _r.y += 2f + (3f * i);
-                EditorGUI.PropertyField(_r, colorGradients.GetArrayElementAtIndex(gradients_index[i]), new GUIContent(""));
+                for (int i = 0; i < gradients_index.Count; i++)
+                {
+                    Rect _r = EditorGUILayout.GetControlRect();
+                    _r.x += 16f;
+                    _r.width -= 2f + 16f;
+                    _r.height += 5f;
+                    _r.y += 2f + (3f * i);
+                    EditorGUI.PropertyField(_r, colorGradients.GetArrayElementAtIndex(gradients_index[i]), new GUIContent(""));
+                }
+                GUILayout.Space(Mathf.Lerp(9f, 24f, gradients_index.Count / 5f));
             }
-            GUILayout.Space(Mathf.Lerp(9f, 24f, gradients_index.Count / 5f));
         }
         if (serializedObject.ApplyModifiedProperties()) changed = true;
 
@@ -196,13 +184,11 @@ public class XSGradientEditor : EditorWindow
         }
 
         bool old_isLinear = isLinear;
-        isLinear = GUILayout.Toggle(isLinear, "Make Linear Texture");
+        drawAdvancedOptions();
         if (old_isLinear != isLinear)
         {
             changed = true;
         }
-
-        manualMaterial = GUILayout.Toggle(manualMaterial, "Manual Material");
 
         if (manualMaterial)
         {
@@ -251,6 +237,9 @@ public class XSGradientEditor : EditorWindow
         }
 
         XSStyles.Separator();
+        drawMGInputOutput();
+
+
         if (GUILayout.Button("Save Ramp"))
         {
             finalFilePath = XSStyles.findAssetPath(finalFilePath);
@@ -274,9 +263,52 @@ public class XSGradientEditor : EditorWindow
                 }
             }
         }
+        drawHelpText();
+    }   
 
-        XSStyles.HelpBox("You can use this to create a custom shadow ramp in realtime. \nIf you do not save, the ramp will be reverted back to what it was previously. \n\n - Click the Gradient box. \n - Choose resolution of the texture. \n - Save.", MessageType.Info);
-        XSStyles.HelpBox("Ramp textures support up to 5 ramps in one texture. That means you can have up to 5 ramps on a single material. You will need to author a ramp mask to choose which ramp to sample from. \n\nA texture that is fully black would sample from the bottom ramp, a texture that is fully white would sample from the top ramp, and a texture that is half gray would sample from the middle ramp. \n\n A quick tip would be that you can sample from each of the 5 ramps with 0, 0.25, 0.5, 0.75, and 1 on the texture. \n\nThe order of the gradients on the UI is the order that they will be on the texture.", MessageType.Info);
+    Gradient reflessGradient(Gradient old_grad)
+    {
+        Gradient grad = new Gradient();
+        grad.SetKeys(old_grad.colorKeys, old_grad.alphaKeys);
+        grad.mode = old_grad.mode;
+        return grad;
+    }
+
+    List<int> reflessIndexes(List<int> old_indexes)
+    {
+        List<int> indexes = new List<int>();
+        for (int i = 0; i < old_indexes.Count; i++)
+        {
+            indexes.Add(old_indexes[i]);
+        }
+        return indexes;
+    }
+
+    void makeReorderedList()
+    {
+        grad_index_reorderable = new ReorderableList(gradients_index, typeof(int), true, false, false, false);
+        grad_index_reorderable.headerHeight = 0f;
+        grad_index_reorderable.footerHeight = 0f;
+        grad_index_reorderable.showDefaultBackground = true;
+
+        grad_index_reorderable.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+        {
+            if (gradients.Count == 5)
+            {
+                Type editorGui = typeof(EditorGUI);
+                MethodInfo mi = editorGui.GetMethod("GradientField", BindingFlags.NonPublic | BindingFlags.Static, null, new Type[2] { typeof(Rect), typeof(Gradient) }, null);
+                mi.Invoke(this, new object[2] { rect, gradients[gradients_index[index]] });
+                if (Event.current.type == EventType.Repaint)
+                {
+                    changed = true;
+                }
+            }
+        };
+
+        grad_index_reorderable.onChangedCallback = (ReorderableList list) =>
+        {
+            changed = true;
+        };
     }
 
     void OnDestroy()
@@ -303,7 +335,7 @@ public class XSGradientEditor : EditorWindow
         {
             for (int x = 0; x < width; x++)
             {
-                if (height == 150)
+                if (gradients_index.Count != 1)
                 {
                     int gradNum = Mathf.FloorToInt(y / 30f);
                     gradNum = Mathf.Abs(gradNum - 5) - 1;
@@ -371,5 +403,78 @@ public class XSGradientEditor : EditorWindow
             Debug.Log("Asset Path is Null, can't set to Clamped.\n You'll need to do it manually.");
         }
         return false;
+    }
+
+    void drawMGInputOutput()
+    {
+        GUILayout.BeginHorizontal();
+        XSMultiGradient old_xsmg = xsmg;
+        xsmg = (XSMultiGradient)EditorGUILayout.ObjectField("MultiGradient Preset", xsmg, typeof(XSMultiGradient), false, null);
+        if (xsmg != old_xsmg)
+        {
+            if (xsmg != null)
+            {
+                this.gradients = xsmg.gradients;
+                this.gradients_index = xsmg.order;
+                makeReorderedList();
+            }
+            else
+            {
+                List<Gradient> new_Grads = new List<Gradient>();
+                for (int i = 0; i < this.gradients.Count; i++)
+                {
+                    new_Grads.Add(reflessGradient(this.gradients[i]));
+                }
+                this.gradients = new_Grads;
+                this.gradients_index = reflessIndexes(this.gradients_index);
+                makeReorderedList();
+            }
+            changed = true;
+        }
+
+        if (GUILayout.Button("Save New", EditorStyles.miniButton, GUILayout.ExpandWidth(false)))
+        {
+            finalFilePath = XSStyles.findAssetPath(finalFilePath);
+            string path = EditorUtility.SaveFilePanel("Save MultiGradient", (finalFilePath + "/Textures/Shadow Ramps/MGPresets"), "MultiGradient", "asset");
+            if (path.Length != 0)
+            {
+                path = path.Substring(Application.dataPath.Length - "Assets".Length);
+                XSMultiGradient _xsmg = ScriptableObject.CreateInstance<XSMultiGradient>();
+                _xsmg.uniqueName = Path.GetFileNameWithoutExtension(path);
+                foreach (Gradient grad in gradients)
+                {
+                    _xsmg.gradients.Add(reflessGradient(grad));
+                }
+                _xsmg.order.AddRange(gradients_index.ToArray());
+                xsmg = _xsmg;
+                AssetDatabase.CreateAsset(_xsmg, path);
+                this.gradients = xsmg.gradients;
+                this.gradients_index = xsmg.order;
+                makeReorderedList();
+                AssetDatabase.SaveAssets();
+            }
+        }
+        GUILayout.EndHorizontal();
+    }
+
+    void drawAdvancedOptions()
+    {
+        GUILayout.BeginHorizontal();
+        isLinear = GUILayout.Toggle(isLinear, "Make Linear Texture");
+        manualMaterial = GUILayout.Toggle(manualMaterial, "Manual Material");
+        GUILayout.EndHorizontal();
+    }
+
+    void drawHelpText()
+    {
+        XSStyles.Separator();
+        dHelpText = XSStyles.ShurikenFoldout("Information", dHelpText);
+        if(dHelpText)
+        {
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+                XSStyles.HelpBox("You can use this to create a custom shadow ramp in realtime. \nIf you do not save, the ramp will be reverted back to what it was previously. \n\n - Click the Gradient box. \n - Choose resolution of the texture. \n - Save.", MessageType.Info);
+                XSStyles.HelpBox("Ramp textures support up to 5 ramps in one texture. That means you can have up to 5 ramps on a single material. You will need to author a ramp mask to choose which ramp to sample from. \n\nA texture that is fully black would sample from the bottom ramp, a texture that is fully white would sample from the top ramp, and a texture that is half gray would sample from the middle ramp. \n\n A quick tip would be that you can sample from each of the 5 ramps with 0, 0.25, 0.5, 0.75, and 1 on the texture. \n\nThe order of the gradients on the UI is the order that they will be on the texture.", MessageType.Info);
+            EditorGUILayout.EndScrollView();
+        }
     }
 }
