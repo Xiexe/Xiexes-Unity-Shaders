@@ -5,9 +5,9 @@ void calcNormal(inout XSLighting i)
     nMap.xy *= _BumpScale;
 
     half3 detNMap = UnpackNormal(i.detailNormal);
-    detNMap.xy *= _DetailNormalMapScale * i.detailMask.r;
+    // detNMap.xy *= _DetailNormalMapScale * i.detailMask.r;
 
-    half3 blendedNormal = BlendNormals(nMap, detNMap);
+    half3 blendedNormal = lerp(nMap, BlendNormals(nMap, detNMap), i.detailMask.r);
 
     half3 tspace0 = half3(i.tangent.x, i.bitangent.x, i.normal.x);
     half3 tspace1 = half3(i.tangent.y, i.bitangent.y, i.normal.y);
