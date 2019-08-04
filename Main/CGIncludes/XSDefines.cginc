@@ -8,7 +8,7 @@ struct VertexInput
     float2 uv : TEXCOORD0;
     float2 uv1 : TEXCOORD1;
     float3 normal : NORMAL;
-    float3 tangent : TANGENT;
+    float4 tangent : TANGENT;
     float4 color : COLOR;
 };
 
