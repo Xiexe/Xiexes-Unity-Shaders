@@ -258,10 +258,11 @@ half4 calcOutlineColor(XSLighting i, DotProducts d, half3 indirectDiffuse, half4
 {
     half3 outlineColor = half3(0,0,0);
     #if defined(Geometry)
-        outlineColor = _OutlineColor * saturate(i.attenuation * d.ndl) * lightCol.xyz;
-        outlineColor += indirectDiffuse * _OutlineColor;
+        half3 ol = lerp(_OutlineColor, _OutlineColor * i.diffuseColor, _OutlineAlbedoTint);
+        outlineColor = ol * saturate(i.attenuation * d.ndl) * lightCol.rgb;
+        outlineColor += indirectDiffuse * ol;
+        outlineColor = lerp(outlineColor, ol, _OutlineLighting);
     #endif
-
     return half4(outlineColor,1);
 }
 
@@ -286,7 +287,7 @@ half4 calcDiffuse(XSLighting i, DotProducts d, half3 indirectDiffuse, half4 ligh
     half4 diffuse; 
     half4 indirect = indirectDiffuse.xyzz;
     diffuse = ramp * i.attenuation * lightCol + indirect;
-    diffuse = i.albedo * i.color.xyzz * diffuse;
+    diffuse = i.albedo * diffuse;
     return diffuse;
 }
 
