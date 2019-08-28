@@ -9,7 +9,8 @@ VertexOutput vert (VertexInput v)
     o.worldPos = mul(unity_ObjectToWorld, v.vertex);
     float3 wnormal = UnityObjectToWorldNormal(v.normal);
     float3 tangent = UnityObjectToWorldDir(v.tangent.xyz);
-    float3 bitangent = cross(tangent, wnormal);
+    half tangentSign = v.tangent.w * unity_WorldTransformParams.w;
+    float3 bitangent = cross(wnormal, tangent) * tangentSign;
     o.ntb[0] = wnormal;
     o.ntb[1] = tangent;
     o.ntb[2] = bitangent;
@@ -115,7 +116,7 @@ float4 frag (
     }
 
     XSLighting o = (XSLighting)0; //Populate Lighting Struct
-    o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color;
+    o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color * lerp(1, float4(i.color.rgb, 1), _VertexColorAlbedo);
     o.specularMap = UNITY_SAMPLE_TEX2D_SAMPLER(_SpecularMap, _MainTex, t.specularMapUV);
     o.metallicGlossMap = UNITY_SAMPLE_TEX2D_SAMPLER(_MetallicGlossMap, _MainTex, t.metallicGlossMapUV);
     o.detailMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DetailMask, _MainTex, t.detailMaskUV);

@@ -40,7 +40,7 @@ public class XSGradientEditor : EditorWindow
     private Vector2 scrollPos;
 
     private bool dHelpText = false;
-    private bool dAdvanced = false;
+    //private bool dAdvanced = false;
 
     [MenuItem("Tools/Xiexe/XSToon/Gradient Editor")]
     static public void Init()

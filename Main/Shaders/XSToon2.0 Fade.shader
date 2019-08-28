@@ -2,6 +2,7 @@
 {
     Properties
     {	
+        [Enum(Off, 0, On, 1)] _VertexColorAlbedo ("Vertex Color Albedo", Int) = 0
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         _MainTex("Texture", 2D) = "white" {}
@@ -62,9 +63,11 @@
         _OcclusionMap("Occlusion", 2D) = "white" {}
         _OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
+        [Enum(Off, 0, On, 1)]_OutlineAlbedoTint("Outline Albedo Tint", Int) = 0
+        [Enum(Lit, 0, Emissive, 1)]_OutlineLighting("Outline Lighting", Int) = 0
         _OutlineMask("Outline Mask", 2D) = "white" {}
         _OutlineWidth("Outline Width", Range(0, 5)) = 1
-        _OutlineColor("Outline Color", Color) = (0,0,0,1)
+        [HDR]_OutlineColor("Outline Color", Color) = (0,0,0,1)
 
         _ThicknessMap("Thickness Map", 2D) = "white" {}
         _SSColor ("Subsurface Color", Color) = (0,0,0,0)
@@ -113,6 +116,7 @@
             Tags { "LightMode" = "ForwardBase" }
             
             CGPROGRAM
+            #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
             
@@ -141,6 +145,7 @@
             Blend SrcAlpha One
 
             CGPROGRAM
+            #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
             
