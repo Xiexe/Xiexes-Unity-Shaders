@@ -9,7 +9,8 @@ VertexOutput vert (VertexInput v)
     o.worldPos = mul(unity_ObjectToWorld, v.vertex);
     float3 wnormal = UnityObjectToWorldNormal(v.normal);
     float3 tangent = UnityObjectToWorldDir(v.tangent.xyz);
-    float3 bitangent = cross(tangent, wnormal);
+    half tangentSign = v.tangent.w * unity_WorldTransformParams.w;
+    float3 bitangent = cross(wnormal, tangent) * tangentSign;
     o.ntb[0] = wnormal;
     o.ntb[1] = tangent;
     o.ntb[2] = bitangent;
