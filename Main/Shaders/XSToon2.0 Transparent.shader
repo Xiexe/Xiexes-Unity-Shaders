@@ -113,6 +113,7 @@
             Tags { "LightMode" = "ForwardBase" }
             
             CGPROGRAM
+            #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
             
@@ -141,6 +142,7 @@
             Blend SrcAlpha One
 
             CGPROGRAM
+            #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
             

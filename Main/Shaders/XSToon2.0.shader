@@ -113,6 +113,7 @@
             CGPROGRAM
             //#define Geometry
 
+            #pragma target 3.0
             #pragma vertex vert
             //#pragma geometry geom
             #pragma fragment frag
@@ -142,6 +143,7 @@
             CGPROGRAM
             //#define Geometry
 
+            #pragma target 3.0
             #pragma vertex vert
             //#pragma geometry geom
             #pragma fragment frag
