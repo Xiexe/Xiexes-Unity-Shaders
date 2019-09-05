@@ -99,7 +99,7 @@ void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightC
     }
     else
     {
-        lightColor = indirectDiffuse.xyzz;
+        lightColor = indirectDiffuse.xyzz * 0.5;
         indirectDiffuse = indirectDiffuse * 0.5;
     }
 }
@@ -141,7 +141,7 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
     half4 rim = rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz);
     rim *= i.attenuation + indirectDiffuse.xyzz;
-    return rim * _RimColor;
+    return rim * _RimColor * i.diffuseColor.rgbb;
 }
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
