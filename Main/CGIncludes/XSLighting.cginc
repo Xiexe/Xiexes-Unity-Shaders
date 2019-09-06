@@ -38,8 +38,7 @@ half4 BRDF_XSLighting(XSLighting i)
     calcLightCol(lightEnv, indirectDiffuse, lightCol);
 
     half lightAvg = (indirectDiffuse.r + indirectDiffuse.g + indirectDiffuse.b + lightCol.r + lightCol.g + lightCol.b) / 6;
-
-    half3 envMapBlurred = getEnvMap(i, d, 5, reflView, indirectDiffuse, viewDir);
+    half3 envMapBlurred = getEnvMap(i, d, 5, reflView, indirectDiffuse, i.normal);
 
     half4 ramp = calcRamp(i,d);
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
