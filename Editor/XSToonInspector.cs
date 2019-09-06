@@ -50,6 +50,8 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _RimRange = null;
     MaterialProperty _RimThreshold = null;
     MaterialProperty _RimSharpness = null;
+    MaterialProperty _RimAlbedoTint = null;
+    MaterialProperty _RimCubemapTint = null;
     MaterialProperty _SpecMode = null;
     MaterialProperty _SpecularStyle = null;
     MaterialProperty _SpecularMap = null;
@@ -71,8 +73,6 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _SSDistortion = null;
     MaterialProperty _SSPower = null;
     MaterialProperty _SSScale = null;
-    MaterialProperty _SSSRange = null;
-    MaterialProperty _SSSSharpness = null;
     //MaterialProperty _HalftoneDotSize = null;
     //MaterialProperty _HalftoneDotAmount = null;
     //MaterialProperty _HalftoneLineAmount = null;
@@ -320,6 +320,8 @@ public class XSToonInspector : ShaderGUI
             if (showRimlight)
             {
                 materialEditor.ShaderProperty(_RimColor, new GUIContent("Rimlight Tint", "The Tint of the Rimlight."));
+                materialEditor.ShaderProperty(_RimAlbedoTint, new GUIContent("Rim Albedo Tint", "How much the Albedo texture should effect the rimlight color."));
+                materialEditor.ShaderProperty(_RimCubemapTint, new GUIContent("Rim Environment Tint", "How much the Environment cubemap should effect the rimlight color."));
                 materialEditor.ShaderProperty(_RimIntensity, new GUIContent("Rimlight Intensity", "Strength of the Rimlight."));
                 materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
                 materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);
@@ -337,8 +339,6 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Subsurface Distortion", "How much the subsurface should follow the normals of the mesh and/or normal map."), 2);
                 materialEditor.ShaderProperty(_SSPower, new GUIContent("Subsurface Power", "Subsurface Power"), 2);
                 materialEditor.ShaderProperty(_SSScale, new GUIContent("Subsurface Scale", "Subsurface Scale"), 2);
-                //materialEditor.ShaderProperty(_SSSRange, new GUIContent("Subsurface Range", "Subsurface Range"), 2);
-                //materialEditor.ShaderProperty(_SSSSharpness, new GUIContent("Subsurface Sharpness", "Subsurface Sharpness"), 2);
             }
 
             if (_AdvMode.floatValue == 1)

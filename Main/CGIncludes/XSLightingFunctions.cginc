@@ -136,13 +136,13 @@ half4 calcMetallicSmoothness(XSLighting i)
     return half4(metallic, 0, 0, roughness);
 }
 
-half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse)
+half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half3 envMap)
 {
     half rimIntensity = saturate((1-d.svdn)) * pow(d.ndl, _RimThreshold);
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
     half4 rim = rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz);
     rim *= i.attenuation + indirectDiffuse.xyzz;
-    return rim * _RimColor * i.diffuseColor.rgbb;
+    return rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
 }
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)

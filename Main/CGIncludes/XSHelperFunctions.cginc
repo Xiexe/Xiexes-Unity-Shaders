@@ -160,6 +160,43 @@ half3 getReflectionUV(half3 direction, half3 position, half4 cubemapPosition, ha
     return direction;
 }
 
+half3 getEnvMap(XSLighting i, DotProducts d, float blur, half3 reflDir, half3 indirectLight, half3 viewDir)
+{//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
+    half3 envMap = half3(0,0,0);
+
+    #if defined(UNITY_PASS_FORWARDBASE) //Indirect PBR specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light. 
+        half3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
+        half4 probe0 = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflectionUV1, blur);
+        half3 probe0sample = DecodeHDR(probe0, unity_SpecCube0_HDR);
+
+        half3 indirectSpecular;
+        half interpolator = unity_SpecCube0_BoxMin.w;
+        
+        UNITY_BRANCH
+        if (interpolator < 0.99999) 
+        {
+            half3 reflectionUV2 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube1_ProbePosition, unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax);
+            half4 probe1 = UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0, reflectionUV2, blur);
+            half3 probe1sample = DecodeHDR(probe1, unity_SpecCube1_HDR);
+            indirectSpecular = lerp(probe1sample, probe0sample, interpolator);
+        }
+        else 
+        {
+            indirectSpecular = probe0sample;
+        }
+
+        if (!any(indirectSpecular))
+        {
+            indirectSpecular = texCUBElod(_BakedCubemap, half4(reflDir, blur));
+            indirectSpecular *= indirectLight;
+        }
+
+        envMap = indirectSpecular;
+    #endif
+
+    return envMap;
+}
+
 void calcAlpha(inout XSLighting i)
 {	
     //Default to 1 alpha || Opaque
