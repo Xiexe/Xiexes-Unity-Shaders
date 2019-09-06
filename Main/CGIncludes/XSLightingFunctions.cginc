@@ -90,8 +90,7 @@ half3 calcLightDir(XSLighting i)
 void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightColor)
 {
     //If we're in an environment with a realtime light, then we should use the light color, and indirect color raw.
-    //Otherwise, we can use the raw indirect color as the light color, and halve if for the indirect color. 
-    //This produces a result that looks very similar to realtime lighting.
+    //...
     if(lightEnv)
     {
         lightColor = _LightColor0;
@@ -99,8 +98,10 @@ void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightC
     }
     else
     {
-        lightColor = indirectDiffuse.xyzz * 0.5;
-        indirectDiffuse = indirectDiffuse * 0.5;
+        lightColor = indirectDiffuse.xyzz * 0.6;    // ...Otherwise
+        indirectDiffuse = indirectDiffuse * 0.4;    // Keep overall light to 100% - these should never go over 100%
+                                                    // ex. If we have indirect 100% as the light color and Indirect 50% as the indirect color, 
+                                                    // we end up with 150% of the light from the scene.
     }
 }
 
