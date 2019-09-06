@@ -337,8 +337,8 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Subsurface Distortion", "How much the subsurface should follow the normals of the mesh and/or normal map."), 2);
                 materialEditor.ShaderProperty(_SSPower, new GUIContent("Subsurface Power", "Subsurface Power"), 2);
                 materialEditor.ShaderProperty(_SSScale, new GUIContent("Subsurface Scale", "Subsurface Scale"), 2);
-                materialEditor.ShaderProperty(_SSSRange, new GUIContent("Subsurface Range", "Subsurface Range"), 2);
-                materialEditor.ShaderProperty(_SSSSharpness, new GUIContent("Subsurface Sharpness", "Subsurface Sharpness"), 2);
+                //materialEditor.ShaderProperty(_SSSRange, new GUIContent("Subsurface Range", "Subsurface Range"), 2);
+                //materialEditor.ShaderProperty(_SSSSharpness, new GUIContent("Subsurface Sharpness", "Subsurface Sharpness"), 2);
             }
 
             if (_AdvMode.floatValue == 1)

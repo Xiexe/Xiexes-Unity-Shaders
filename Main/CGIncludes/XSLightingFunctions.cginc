@@ -299,8 +299,8 @@ half4 calcSubsurfaceScattering(XSLighting i, DotProducts d, half3 lightDir, half
     UNITY_BRANCH
     if(any(_SSColor.rgb)) // Skip all the SSS stuff if the color is 0.
     {
-        d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
-        half attenuation = saturate(i.attenuation * d.ndl);
+        //d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
+        half attenuation = saturate(i.attenuation * (d.ndl * 0.5 + 0.5));
         half3 H = normalize(lightDir + normal * _SSDistortion);
         half VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
         half3 I = _SSColor * (VdotH + indirectDiffuse) * attenuation * i.thickness * _SSScale;
