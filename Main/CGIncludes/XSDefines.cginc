@@ -28,6 +28,7 @@ struct VertexOutput
     float4 color : TEXCOORD6;
     float3 normal : TEXCOORD8;
     float4 screenPos : TEXCOORD9;
+    float3 objPos : TEXCOORD11;
 
     //float distanceToOrigin : TEXCOORD10;
     SHADOW_COORDS(7)
@@ -46,6 +47,7 @@ struct VertexOutput
         float4 color : TEXCOORD6;
         float3 normal : TEXCOORD8;
         float4 screenPos : TEXCOORD9;
+        float3 objPos : TEXCOORD11;
 
         //float distanceToOrigin : TEXCOORD10;
         SHADOW_COORDS(7)
@@ -61,6 +63,7 @@ struct VertexOutput
         float4 worldPos : TEXCOORD5;
         float4 color : TEXCOORD6;
         float4 screenPos : TEXCOORD8;
+        float3 objPos : TEXCOORD10;
 
         //float distanceToOrigin : TEXCOORD9;
         SHADOW_COORDS(7)
@@ -92,6 +95,7 @@ struct XSLighting
     half alpha;
     float isOutline;
     float2 screenUV;
+    float3 objPos;
 };
 
 struct TextureUV
@@ -164,6 +168,7 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
     _UVSetEmission;
+
 
 // half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount;
 

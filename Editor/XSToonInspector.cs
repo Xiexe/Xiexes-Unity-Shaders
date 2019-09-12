@@ -96,7 +96,16 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _OutlineColor = null;
     MaterialProperty _ShadowSharpness = null;
     MaterialProperty _AdvMode = null;
-//
+
+    //Material Properties for Patreon Plugins
+    MaterialProperty _LeftRightPan = null;
+    MaterialProperty _UpDownPan = null;
+    MaterialProperty _Twitchyness = null;
+    MaterialProperty _AttentionSpan = null;
+    MaterialProperty _FollowPower = null;
+    MaterialProperty _FollowLimit = null;
+    //--
+
     static bool showMainSettings = true;
     static bool showNormalMapSettings = false;
     static bool showShadows = true;
@@ -107,7 +116,10 @@ public class XSToonInspector : ShaderGUI
     static bool showOutlines = false;
     static bool showEmission = false;
     static bool showAdvanced = false;
+    static bool showEyeTracking = false;
 
+    bool isPatreonShader = false;
+    bool isEyeTracking = false;
     bool isOutlined = false;
     bool isCutout = false;
 
@@ -118,6 +130,8 @@ public class XSToonInspector : ShaderGUI
 
         isCutout = shader.name.Contains("Cutout") && !shader.name.Contains("A2C");
         isOutlined = shader.name.Contains("Outline");
+        isPatreonShader = shader.name.Contains("Patreon");
+        isEyeTracking = shader.name.Contains("EyeTracking");
 
         //Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
         //This makes things a lot nicer to maintain and cleaner to look at.
@@ -352,6 +366,25 @@ public class XSToonInspector : ShaderGUI
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
                 }
             }
+
+            //Plugins for Patreon releases
+            if(isPatreonShader)
+            {
+                if(isEyeTracking)
+                {
+                    showEyeTracking = XSStyles.ShurikenFoldout("Eye Tracking Settings", showEyeTracking);
+                    if(showEyeTracking)
+                    {
+                        materialEditor.ShaderProperty(_LeftRightPan, new GUIContent("Left Right Adj.", "Adjusts the eyes manually left or right."));
+                        materialEditor.ShaderProperty(_UpDownPan, new GUIContent("Up Down Adj.", "Adjusts the eyes manually up or down."));
+                        materialEditor.ShaderProperty(_AttentionSpan, new GUIContent("Attention Span", "How often should the eyes look at the target; 0 = never, 1 = always, 0.5 = half of the time."));
+                        materialEditor.ShaderProperty(_Twitchyness, new GUIContent("Twitchyness", "How much should the eyes look around near the target?"));
+                        materialEditor.ShaderProperty(_FollowPower, new GUIContent("Follow Power", "The influence the target has on the eye"));
+                        materialEditor.ShaderProperty(_FollowLimit, new GUIContent("Follow Limit", "Limits the angle from the front of the face on how far the eyes can track/rotate."));
+                    }
+                }
+            }
+            //
 
             XSStyles.DoFooter();
         }

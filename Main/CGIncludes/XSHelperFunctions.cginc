@@ -33,6 +33,12 @@ void InitializeTextureUVs(
         inout TextureUV t)
 {	
 
+    #if defined(PatreonVariant)
+        float2 eyeUvOffset = eyeOffsets(i.uv, i.objPos, i.worldPos, i.ntb[0]);
+        i.uv = eyeUvOffset;
+        i.uv1 = eyeUvOffset;
+    #endif
+
     half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
     t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
 
@@ -218,6 +224,7 @@ void calcAlpha(inout XSLighting i)
         clip(i.albedo.a - _Cutoff);
     #endif
 }
+
 // //Halftone functions, finish implementing later.. Not correct right now.
 // half2 rotateUV(half2 uv, half rotation)
 // {
