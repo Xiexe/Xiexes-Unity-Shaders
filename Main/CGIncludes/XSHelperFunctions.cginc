@@ -33,7 +33,7 @@ void InitializeTextureUVs(
         inout TextureUV t)
 {	
 
-    #if defined(PatreonVariant)
+    #if defined(PatreonEyeTracking)
         float2 eyeUvOffset = eyeOffsets(i.uv, i.objPos, i.worldPos, i.ntb[0]);
         i.uv = eyeUvOffset;
         i.uv1 = eyeUvOffset;

@@ -169,7 +169,6 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
     _UVSetEmission;
 
-
 // half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount;
 
 //Defines for helper functions

@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -98,12 +99,13 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _AdvMode = null;
 
     //Material Properties for Patreon Plugins
-    MaterialProperty _LeftRightPan = null;
-    MaterialProperty _UpDownPan = null;
-    MaterialProperty _Twitchyness = null;
-    MaterialProperty _AttentionSpan = null;
-    MaterialProperty _FollowPower = null;
-    MaterialProperty _FollowLimit = null;
+        MaterialProperty _LeftRightPan = null;
+        MaterialProperty _UpDownPan = null;
+        MaterialProperty _Twitchyness = null;
+        MaterialProperty _AttentionSpan = null;
+        MaterialProperty _FollowPower = null;
+        MaterialProperty _FollowLimit = null;
+	    MaterialProperty _LookSpeed = null;
     //--
 
     static bool showMainSettings = true;
@@ -133,25 +135,25 @@ public class XSToonInspector : ShaderGUI
         isPatreonShader = shader.name.Contains("Patreon");
         isEyeTracking = shader.name.Contains("EyeTracking");
 
-        //Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
-        //This makes things a lot nicer to maintain and cleaner to look at.
-        foreach (var property in GetType().GetFields(bindingFlags)) 
-        {                                                           
-            if (property.FieldType == typeof(MaterialProperty))
-            {
-                property.SetValue(this, FindProperty(property.Name, props));
-            }
-        }
+		//Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
+		//This makes things a lot nicer to maintain and cleaner to look at.
+		foreach (var property in GetType().GetFields(bindingFlags))
+		{
+			if (property.FieldType == typeof(MaterialProperty))
+			{
+				try{ property.SetValue(this, FindProperty(property.Name, props)); } catch { /*Is it really a problem if it doesn't exist?*/ }
+			}
+		}
 
-        EditorGUI.BeginChangeCheck();
-        {
-            if (!isCutout)// Do this to make sure that if you're using AlphaToCoverage that you fallback to cutout with 0.5 Cutoff if your shaders are blocked.
-            {
-                material.SetFloat("_Cutoff", 0.5f);
-            }
+		EditorGUI.BeginChangeCheck();
+		{
+			if (!isCutout)// Do this to make sure that if you're using AlphaToCoverage that you fallback to cutout with 0.5 Cutoff if your shaders are blocked.
+			{
+				material.SetFloat("_Cutoff", 0.5f);
+			}
 
-            XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
-                materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
+			XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
+			materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
                 materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
                 materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
 
@@ -381,7 +383,8 @@ public class XSToonInspector : ShaderGUI
                         materialEditor.ShaderProperty(_Twitchyness, new GUIContent("Twitchyness", "How much should the eyes look around near the target?"));
                         materialEditor.ShaderProperty(_FollowPower, new GUIContent("Follow Power", "The influence the target has on the eye"));
                         materialEditor.ShaderProperty(_FollowLimit, new GUIContent("Follow Limit", "Limits the angle from the front of the face on how far the eyes can track/rotate."));
-                    }
+						materialEditor.ShaderProperty(_LookSpeed, new GUIContent("Look Speed","How fast the eye transitions to looking at the target"));
+					}
                 }
             }
             //
