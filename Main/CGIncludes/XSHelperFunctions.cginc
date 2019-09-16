@@ -212,7 +212,7 @@ void calcAlpha(inout XSLighting i)
 
     #if defined(AlphaToMask) // mix of dithering and alpha blend to provide best results.
         half dither = calcDither(i.screenUV.xy);
-        i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);//lerp(i.albedo.a, i.albedo.a - (dither * (1-i.albedo.a)), 0.2);
+        i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);
     #endif
 
     #if defined(Dithered)

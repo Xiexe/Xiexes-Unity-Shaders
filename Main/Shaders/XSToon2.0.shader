@@ -140,7 +140,9 @@
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
             #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVertFrag.cginc"
+            #include "../CGIncludes/XSVert.cginc"
+            #include "../CGIncludes/XSGeom.cginc"
+            #include "../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -170,7 +172,9 @@
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
             #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVertFrag.cginc"
+            #include "../CGIncludes/XSVert.cginc"
+            #include "../CGIncludes/XSGeom.cginc"
+            #include "../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 

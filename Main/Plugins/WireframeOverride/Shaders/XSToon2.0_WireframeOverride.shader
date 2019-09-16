@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0_Dithered"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0_WireframeOverride"
 {
     Properties
     {	
@@ -101,9 +101,9 @@
     
     SubShader
     {
-        Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         Cull [_Culling]
-                Stencil 
+        Stencil 
         {
             Ref [_Stencil]
             Comp [_StencilComp]
@@ -115,10 +115,12 @@
             Tags { "LightMode" = "ForwardBase" }
             
             CGPROGRAM
-            #pragma target 3.0
+            #define Geometry
+
             #pragma vertex vert
+            #pragma geometry geom
             #pragma fragment frag
-            
+
             #pragma multi_compile _ VERTEXLIGHT_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase 
@@ -126,16 +128,14 @@
             #ifndef UNITY_PASS_FORWARDBASE
                 #define UNITY_PASS_FORWARDBASE
             #endif
-            
-            #define Dithered
 
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../../CGIncludes/XSDefines.cginc"
+            #include "../../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../../CGIncludes/XSLighting.cginc"
+            #include "../../../CGIncludes/XSVert.cginc"
+            #include "../CGInc/XSGeom.cginc"
+            #include "../../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -146,24 +146,25 @@
             Blend One One
 
             CGPROGRAM
-            #pragma target 3.0
+            #define Geometry
+
             #pragma vertex vert
+            #pragma geometry geom
             #pragma fragment frag
-            
+
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
-            #define Dithered
             
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../../CGIncludes/XSDefines.cginc"
+            #include "../../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../../CGIncludes/XSLighting.cginc"
+            #include "../../../CGIncludes/XSVert.cginc"
+            #include "../CGInc/XSGeom.cginc"
+            #include "../../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -175,18 +176,17 @@
             CGPROGRAM
             #pragma vertex vertShadowCaster
             #pragma fragment fragShadowCaster
-            #pragma target 3.0
+
             #pragma multi_compile_shadowcaster
             #ifndef UNITY_PASS_SHADOWCASTER
                 #define UNITY_PASS_SHADOWCASTER
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-            #define Dithered
 
-            #include "../CGIncludes/XSShadowCaster.cginc"
+            #include "../../../CGIncludes/XSShadowCaster.cginc"
             ENDCG
         }
     }
-    Fallback "Transparent/Cutout/Diffuse"
+    Fallback "Diffuse"
     CustomEditor "XSToonInspector"
 }
