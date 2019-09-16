@@ -38,10 +38,11 @@ half4 BRDF_XSLighting(XSLighting i)
     calcLightCol(lightEnv, indirectDiffuse, lightCol);
 
     half lightAvg = (indirectDiffuse.r + indirectDiffuse.g + indirectDiffuse.b + lightCol.r + lightCol.g + lightCol.b) / 6;
+    half3 envMapBlurred = getEnvMap(i, d, 5, reflView, indirectDiffuse, i.normal);
 
     half4 ramp = calcRamp(i,d);
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
-    half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse);
+    half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse, envMapBlurred);
     half4 shadowRim = calcShadowRim(i, d, indirectDiffuse);
     half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflView, indirectDiffuse, viewDir, ramp);
     half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);

@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -50,6 +51,9 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _RimRange = null;
     MaterialProperty _RimThreshold = null;
     MaterialProperty _RimSharpness = null;
+    MaterialProperty _RimAlbedoTint = null;
+    MaterialProperty _RimCubemapTint = null;
+    MaterialProperty _RimAttenEffect = null;
     MaterialProperty _SpecMode = null;
     MaterialProperty _SpecularStyle = null;
     MaterialProperty _SpecularMap = null;
@@ -71,8 +75,6 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _SSDistortion = null;
     MaterialProperty _SSPower = null;
     MaterialProperty _SSScale = null;
-    MaterialProperty _SSSRange = null;
-    MaterialProperty _SSSSharpness = null;
     //MaterialProperty _HalftoneDotSize = null;
     //MaterialProperty _HalftoneDotAmount = null;
     //MaterialProperty _HalftoneLineAmount = null;
@@ -96,7 +98,19 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _OutlineColor = null;
     MaterialProperty _ShadowSharpness = null;
     MaterialProperty _AdvMode = null;
-//
+
+    //Material Properties for Patreon Plugins
+        MaterialProperty _LeftRightPan = null;
+        MaterialProperty _UpDownPan = null;
+        MaterialProperty _Twitchyness = null;
+        MaterialProperty _AttentionSpan = null;
+        MaterialProperty _FollowPower = null;
+        MaterialProperty _FollowLimit = null;
+	    MaterialProperty _LookSpeed = null;
+        MaterialProperty _IrisSize = null;
+        MaterialProperty _EyeOffsetLimit = null;        
+    //--
+
     static bool showMainSettings = true;
     static bool showNormalMapSettings = false;
     static bool showShadows = true;
@@ -107,7 +121,10 @@ public class XSToonInspector : ShaderGUI
     static bool showOutlines = false;
     static bool showEmission = false;
     static bool showAdvanced = false;
+    static bool showEyeTracking = false;
 
+    bool isPatreonShader = false;
+    bool isEyeTracking = false;
     bool isOutlined = false;
     bool isCutout = false;
 
@@ -118,26 +135,28 @@ public class XSToonInspector : ShaderGUI
 
         isCutout = shader.name.Contains("Cutout") && !shader.name.Contains("A2C");
         isOutlined = shader.name.Contains("Outline");
+        isPatreonShader = shader.name.Contains("Patreon");
+        isEyeTracking = shader.name.Contains("EyeTracking");
 
-        //Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
-        //This makes things a lot nicer to maintain and cleaner to look at.
-        foreach (var property in GetType().GetFields(bindingFlags)) 
-        {                                                           
-            if (property.FieldType == typeof(MaterialProperty))
-            {
-                property.SetValue(this, FindProperty(property.Name, props));
-            }
-        }
+		//Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
+		//This makes things a lot nicer to maintain and cleaner to look at.
+		foreach (var property in GetType().GetFields(bindingFlags))
+		{
+			if (property.FieldType == typeof(MaterialProperty))
+			{
+				try{ property.SetValue(this, FindProperty(property.Name, props)); } catch { /*Is it really a problem if it doesn't exist?*/ }
+			}
+		}
 
-        EditorGUI.BeginChangeCheck();
-        {
-            if (!isCutout)// Do this to make sure that if you're using AlphaToCoverage that you fallback to cutout with 0.5 Cutoff if your shaders are blocked.
-            {
-                material.SetFloat("_Cutoff", 0.5f);
-            }
+		EditorGUI.BeginChangeCheck();
+		{
+			if (!isCutout)// Do this to make sure that if you're using AlphaToCoverage that you fallback to cutout with 0.5 Cutoff if your shaders are blocked.
+			{
+				material.SetFloat("_Cutoff", 0.5f);
+			}
 
-            XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
-                materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
+			XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
+			materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
                 materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
                 materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
 
@@ -160,6 +179,7 @@ public class XSToonInspector : ShaderGUI
             {
                 materialEditor.TexturePropertySingleLine(new GUIContent("Ramp Selection Mask", "A black to white mask that determins how far up on the multi ramp to sample. 0 for bottom, 1 for top, 0.5 for middle, 0.25, and 0.75 for mid bottom and mid top respectively."), _RampSelectionMask);
                 
+                XSStyles.SeparatorThin();
                 if (_RampSelectionMask.textureValue != null) 
                 {
                     string rampMaskPath = AssetDatabase.GetAssetPath(_RampSelectionMask.textureValue);
@@ -177,13 +197,13 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), _Ramp);
                 materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
 
-                GUILayout.Space(5);
+                XSStyles.SeparatorThin();
                 materialEditor.TexturePropertySingleLine(new GUIContent("Occlusion Map", "Occlusion Map, used to darken areas on the model artifically."), _OcclusionMap);
                 XSStyles.constrainedShaderProperty(materialEditor, _OcclusionColor, new GUIContent("Occlusion Tint", "Occlusion shadow tint."), 2);
                 materialEditor.ShaderProperty(_UVSetOcclusion, new GUIContent("UV Set", "The UV set to use for the Occlusion Texture"), 2);
                 materialEditor.TextureScaleOffsetProperty(_OcclusionMap);
 
-                GUILayout.Space(5);
+                XSStyles.SeparatorThin();
                 XSStyles.constrainedShaderProperty(materialEditor, _ShadowRim, new GUIContent("Shadow Rim", "Shadow Rim Color. Set to white to disable."), 0);
                 materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
                 materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
@@ -213,13 +233,13 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.ShaderProperty(_UVSetNormal, new GUIContent("UV Set", "The UV set to use for the Normal Map"), 2);
                 materialEditor.TextureScaleOffsetProperty(_BumpMap);
 
-                GUILayout.Space(5);
+                XSStyles.SeparatorThin();
                 materialEditor.TexturePropertySingleLine(new GUIContent("Detail Normal Map", "Detail Normal Map"), _DetailNormalMap);
                 materialEditor.ShaderProperty(_DetailNormalMapScale, new GUIContent("Detail Normal Strength", "Strength of the detail Normal Map"), 2);
                 materialEditor.ShaderProperty(_UVSetDetNormal, new GUIContent("UV Set", "The UV set to use for the Detail Normal Map"), 2);
                 materialEditor.TextureScaleOffsetProperty(_DetailNormalMap);
 
-                GUILayout.Space(5);
+                XSStyles.SeparatorThin();
                 materialEditor.TexturePropertySingleLine(new GUIContent("Detail Mask", "Mask for Detail Maps"), _DetailMask);
                 materialEditor.ShaderProperty(_UVSetDetMask, new GUIContent("UV Set", "The UV set to use for the Detail Mask"), 2);
                 materialEditor.TextureScaleOffsetProperty(_DetailMask);
@@ -231,6 +251,8 @@ public class XSToonInspector : ShaderGUI
             {
                 materialEditor.ShaderProperty(_SpecMode, new GUIContent("Specular Mode", "Specular Mode."));
                 materialEditor.ShaderProperty(_SpecularStyle, new GUIContent("Specular Style", "Specular Style."));
+                
+                XSStyles.SeparatorThin();
                 materialEditor.TexturePropertySingleLine(new GUIContent("Specular Map(R,G,B)", "Specular Map. Red channel controls Intensity, Green controls how much specular is tinted by Albedo, and Blue controls Smoothness (Only for Blinn-Phong, and GGX)."), _SpecularMap);
                 materialEditor.TextureScaleOffsetProperty(_SpecularMap);
                 materialEditor.ShaderProperty(_UVSetSpecular, new GUIContent("UV Set", "The UV set to use for the Specular Map"), 2);
@@ -256,7 +278,11 @@ public class XSToonInspector : ShaderGUI
                 {
                     materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
                     materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
+                    
+                    XSStyles.SeparatorThin();
                     materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
+                    
+                    XSStyles.SeparatorThin();
                     materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel. \nIf Clearcoat is enabled, Clearcoat Smoothness on Green Channel, Clearcoat Reflectivity on Blue Channel."), _MetallicGlossMap);
                     materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
                     materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the Metallic Smoothness Map"), 2);
@@ -269,7 +295,11 @@ public class XSToonInspector : ShaderGUI
                 {
                     materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
                     materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
+                    
+                    XSStyles.SeparatorThin();
                     materialEditor.TexturePropertySingleLine(new GUIContent("Baked Cubemap", "Baked cubemap."), _BakedCubemap);
+                    
+                    XSStyles.SeparatorThin();
                     materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel. \nIf Clearcoat is enabled, Clearcoat Smoothness on Green Channel, Clearcoat Reflectivity on Blue Channel."), _MetallicGlossMap);
                     materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
                     materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the MetallicSmoothness Map"), 2);
@@ -281,6 +311,8 @@ public class XSToonInspector : ShaderGUI
                 else if (_ReflectionMode.floatValue == 2) //Matcap
                 {
                     materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
+                    
+                    XSStyles.SeparatorThin();
                     materialEditor.TexturePropertySingleLine(new GUIContent("Matcap", "Matcap Texture"), _Matcap, _MatcapTint);
                     materialEditor.ShaderProperty(_Glossiness, new GUIContent("Matcap Blur", "Matcap blur, blurs the Matcap, set to 1 for full clarity"), 2);
                     material.SetFloat("_Metallic", 0);
@@ -289,6 +321,7 @@ public class XSToonInspector : ShaderGUI
                 }
                 if (_ReflectionMode.floatValue != 3)
                 {
+                    XSStyles.SeparatorThin();
                     materialEditor.TexturePropertySingleLine(new GUIContent("Reflectivity Mask", "Mask for reflections."), _ReflectivityMask);
                     materialEditor.TextureScaleOffsetProperty(_ReflectivityMask);
                     materialEditor.ShaderProperty(_UVSetReflectivity, new GUIContent("UV Set", "The UV set to use for the Reflectivity Mask"), 2);
@@ -310,7 +343,7 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
                 materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
 
-                GUILayout.Space(5);
+                XSStyles.SeparatorThin();
                 materialEditor.ShaderProperty(_ScaleWithLight, new GUIContent("Scale w/ Light", "Scales the emission intensity based on how dark or bright the environment is."));
                 if(_ScaleWithLight.floatValue == 0)
                     materialEditor.ShaderProperty(_ScaleWithLightSensitivity, new GUIContent("Scaling Sensitivity", "How agressively the emission should scale with the light."));
@@ -320,6 +353,9 @@ public class XSToonInspector : ShaderGUI
             if (showRimlight)
             {
                 materialEditor.ShaderProperty(_RimColor, new GUIContent("Rimlight Tint", "The Tint of the Rimlight."));
+                materialEditor.ShaderProperty(_RimAlbedoTint, new GUIContent("Rim Albedo Tint", "How much the Albedo texture should effect the rimlight color."));
+                materialEditor.ShaderProperty(_RimCubemapTint, new GUIContent("Rim Environment Tint", "How much the Environment cubemap should effect the rimlight color."));
+                materialEditor.ShaderProperty(_RimAttenEffect, new GUIContent("Rim Attenuation Effect","How much should realtime shadows mask out the rimlight?"));
                 materialEditor.ShaderProperty(_RimIntensity, new GUIContent("Rimlight Intensity", "Strength of the Rimlight."));
                 materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
                 materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);
@@ -332,13 +368,10 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.TexturePropertySingleLine(new GUIContent("Thickness Map", "Thickness Map, used to mask areas where subsurface can happen"), _ThicknessMap);
                 materialEditor.TextureScaleOffsetProperty(_ThicknessMap);
                 materialEditor.ShaderProperty(_UVSetThickness, new GUIContent("UV Set", "The UV set to use for the Thickness Map"), 2);
-
                 XSStyles.constrainedShaderProperty(materialEditor, _SSColor, new GUIContent("Subsurface Color", "Subsurface Scattering Color"), 2);
                 materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Subsurface Distortion", "How much the subsurface should follow the normals of the mesh and/or normal map."), 2);
                 materialEditor.ShaderProperty(_SSPower, new GUIContent("Subsurface Power", "Subsurface Power"), 2);
                 materialEditor.ShaderProperty(_SSScale, new GUIContent("Subsurface Scale", "Subsurface Scale"), 2);
-                materialEditor.ShaderProperty(_SSSRange, new GUIContent("Subsurface Range", "Subsurface Range"), 2);
-                materialEditor.ShaderProperty(_SSSSharpness, new GUIContent("Subsurface Sharpness", "Subsurface Sharpness"), 2);
             }
 
             if (_AdvMode.floatValue == 1)
@@ -352,6 +385,32 @@ public class XSToonInspector : ShaderGUI
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
                 }
             }
+
+            //Plugins for Patreon releases
+            if(isPatreonShader)
+            {
+                if(isEyeTracking)
+                {
+                    showEyeTracking = XSStyles.ShurikenFoldout("Eye Tracking Settings", showEyeTracking);
+                    if(showEyeTracking)
+                    {
+                        materialEditor.ShaderProperty(_LeftRightPan, new GUIContent("Left Right Adj.", "Adjusts the eyes manually left or right."));
+                        materialEditor.ShaderProperty(_UpDownPan, new GUIContent("Up Down Adj.", "Adjusts the eyes manually up or down."));
+                        
+                        XSStyles.SeparatorThin();
+                        materialEditor.ShaderProperty(_AttentionSpan, new GUIContent("Attention Span", "How often should the eyes look at the target; 0 = never, 1 = always, 0.5 = half of the time."));
+                        materialEditor.ShaderProperty(_FollowPower, new GUIContent("Follow Power", "The influence the target has on the eye"));
+						materialEditor.ShaderProperty(_LookSpeed, new GUIContent("Look Speed","How fast the eye transitions to looking at the target"));
+                        materialEditor.ShaderProperty(_Twitchyness, new GUIContent("Refocus Frequency", "How much should the eyes look around near the target?"));
+
+                        XSStyles.SeparatorThin();
+                        materialEditor.ShaderProperty(_IrisSize, new GUIContent("Iris Size", "Size of the iris"));  
+                        materialEditor.ShaderProperty(_FollowLimit, new GUIContent("Follow Limit", "Limits the angle from the front of the face on how far the eyes can track/rotate."));               
+                        materialEditor.ShaderProperty(_EyeOffsetLimit, new GUIContent("Offset Limit", "Limit for how far the eyes can turn"));
+					}
+                }
+            }
+            //
 
             XSStyles.DoFooter();
         }

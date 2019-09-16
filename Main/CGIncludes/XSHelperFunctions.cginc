@@ -33,6 +33,12 @@ void InitializeTextureUVs(
         inout TextureUV t)
 {	
 
+    #if defined(PatreonEyeTracking)
+        float2 eyeUvOffset = eyeOffsets(i.uv, i.objPos, i.worldPos, i.ntb[0]);
+        i.uv = eyeUvOffset;
+        i.uv1 = eyeUvOffset;
+    #endif
+
     half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
     t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
 
@@ -160,6 +166,37 @@ half3 getReflectionUV(half3 direction, half3 position, half4 cubemapPosition, ha
     return direction;
 }
 
+half3 getEnvMap(XSLighting i, DotProducts d, float blur, half3 reflDir, half3 indirectLight, half3 wnormal)
+{//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
+    half3 envMap = half3(0,0,0);
+
+    #if defined(UNITY_PASS_FORWARDBASE) //Indirect PBR specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light. 
+        half3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
+        half4 probe0 = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflectionUV1, blur);
+        half3 probe0sample = DecodeHDR(probe0, unity_SpecCube0_HDR);
+
+        half3 indirectSpecular;
+        half interpolator = unity_SpecCube0_BoxMin.w;
+        
+        UNITY_BRANCH
+        if (interpolator < 0.99999) 
+        {
+            half3 reflectionUV2 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube1_ProbePosition, unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax);
+            half4 probe1 = UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0, reflectionUV2, blur);
+            half3 probe1sample = DecodeHDR(probe1, unity_SpecCube1_HDR);
+            indirectSpecular = lerp(probe1sample, probe0sample, interpolator);
+        }
+        else 
+        {
+            indirectSpecular = probe0sample;
+        }
+
+        envMap = indirectSpecular;
+    #endif
+
+    return envMap;
+}
+
 void calcAlpha(inout XSLighting i)
 {	
     //Default to 1 alpha || Opaque
@@ -175,7 +212,7 @@ void calcAlpha(inout XSLighting i)
 
     #if defined(AlphaToMask) // mix of dithering and alpha blend to provide best results.
         half dither = calcDither(i.screenUV.xy);
-        i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);//lerp(i.albedo.a, i.albedo.a - (dither * (1-i.albedo.a)), 0.2);
+        i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);
     #endif
 
     #if defined(Dithered)
@@ -187,6 +224,7 @@ void calcAlpha(inout XSLighting i)
         clip(i.albedo.a - _Cutoff);
     #endif
 }
+
 // //Halftone functions, finish implementing later.. Not correct right now.
 // half2 rotateUV(half2 uv, half rotation)
 // {

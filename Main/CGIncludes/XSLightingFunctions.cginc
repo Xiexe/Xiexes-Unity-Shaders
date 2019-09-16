@@ -90,8 +90,7 @@ half3 calcLightDir(XSLighting i)
 void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightColor)
 {
     //If we're in an environment with a realtime light, then we should use the light color, and indirect color raw.
-    //Otherwise, we can use the raw indirect color as the light color, and halve if for the indirect color. 
-    //This produces a result that looks very similar to realtime lighting.
+    //...
     if(lightEnv)
     {
         lightColor = _LightColor0;
@@ -99,8 +98,10 @@ void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightC
     }
     else
     {
-        lightColor = indirectDiffuse.xyzz;
-        indirectDiffuse = indirectDiffuse * 0.5;
+        lightColor = indirectDiffuse.xyzz * 0.6;    // ...Otherwise
+        indirectDiffuse = indirectDiffuse * 0.4;    // Keep overall light to 100% - these should never go over 100%
+                                                    // ex. If we have indirect 100% as the light color and Indirect 50% as the indirect color, 
+                                                    // we end up with 150% of the light from the scene.
     }
 }
 
@@ -135,13 +136,13 @@ half4 calcMetallicSmoothness(XSLighting i)
     return half4(metallic, 0, 0, roughness);
 }
 
-half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse)
+half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half3 envMap)
 {
     half rimIntensity = saturate((1-d.svdn)) * pow(d.ndl, _RimThreshold);
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
     half4 rim = rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz);
-    rim *= i.attenuation + indirectDiffuse.xyzz;
-    return rim * _RimColor;
+    rim *= lerp(1, i.attenuation + indirectDiffuse.xyzz, _RimAttenEffect);
+    return rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
 }
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
@@ -298,8 +299,8 @@ half4 calcSubsurfaceScattering(XSLighting i, DotProducts d, half3 lightDir, half
     UNITY_BRANCH
     if(any(_SSColor.rgb)) // Skip all the SSS stuff if the color is 0.
     {
-        d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
-        half attenuation = saturate(i.attenuation * d.ndl);
+        //d.ndl = smoothstep(_SSSRange - _SSSSharpness, _SSSRange + _SSSSharpness, d.ndl);
+        half attenuation = saturate(i.attenuation * (d.ndl * 0.5 + 0.5));
         half3 H = normalize(lightDir + normal * _SSDistortion);
         half VdotH = pow(saturate(dot(viewDir, -H)), _SSPower);
         half3 I = _SSColor * (VdotH + indirectDiffuse) * attenuation * i.thickness * _SSScale;

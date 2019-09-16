@@ -1,6 +1,6 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0_CutoutA2C_Outlined"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0_WireframeOverride"
 {
-        Properties
+    Properties
     {	
         [Enum(Off, 0, On, 1)] _VertexColorAlbedo ("Vertex Color Albedo", Int) = 0
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
@@ -101,9 +101,9 @@
     
     SubShader
     {
-        Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         Cull [_Culling]
-                Stencil 
+        Stencil 
         {
             Ref [_Stencil]
             Comp [_StencilComp]
@@ -113,30 +113,29 @@
         {
             Name "FORWARD"
             Tags { "LightMode" = "ForwardBase" }
-            AlphaToMask On
+            
             CGPROGRAM
             #define Geometry
 
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
-            
+
             #pragma multi_compile _ VERTEXLIGHT_ON
+            #pragma multi_compile_fog
             #pragma multi_compile_fwdbase 
             
             #ifndef UNITY_PASS_FORWARDBASE
                 #define UNITY_PASS_FORWARDBASE
             #endif
-            
-            #define AlphaToMask
 
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../../CGIncludes/XSDefines.cginc"
+            #include "../../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../../CGIncludes/XSLighting.cginc"
+            #include "../../../CGIncludes/XSVert.cginc"
+            #include "../CGInc/XSGeom.cginc"
+            #include "../../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -145,26 +144,27 @@
             Name "FWDADD"
             Tags { "LightMode" = "ForwardAdd" }
             Blend One One
-            AlphaToMask On
+
             CGPROGRAM
             #define Geometry
 
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
+
+            #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
-            #define AlphaToMask
             
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../../CGIncludes/XSDefines.cginc"
+            #include "../../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../../CGIncludes/XSLighting.cginc"
+            #include "../../../CGIncludes/XSVert.cginc"
+            #include "../CGInc/XSGeom.cginc"
+            #include "../../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -176,18 +176,17 @@
             CGPROGRAM
             #pragma vertex vertShadowCaster
             #pragma fragment fragShadowCaster
-            #pragma target 3.0
+
             #pragma multi_compile_shadowcaster
             #ifndef UNITY_PASS_SHADOWCASTER
                 #define UNITY_PASS_SHADOWCASTER
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-            #define AlphaToMask
 
-            #include "../CGIncludes/XSShadowCaster.cginc"
+            #include "../../../CGIncludes/XSShadowCaster.cginc"
             ENDCG
         }
     }
-    Fallback "Transparent/Cutout/Diffuse"
+    Fallback "Diffuse"
     CustomEditor "XSToonInspector"
 }

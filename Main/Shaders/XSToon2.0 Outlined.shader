@@ -38,6 +38,9 @@
         _ScaleWithLightSensitivity("Scaling Sensitivity", Range(0,1)) = 1 
 
         _RimColor("Rimlight Tint", Color) = (1,1,1,1)
+        _RimAlbedoTint("Rim Albedo Tint", Range(0,1)) = 0
+        _RimCubemapTint("Rim Environment Tint", Range(0,1)) = 0
+        _RimAttenEffect("Rim Attenuation Effect", Range(0,1)) = 1
         _RimIntensity("Rimlight Intensity", Float) = 0
         _RimRange("Rim Range", Range(0,1)) = 0.7
         _RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
@@ -74,8 +77,6 @@
         _SSDistortion("Normal Distortion", Range(0,3)) = 1
         _SSPower("Subsurface Power", Range(0,3)) = 1
         _SSScale("Subsurface Scale", Range(0,3)) = 1
-        _SSSRange("Subsurface Range", Range(0,1)) = 1
-        _SSSSharpness("Subsurface Falloff", Range(0.001, 1)) = 0.2
 
         _HalftoneDotSize("Halftone Dot Size", Float) = 1.7
         _HalftoneDotAmount("Halftone Dot Amount", Float) = 50
@@ -132,7 +133,9 @@
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
             #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVertFrag.cginc"
+            #include "../CGIncludes/XSVert.cginc"
+            #include "../CGIncludes/XSGeom.cginc"
+            #include "../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -159,7 +162,9 @@
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
             #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVertFrag.cginc"
+            #include "../CGIncludes/XSVert.cginc"
+            #include "../CGIncludes/XSGeom.cginc"
+            #include "../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 

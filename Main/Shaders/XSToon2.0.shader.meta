@@ -13,8 +13,10 @@ ShaderImporter:
   - _ReflectivityMask: {instanceID: 0}
   - _EmissionMap: {instanceID: 0}
   - _SpecularMap: {instanceID: 0}
+  - _RampSelectionMask: {instanceID: 0}
   - _Ramp: {fileID: 2800000, guid: 529b95e318b684643b47bd73e037118a, type: 3}
   - _OcclusionMap: {instanceID: 0}
+  - _OutlineMask: {instanceID: 0}
   - _ThicknessMap: {instanceID: 0}
   userData: 
   assetBundleName: 

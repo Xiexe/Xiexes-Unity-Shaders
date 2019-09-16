@@ -28,6 +28,7 @@ struct VertexOutput
     float4 color : TEXCOORD6;
     float3 normal : TEXCOORD8;
     float4 screenPos : TEXCOORD9;
+    float3 objPos : TEXCOORD11;
 
     //float distanceToOrigin : TEXCOORD10;
     SHADOW_COORDS(7)
@@ -46,6 +47,7 @@ struct VertexOutput
         float4 color : TEXCOORD6;
         float3 normal : TEXCOORD8;
         float4 screenPos : TEXCOORD9;
+        float3 objPos : TEXCOORD11;
 
         //float distanceToOrigin : TEXCOORD10;
         SHADOW_COORDS(7)
@@ -61,6 +63,7 @@ struct VertexOutput
         float4 worldPos : TEXCOORD5;
         float4 color : TEXCOORD6;
         float4 screenPos : TEXCOORD8;
+        float3 objPos : TEXCOORD10;
 
         //float distanceToOrigin : TEXCOORD9;
         SHADOW_COORDS(7)
@@ -92,6 +95,7 @@ struct XSLighting
     half alpha;
     float isOutline;
     float2 screenUV;
+    float3 objPos;
 };
 
 struct TextureUV
@@ -151,15 +155,13 @@ half _Metallic, _Glossiness, _Reflectivity, _ClearcoatStrength, _ClearcoatSmooth
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _SpecularAlbedoTint;
 
-half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness;
+half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _RimCubemapTint, _RimAttenEffect;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness;
 
 half _SSDistortion, _SSPower, _SSScale;
-half _SSSRange, _SSSSharpness;
 half _OutlineWidth;
 
 int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
-
 int _TilingMode, _VertexColorAlbedo, _ScaleWithLight;
 int _OutlineAlbedoTint, _OutlineLighting;
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
