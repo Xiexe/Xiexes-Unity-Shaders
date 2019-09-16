@@ -53,6 +53,7 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _RimSharpness = null;
     MaterialProperty _RimAlbedoTint = null;
     MaterialProperty _RimCubemapTint = null;
+    MaterialProperty _RimAttenEffect = null;
     MaterialProperty _SpecMode = null;
     MaterialProperty _SpecularStyle = null;
     MaterialProperty _SpecularMap = null;
@@ -354,6 +355,7 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.ShaderProperty(_RimColor, new GUIContent("Rimlight Tint", "The Tint of the Rimlight."));
                 materialEditor.ShaderProperty(_RimAlbedoTint, new GUIContent("Rim Albedo Tint", "How much the Albedo texture should effect the rimlight color."));
                 materialEditor.ShaderProperty(_RimCubemapTint, new GUIContent("Rim Environment Tint", "How much the Environment cubemap should effect the rimlight color."));
+                materialEditor.ShaderProperty(_RimAttenEffect, new GUIContent("Rim Attenuation Effect","How much should realtime shadows mask out the rimlight?"));
                 materialEditor.ShaderProperty(_RimIntensity, new GUIContent("Rimlight Intensity", "Strength of the Rimlight."));
                 materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
                 materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);

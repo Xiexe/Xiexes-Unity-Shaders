@@ -40,6 +40,7 @@
         _RimColor("Rimlight Tint", Color) = (1,1,1,1)
         _RimAlbedoTint("Rim Albedo Tint", Range(0,1)) = 0
         _RimCubemapTint("Rim Environment Tint", Range(0,1)) = 0
+        _RimAttenEffect("Rim Attenuation Effect", Range(0,1)) = 1
         _RimIntensity("Rimlight Intensity", Float) = 0
         _RimRange("Rim Range", Range(0,1)) = 0.7
         _RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
@@ -96,13 +97,6 @@
         [IntRange] _Stencil ("Stencil ID [0;255]", Range(0,255)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
-
-        //[HideInInspector]_LeftRightPan("Left/Right", Range(-1,1)) = 0 
-        //[HideInInspector]_UpDownPan("Up/Down", Range(-1,1)) = 0
-        //[HideInInspector]_Twitchyness("Twitchyness", Range(0,1)) = 0.7
-        //[HideInInspector]_AttentionSpan("Attention Span", Range(0,1)) = 0.2
-        //[HideInInspector]_FollowPower("Follow Power", Range(0,1)) = 0
-        //[HideInInspector]_FollowLimit("Follow Limit", Range(0,1)) = 0
     }
 
     SubShader

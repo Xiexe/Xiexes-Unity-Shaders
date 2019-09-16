@@ -1,6 +1,6 @@
 ﻿Shader "Xiexe/Toon2.0/XSToon2.0_Dithered"
 {
-    Properties
+        Properties
     {	
         [Enum(Off, 0, On, 1)] _VertexColorAlbedo ("Vertex Color Albedo", Int) = 0
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
@@ -40,6 +40,7 @@
         _RimColor("Rimlight Tint", Color) = (1,1,1,1)
         _RimAlbedoTint("Rim Albedo Tint", Range(0,1)) = 0
         _RimCubemapTint("Rim Environment Tint", Range(0,1)) = 0
+        _RimAttenEffect("Rim Attenuation Effect", Range(0,1)) = 1
         _RimIntensity("Rimlight Intensity", Float) = 0
         _RimRange("Rim Range", Range(0,1)) = 0.7
         _RimThreshold("Rim Threshold", Range(0, 1)) = 0.1
@@ -96,7 +97,6 @@
         [IntRange] _Stencil ("Stencil ID [0;255]", Range(0,255)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
-
     }
     
     SubShader

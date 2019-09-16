@@ -40,6 +40,7 @@
         _RimColor("Rimlight Tint", Color) = (1,1,1,1)
         _RimAlbedoTint("Rim Albedo Tint", Range(0,1)) = 0
         _RimCubemapTint("Rim Environment Tint", Range(0,1)) = 0
+        _RimAttenEffect("Rim Attenuation Effect", Range(0,1)) = 1
         _RimIntensity("Rimlight Intensity", Float) = 0
         _RimRange("Rim Range", Range(0,1)) = 0.7
         _RimThreshold("Rim Threshold", Range(0, 1)) = 0.1

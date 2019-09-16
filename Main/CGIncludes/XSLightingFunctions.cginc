@@ -141,7 +141,7 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
     half rimIntensity = saturate((1-d.svdn)) * pow(d.ndl, _RimThreshold);
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
     half4 rim = rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz);
-    rim *= i.attenuation + indirectDiffuse.xyzz;
+    rim *= lerp(1, i.attenuation + indirectDiffuse.xyzz, _RimAttenEffect);
     return rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
 }
 
