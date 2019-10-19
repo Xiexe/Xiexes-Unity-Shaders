@@ -147,7 +147,7 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 {
-    half rimIntensity = saturate((1-d.svdn)) * pow(1-d.ndl, _ShadowRimThreshold * 2);
+    half rimIntensity = saturate((1-d.svdn));// * pow(1-d.ndl, _ShadowRimThreshold * 2);
     rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
     half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * 0.1), rimIntensity);
 
