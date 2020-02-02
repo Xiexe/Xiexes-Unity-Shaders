@@ -62,6 +62,7 @@
         _ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
         _ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
+        _ShadowRimAlbedoTint("Shadow Rim Albedo Tint", Range(0, 1)) = 0
         
         _OcclusionMap("Occlusion", 2D) = "white" {}
         _OcclusionColor("Occlusion Color", Color) = (0,0,0,0)

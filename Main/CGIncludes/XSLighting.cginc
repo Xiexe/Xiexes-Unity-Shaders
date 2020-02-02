@@ -29,9 +29,9 @@ half4 BRDF_XSLighting(XSLighting i)
     i.diffuseColor.rgb = lerp(dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation);
 
     #if defined(VERTEXLIGHT_ON)
-        half3 indirectDiffuse = calcIndirectDiffuse() + get4VertexLightsColFalloff(i.worldPos, i.normal);   
+        half3 indirectDiffuse = calcIndirectDiffuse(i) + get4VertexLightsColFalloff(i.worldPos, i.normal);   
     #else
-        half3 indirectDiffuse = calcIndirectDiffuse();
+        half3 indirectDiffuse = calcIndirectDiffuse(i);
     #endif
 
     half4 lightCol = half4(0,0,0,0);

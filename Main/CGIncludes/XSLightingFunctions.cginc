@@ -147,11 +147,11 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
 
 half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 {
-    half rimIntensity = saturate((1-d.svdn));// * pow(1-d.ndl, _ShadowRimThreshold * 2);
+    half rimIntensity = saturate((1-d.svdn)) * pow(1-d.ndl, _ShadowRimThreshold * 2);
     rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
-    half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * 0.1), rimIntensity);
+    half4 shadowRim = lerp(1, (_ShadowRim * lerp(1, i.diffuseColor.rgbb, _ShadowRimAlbedoTint)) + (indirectDiffuse.xyzz * 0.1), rimIntensity);
 
-    return shadowRim;
+    return shadowRim ;
 }
 
 half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half4 metallicSmoothness, half ax, half ay)
@@ -277,9 +277,9 @@ half4 calcRamp(XSLighting i, DotProducts d)
     return ramp;
 }
 
-half3 calcIndirectDiffuse()
+half3 calcIndirectDiffuse(XSLighting i)
 {// We don't care about anything other than the color from probes for toon lighting.
-    half3 indirectDiffuse = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
+    half3 indirectDiffuse = ShadeSH9(float4(0,1,0,1));//half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
     return indirectDiffuse;
 }
 

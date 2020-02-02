@@ -210,9 +210,14 @@ void calcAlpha(inout XSLighting i)
         i.alpha = _Color.a;
     #endif
 
-    #if defined(AlphaToMask) // mix of dithering and alpha blend to provide best results.
+    #if defined(AlphaToMask) && !defined(Masked)// mix of dithering and alpha blend to provide best results.
         half dither = calcDither(i.screenUV.xy);
         i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);
+    #endif
+
+    #if defined(AlphaToMask) && defined(Masked)
+        i.alpha = saturate(i.cutoutMask.r + _Cutoff);
+        i.alpha = lerp(1-i.alpha, i.alpha, i.albedo.a);
     #endif
 
     #if defined(Dithered)
@@ -223,6 +228,8 @@ void calcAlpha(inout XSLighting i)
     #if defined(Cutout)
         clip(i.albedo.a - _Cutoff);
     #endif
+
+
 }
 
 // //Halftone functions, finish implementing later.. Not correct right now.

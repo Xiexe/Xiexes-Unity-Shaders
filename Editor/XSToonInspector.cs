@@ -68,6 +68,7 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _ShadowRimRange = null;
     MaterialProperty _ShadowRimThreshold = null;
     MaterialProperty _ShadowRimSharpness = null;
+    MaterialProperty _ShadowRimAlbedoTint = null;
     MaterialProperty _OcclusionMap = null;
     MaterialProperty _OcclusionColor = null;
     MaterialProperty _ThicknessMap = null;
@@ -98,6 +99,7 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _OutlineColor = null;
     MaterialProperty _ShadowSharpness = null;
     MaterialProperty _AdvMode = null;
+    MaterialProperty _CutoutMask = null;
 
     //Material Properties for Patreon Plugins
         MaterialProperty _LeftRightPan = null;
@@ -127,6 +129,7 @@ public class XSToonInspector : ShaderGUI
     bool isEyeTracking = false;
     bool isOutlined = false;
     bool isCutout = false;
+    bool isCutoutMasked = false;
 
     public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
     {
@@ -134,6 +137,7 @@ public class XSToonInspector : ShaderGUI
         Shader shader = material.shader;
 
         isCutout = shader.name.Contains("Cutout") && !shader.name.Contains("A2C");
+        isCutoutMasked = shader.name.Contains("A2C") && shader.name.Contains("Masked");
         isOutlined = shader.name.Contains("Outline");
         isPatreonShader = shader.name.Contains("Patreon");
         isEyeTracking = shader.name.Contains("EyeTracking");
@@ -150,7 +154,7 @@ public class XSToonInspector : ShaderGUI
 
 		EditorGUI.BeginChangeCheck();
 		{
-			if (!isCutout)// Do this to make sure that if you're using AlphaToCoverage that you fallback to cutout with 0.5 Cutoff if your shaders are blocked.
+			if (!isCutout && !isCutoutMasked)// Do this to make sure that if you're using AlphaToCoverage that you fallback to cutout with 0.5 Cutoff if your shaders are blocked.
 			{
 				material.SetFloat("_Cutoff", 0.5f);
 			}
@@ -167,6 +171,11 @@ public class XSToonInspector : ShaderGUI
                 if (isCutout)
                 {
                     materialEditor.ShaderProperty(_Cutoff, new GUIContent("Cutoff", "The Cutoff Amount"), 2);
+                }
+                if(isCutoutMasked)
+                {
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Mask", "Black and white cutout mask"), _CutoutMask);
+                    materialEditor.ShaderProperty(_Cutoff, new GUIContent("Dissolve Progress", "The Cutoff Amount"), 2);
                 }
                 materialEditor.ShaderProperty(_UVSetAlbedo, new GUIContent("UV Set", "The UV set to use for the Albedo Texture."), 2);
                 materialEditor.TextureScaleOffsetProperty(_MainTex);
@@ -205,6 +214,7 @@ public class XSToonInspector : ShaderGUI
 
                 XSStyles.SeparatorThin();
                 XSStyles.constrainedShaderProperty(materialEditor, _ShadowRim, new GUIContent("Shadow Rim", "Shadow Rim Color. Set to white to disable."), 0);
+                materialEditor.ShaderProperty(_ShadowRimAlbedoTint, new GUIContent("Shadow Rim Albedo Tint", "How much the Albedo texture should effect the Shadow Rim color."));
                 materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
                 materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
                 materialEditor.ShaderProperty(_ShadowRimSharpness, new GUIContent("Sharpness", "Sharpness of the Shadow Rim"), 2);
