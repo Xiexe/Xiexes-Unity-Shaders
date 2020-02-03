@@ -6,9 +6,13 @@
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         _MainTex("Texture", 2D) = "white" {}
+        _CutoutMask("Dissolve Mask", 2D) = "white" {}
         _Saturation("Main Texture Saturation", Range(0,10)) = 1
         _Color("Color Tint", Color) = (1,1,1,1)
         _Cutoff("Cutoff", Float) = 0.5
+
+        [Toggle(_)]_FadeDither("Dither Distance Fading", Float) = 0
+        _FadeDitherDistance("Fade Dither Distance", Float) = 0
 
         _BumpMap("Normal Map", 2D) = "bump" {}
         _BumpScale("Normal Scale", Range(-2,2)) = 1

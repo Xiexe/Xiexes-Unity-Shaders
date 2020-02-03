@@ -84,7 +84,7 @@ struct XSLighting
     half4 occlusion;
     half4 emissionMap;
     half4 rampMask;
-    #if defined(AlphaToMask) && defined(Masked)
+    #if defined(AlphaToMask) && defined(Masked) || defined(Dithered)
         half4 cutoutMask;
     #endif
 
@@ -153,6 +153,7 @@ half4 _Color, _ShadowRim,
     _EmissionColor, _MatcapTint, _RimColor;
 
 half _Cutoff;
+half _FadeDitherDistance;
 half _EmissionToDiffuse, _ScaleWithLightSensitivity;
 half _Saturation;
 half _Metallic, _Glossiness, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
@@ -165,6 +166,7 @@ half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;
 
+int _FadeDither;
 int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 int _TilingMode, _VertexColorAlbedo, _ScaleWithLight;
 int _OutlineAlbedoTint, _OutlineLighting;

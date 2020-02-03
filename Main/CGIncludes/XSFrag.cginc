@@ -45,7 +45,7 @@ float4 frag (
     o.reflectivityMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectivityMask, _MainTex, t.reflectivityMaskUV) * _Reflectivity;
     o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV) * _EmissionColor;
     o.rampMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RampSelectionMask, _MainTex, i.uv); // This texture doesn't need to ever be on a second uv channel, and doesn't need tiling, convince me otherwise.
-    #if defined(AlphaToMask) && defined(Masked)
+    #if defined(AlphaToMask) && defined(Masked) || defined(Dithered)
         o.cutoutMask = UNITY_SAMPLE_TEX2D_SAMPLER(_CutoutMask, _MainTex, i.uv);
     #endif
 

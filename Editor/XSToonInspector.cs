@@ -23,6 +23,9 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _Saturation = null;
     MaterialProperty _Color = null;
     MaterialProperty _Cutoff = null;
+    MaterialProperty _DitherMask = null;
+    MaterialProperty _FadeDither = null;
+    MaterialProperty _FadeDitherDistance = null;
     MaterialProperty _BumpMap = null;
     MaterialProperty _BumpScale = null;
     MaterialProperty _DetailNormalMap = null;
@@ -130,12 +133,14 @@ public class XSToonInspector : ShaderGUI
     bool isOutlined = false;
     bool isCutout = false;
     bool isCutoutMasked = false;
+    bool isDithered = false;
 
     public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
     {
         Material material = materialEditor.target as Material;
         Shader shader = material.shader;
 
+        isDithered = shader.name.Contains("Dithered");
         isCutout = shader.name.Contains("Cutout") && !shader.name.Contains("A2C");
         isCutoutMasked = shader.name.Contains("A2C") && shader.name.Contains("Masked");
         isOutlined = shader.name.Contains("Outline");
@@ -181,6 +186,13 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.TextureScaleOffsetProperty(_MainTex);
                 materialEditor.ShaderProperty(_Saturation, new GUIContent("Saturation", "Controls saturation of the final output from the shader."));
 
+                if(isDithered)
+                {
+                    //Dither Fading
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Mask", "Black and white mask to control dithering."), _CutoutMask);
+                    materialEditor.ShaderProperty(_FadeDither, new GUIContent("Use Distance Fading", "Make the shader dither out based on the distance to the camera."), 2);
+                    materialEditor.ShaderProperty(_FadeDitherDistance, new GUIContent("Fade Distance", "The distance at which the fading starts happening."), 2);
+                }
             }
 
             showShadows = XSStyles.ShurikenFoldout("Shadows", showShadows);

@@ -207,7 +207,7 @@ void calcAlpha(inout XSLighting i)
     #endif
 
     #if defined(Transparent)
-        i.alpha = _Color.a;
+        i.alpha = i.albedo.a;
     #endif
 
     #if defined(AlphaToMask) && !defined(Masked)// mix of dithering and alpha blend to provide best results.
@@ -222,7 +222,16 @@ void calcAlpha(inout XSLighting i)
 
     #if defined(Dithered)
         half dither = calcDither(i.screenUV.xy);
-        clip(i.albedo.a - dither);
+        if(_FadeDither)
+        {   
+            float d = distance(_WorldSpaceCameraPos, i.worldPos);
+            d = smoothstep(_FadeDitherDistance, _FadeDitherDistance + 0.02, d);
+            clip( ((1-i.cutoutMask.r) + d) - dither);
+        }
+        else
+        {
+            clip(i.albedo.a - dither);
+        }
     #endif
 
     #if defined(Cutout)

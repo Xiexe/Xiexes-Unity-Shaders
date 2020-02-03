@@ -237,7 +237,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness
             
             if(_ReflectionBlendMode != 1)
             {
-                spec *= indirectLight;
+                spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
             }
         }
         else if (_ReflectionMode == 2) //Matcap
@@ -248,7 +248,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness
             
             if(_ReflectionBlendMode != 1)
             {
-                spec *= indirectLight;
+                spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
             }
         }
         spec = lerp(spec, spec * ramp, metallicSmoothness.w); // should only not see shadows on a perfect mirror.
