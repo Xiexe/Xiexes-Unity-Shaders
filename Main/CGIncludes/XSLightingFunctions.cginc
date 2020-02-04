@@ -133,10 +133,10 @@ half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal, inout half4 verte
     //This is lerping between a white color and the actual color of the light based on the falloff, that way with our lighting model
     //we don't end up with *very* red/green/blue lights. This is a stylistic choice and can be removed for other lighting models.
     //without it, it would just be "lightColor.rgb = unity_Lightcolor[i] * atten.x/y/z/w;"
-    lightColor.rgb += lerp( dot(gs0, grayscaleVec), unity_LightColor[0], colorFalloff.x) * atten.x; 
-    lightColor.rgb += lerp( dot(gs1, grayscaleVec), unity_LightColor[1], colorFalloff.y) * atten.y; 
-    lightColor.rgb += lerp( dot(gs2, grayscaleVec), unity_LightColor[2], colorFalloff.z) * atten.z; 
-    lightColor.rgb += lerp( dot(gs3, grayscaleVec), unity_LightColor[3], colorFalloff.w) * atten.w; 
+    lightColor.rgb += unity_LightColor[0]* atten.x; 
+    lightColor.rgb += unity_LightColor[1]* atten.y; 
+    lightColor.rgb += unity_LightColor[2]* atten.z; 
+    lightColor.rgb += unity_LightColor[3]* atten.w; 
 
     return lightColor;
 }
