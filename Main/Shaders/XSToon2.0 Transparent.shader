@@ -23,7 +23,7 @@
         _MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
         _BakedCubemap("Baked Cubemap", CUBE) = "black" {}
         _Matcap("Matcap", 2D) = "black" {}
-        _MatcapTint("Matcap Tint", Color) = (1,1,1,1)
+        [HDR]_MatcapTint("Matcap Tint", Color) = (1,1,1,1)
         _ReflectivityMask("Reflection Mask" , 2D) = "white" {}
         _Metallic("Metallic", Range(0,1)) = 0
         _Glossiness("Smoothness", Range(0,1)) = 0
@@ -62,6 +62,7 @@
         _ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
         _ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
+        _ShadowRimAlbedoTint("Shadow Rim Albedo Tint", Range(0, 1)) = 0
         
         _OcclusionMap("Occlusion", 2D) = "white" {}
         _OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
@@ -109,7 +110,7 @@
             Comp [_StencilComp]
             Pass [_StencilOp]
         }
-        Blend SrcAlpha OneMinusSrcAlpha
+        Blend One OneMinusSrcAlpha
         ZWrite Off
         Pass
         {

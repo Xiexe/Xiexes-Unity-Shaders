@@ -43,7 +43,7 @@
     }
 //
 
-half3 getVertexLightsDir(XSLighting i)
+half3 getVertexLightsDir(XSLighting i, half4 vertexLightAtten)
 {
     half3 toLightX = half3(unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x);
     half3 toLightY = half3(unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y);
@@ -55,17 +55,17 @@ half3 getVertexLightsDir(XSLighting i)
     half3 dirZ = toLightZ - i.worldPos;
     half3 dirW = toLightW - i.worldPos;
     
-    dirX *= length(toLightX);
-    dirY *= length(toLightY);
-    dirZ *= length(toLightZ);
-    dirW *= length(toLightW);
+    dirX *= length(toLightX) * vertexLightAtten.x;
+    dirY *= length(toLightY) * vertexLightAtten.y;
+    dirZ *= length(toLightZ) * vertexLightAtten.z;
+    dirW *= length(toLightW) * vertexLightAtten.w;
 
-    half3 dir = (dirX + dirY + dirZ + dirW);
-    return normalize(dir); //Has to be normalized before feeding into LightDir, otherwise you end up with some weird behavior.
+    half3 dir = (dirX + dirY + dirZ + dirW) / 4;
+    return dir;
 }
 
 // Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
-half3 calcLightDir(XSLighting i)
+half3 calcLightDir(XSLighting i, half4 vertexLightAtten)
 {   
     half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
 
@@ -73,7 +73,7 @@ half3 calcLightDir(XSLighting i)
     lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
     
     #if defined(VERTEXLIGHT_ON)
-        half3 vertexDir = getVertexLightsDir(i);
+        half3 vertexDir = getVertexLightsDir(i, vertexLightAtten);
         lightDir = (lightDir + probeLightDir + vertexDir);
     #endif
 
@@ -105,7 +105,7 @@ void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightC
     }
 }
 
-half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal)
+half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal, inout half4 vertexLightAtten)
 {
     half3 lightColor = 0;
     half4 toLightX = unity_4LightPosX0 - worldPos.x;
@@ -117,13 +117,26 @@ half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal)
     lengthSq += toLightY * toLightY;
     lengthSq += toLightZ * toLightZ;
 
-    half4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
-    atten = atten*atten; // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect that Unity's normal integration of vertex lights has.
-    
-    lightColor.rgb += unity_LightColor[0] * atten.x;
-    lightColor.rgb += unity_LightColor[1] * atten.y;
-    lightColor.rgb += unity_LightColor[2] * atten.z;
-    lightColor.rgb += unity_LightColor[3] * atten.w;
+    float4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
+    float4 atten2 = saturate(1 - (lengthSq * unity_4LightAtten0 / 25));
+    atten = min(atten, atten2 * atten2);
+
+    // half4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
+    // atten = saturate(atten*atten); // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect that Unity's normal integration of vertex lights has.
+    half4 colorFalloff = smoothstep(-0.7, 1.3, atten);
+    vertexLightAtten = atten;
+
+    half gs0 = dot(unity_LightColor[0], grayscaleVec);
+    half gs1 = dot(unity_LightColor[1], grayscaleVec);
+    half gs2 = dot(unity_LightColor[2], grayscaleVec);
+    half gs3 = dot(unity_LightColor[3], grayscaleVec);
+    //This is lerping between a white color and the actual color of the light based on the falloff, that way with our lighting model
+    //we don't end up with *very* red/green/blue lights. This is a stylistic choice and can be removed for other lighting models.
+    //without it, it would just be "lightColor.rgb = unity_Lightcolor[i] * atten.x/y/z/w;"
+    lightColor.rgb += unity_LightColor[0]* atten.x; 
+    lightColor.rgb += unity_LightColor[1]* atten.y; 
+    lightColor.rgb += unity_LightColor[2]* atten.z; 
+    lightColor.rgb += unity_LightColor[3]* atten.w; 
 
     return lightColor;
 }
@@ -149,9 +162,9 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
 {
     half rimIntensity = saturate((1-d.svdn)) * pow(1-d.ndl, _ShadowRimThreshold * 2);
     rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
-    half4 shadowRim = lerp(1, _ShadowRim + (indirectDiffuse.xyzz * 0.1), rimIntensity);
+    half4 shadowRim = lerp(1, (_ShadowRim * lerp(1, i.diffuseColor.rgbb, _ShadowRimAlbedoTint)) + (indirectDiffuse.xyzz * 0.1), rimIntensity);
 
-    return shadowRim;
+    return shadowRim ;
 }
 
 half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half4 metallicSmoothness, half ax, half ay)
@@ -237,7 +250,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness
             
             if(_ReflectionBlendMode != 1)
             {
-                spec *= indirectLight;
+                spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
             }
         }
         else if (_ReflectionMode == 2) //Matcap
@@ -248,7 +261,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness
             
             if(_ReflectionBlendMode != 1)
             {
-                spec *= indirectLight;
+                spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
             }
         }
         spec = lerp(spec, spec * ramp, metallicSmoothness.w); // should only not see shadows on a perfect mirror.
@@ -270,16 +283,20 @@ half4 calcOutlineColor(XSLighting i, DotProducts d, half3 indirectDiffuse, half4
 half4 calcRamp(XSLighting i, DotProducts d)
 {
     half remapRamp; 
-    remapRamp = d.ndl * 0.5 + 0.5;
+    remapRamp = (d.ndl * 0.5 + 0.5);
+    
+    #if defined(UNITY_PASS_FORWARDBASE)
+       remapRamp *= i.attenuation;
+    #endif
 
     half4 ramp = tex2D( _Ramp, half2(remapRamp, i.rampMask.r) );
 
     return ramp;
 }
 
-half3 calcIndirectDiffuse()
+half3 calcIndirectDiffuse(XSLighting i)
 {// We don't care about anything other than the color from probes for toon lighting.
-    half3 indirectDiffuse = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
+    half3 indirectDiffuse = ShadeSH9(float4(0,1,0,1));//half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
     return indirectDiffuse;
 }
 

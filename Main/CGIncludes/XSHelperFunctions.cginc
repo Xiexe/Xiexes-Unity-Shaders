@@ -207,22 +207,38 @@ void calcAlpha(inout XSLighting i)
     #endif
 
     #if defined(Transparent)
-        i.alpha = _Color.a;
+        i.alpha = i.albedo.a;
     #endif
 
-    #if defined(AlphaToMask) // mix of dithering and alpha blend to provide best results.
+    #if defined(AlphaToMask) && !defined(Masked)// mix of dithering and alpha blend to provide best results.
         half dither = calcDither(i.screenUV.xy);
         i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);
     #endif
 
+    #if defined(AlphaToMask) && defined(Masked)
+        i.alpha = saturate(i.cutoutMask.r + _Cutoff);
+        i.alpha = lerp(1-i.alpha, i.alpha, i.albedo.a);
+    #endif
+
     #if defined(Dithered)
         half dither = calcDither(i.screenUV.xy);
-        clip(i.albedo.a - dither);
+        if(_FadeDither)
+        {   
+            float d = distance(_WorldSpaceCameraPos, i.worldPos);
+            d = smoothstep(_FadeDitherDistance, _FadeDitherDistance + 0.02, d);
+            clip( ((1-i.cutoutMask.r) + d) - dither);
+        }
+        else
+        {
+            clip(i.albedo.a - dither);
+        }
     #endif
 
     #if defined(Cutout)
         clip(i.albedo.a - _Cutoff);
     #endif
+
+
 }
 
 // //Halftone functions, finish implementing later.. Not correct right now.

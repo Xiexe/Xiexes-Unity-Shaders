@@ -1,11 +1,12 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0_CutoutA2C_Masked"
 {
-    Properties
+        Properties
     {	
         [Enum(Off, 0, On, 1)] _VertexColorAlbedo ("Vertex Color Albedo", Int) = 0
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         _MainTex("Texture", 2D) = "white" {}
+        _CutoutMask("Dissolve Mask", 2D) = "white" {}
         _Saturation("Main Texture Saturation", Range(0,10)) = 1
         _Color("Color Tint", Color) = (1,1,1,1)
         _Cutoff("Cutoff", Float) = 0.5
@@ -63,7 +64,7 @@
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
         _ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
         _ShadowRimAlbedoTint("Shadow Rim Albedo Tint", Range(0, 1)) = 0
-        
+
         _OcclusionMap("Occlusion", 2D) = "white" {}
         _OcclusionColor("Occlusion Color", Color) = (0,0,0,0)
 
@@ -99,12 +100,12 @@
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
     }
-
+    
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+        Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
         Cull [_Culling]
-        Stencil 
+                Stencil 
         {
             Ref [_Stencil]
             Comp [_StencilComp]
@@ -114,22 +115,22 @@
         {
             Name "FORWARD"
             Tags { "LightMode" = "ForwardBase" }
-            
+            AlphaToMask On
             CGPROGRAM
-            //#define Geometry
-
             #pragma target 3.0
             #pragma vertex vert
-            //#pragma geometry geom
             #pragma fragment frag
-
+            
             #pragma multi_compile _ VERTEXLIGHT_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase 
-            
+
             #ifndef UNITY_PASS_FORWARDBASE
                 #define UNITY_PASS_FORWARDBASE
             #endif
+            
+            #define AlphaToMask
+            #define Masked
 
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -146,22 +147,19 @@
             Name "FWDADD"
             Tags { "LightMode" = "ForwardAdd" }
             Blend One One
-
+            AlphaToMask On
             CGPROGRAM
-            //#define Geometry
-
             #pragma target 3.0
             #pragma vertex vert
-            //#pragma geometry geom
             #pragma fragment frag
             
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
-            
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
-           
+            #define AlphaToMask
+            #define Masked
             
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -183,17 +181,17 @@
             #pragma fragment fragShadowCaster
             #pragma target 3.0
             #pragma multi_compile_shadowcaster
-
             #ifndef UNITY_PASS_SHADOWCASTER
                 #define UNITY_PASS_SHADOWCASTER
             #endif
-
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
+            #define AlphaToMask
+            #define Masked
 
             #include "../CGIncludes/XSShadowCaster.cginc"
             ENDCG
         }
     }
-    Fallback "Diffuse"
+    Fallback "Transparent/Cutout/Diffuse"
     CustomEditor "XSToonInspector"
 }

@@ -4,35 +4,6 @@
     {
         g2f o;
 
-        //Outlines loop
-        for (int i = 2; i >= 0; i--)
-        {	
-            float4 worldPos = (mul(unity_ObjectToWorld, IN[i].vertex));
-            half outlineWidthMask = tex2Dlod(_OutlineMask, float4(IN[i].uv, 0, 0));
-            float3 outlineWidth = outlineWidthMask * _OutlineWidth * .01;
-            outlineWidth *= min(distance(worldPos, _WorldSpaceCameraPos) * 3, 1);
-            float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].normal) * outlineWidth, 1);
-            
-            
-            o.pos = UnityObjectToClipPos(outlinePos);
-            o.worldPos = worldPos;
-            o.ntb[0] = IN[i].ntb[0];
-            o.ntb[1] = IN[i].ntb[1];
-            o.ntb[2] = IN[i].ntb[2];
-            o.uv = IN[i].uv;
-            o.uv1 = IN[i].uv1;
-            o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors | 1 = is an outline
-            o.screenPos = ComputeScreenPos(o.pos);
-            o.objPos = normalize(outlinePos);
-
-            #if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
-                o._ShadowCoord = IN[i]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here
-            #endif
-            UNITY_TRANSFER_FOG(o, o.pos);
-            tristream.Append(o);
-        }
-        tristream.RestartStrip();
-        
         //Main Mesh loop
         for (int j = 0; j < 3; j++)
         {
@@ -54,5 +25,39 @@
             tristream.Append(o);
         }
         tristream.RestartStrip();
+
+        //Outlines loop
+        for (int i = 2; i >= 0; i--)
+        {	
+            float4 worldPos = (mul(unity_ObjectToWorld, IN[i].vertex));
+            half outlineWidthMask = tex2Dlod(_OutlineMask, float4(IN[i].uv, 0, 0));
+            float3 outlineWidth = outlineWidthMask * _OutlineWidth * .01;
+            outlineWidth *= min(distance(worldPos, _WorldSpaceCameraPos) * 3, 1);
+            float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].normal) * outlineWidth, 1);
+            
+            if(outlineWidthMask == 0)
+                return;
+            else
+                o.pos = UnityObjectToClipPos(outlinePos);
+
+            o.worldPos = worldPos;
+            o.ntb[0] = IN[i].ntb[0];
+            o.ntb[1] = IN[i].ntb[1];
+            o.ntb[2] = IN[i].ntb[2];
+            o.uv = IN[i].uv;
+            o.uv1 = IN[i].uv1;
+            o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors | 1 = is an outline
+            o.screenPos = ComputeScreenPos(o.pos);
+            o.objPos = normalize(outlinePos);
+
+            #if defined (SHADOWS_SCREEN) || ( defined (SHADOWS_DEPTH) && defined (SPOT) ) || defined (SHADOWS_CUBE)
+                o._ShadowCoord = IN[i]._ShadowCoord; //Can't use TRANSFER_SHADOW() macro here
+            #endif
+            UNITY_TRANSFER_FOG(o, o.pos);
+            tristream.Append(o);
+        }
+        tristream.RestartStrip();
+        
+
     }
 #endif

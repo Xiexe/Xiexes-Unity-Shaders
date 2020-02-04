@@ -6,9 +6,13 @@
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         _MainTex("Texture", 2D) = "white" {}
+        _CutoutMask("Dissolve Mask", 2D) = "white" {}
         _Saturation("Main Texture Saturation", Range(0,10)) = 1
         _Color("Color Tint", Color) = (1,1,1,1)
         _Cutoff("Cutoff", Float) = 0.5
+
+        [Toggle(_)]_FadeDither("Dither Distance Fading", Float) = 0
+        _FadeDitherDistance("Fade Dither Distance", Float) = 0
 
         _BumpMap("Normal Map", 2D) = "bump" {}
         _BumpScale("Normal Scale", Range(-2,2)) = 1
@@ -23,7 +27,7 @@
         _MetallicGlossMap("Metallic", 2D) = "white" {} //Metallic, 0, 0, Smoothness
         _BakedCubemap("Baked Cubemap", CUBE) = "black" {}
         _Matcap("Matcap", 2D) = "black" {}
-        _MatcapTint("Matcap Tint", Color) = (1,1,1,1)
+        [HDR]_MatcapTint("Matcap Tint", Color) = (1,1,1,1)
         _ReflectivityMask("Reflection Mask" , 2D) = "white" {}
         _Metallic("Metallic", Range(0,1)) = 0
         _Glossiness("Smoothness", Range(0,1)) = 0
@@ -62,6 +66,7 @@
         _ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
         _ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
+        _ShadowRimAlbedoTint("Shadow Rim Albedo Tint", Range(0, 1)) = 0
         
         _OcclusionMap("Occlusion", 2D) = "white" {}
         _OcclusionColor("Occlusion Color", Color) = (0,0,0,0)

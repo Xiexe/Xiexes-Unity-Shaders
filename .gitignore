@@ -10,3 +10,5 @@ Main/Patreon/
 Main/Patreon.meta
 Main/Plugins/Patreon/
 Main/Plugins/Patreon.meta
+Main/Plugins/*.zip
+Main/Plugins/*.zip.meta
