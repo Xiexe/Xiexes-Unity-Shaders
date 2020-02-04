@@ -119,14 +119,20 @@ half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal, inout half4 verte
 
     half4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
     atten = saturate(atten*atten); // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect that Unity's normal integration of vertex lights has.
+    half4 colorFalloff = smoothstep(-0.7, 1.3, atten);
     vertexLightAtten = atten;
+
+    half gs0 = dot(unity_LightColor[0], grayscaleVec);
+    half gs1 = dot(unity_LightColor[1], grayscaleVec);
+    half gs2 = dot(unity_LightColor[2], grayscaleVec);
+    half gs3 = dot(unity_LightColor[3], grayscaleVec);
     //This is lerping between a white color and the actual color of the light based on the falloff, that way with our lighting model
     //we don't end up with *very* red/green/blue lights. This is a stylistic choice and can be removed for other lighting models.
     //without it, it would just be "lightColor.rgb = unity_Lightcolor[i] * atten.x/y/z/w;"
-    lightColor.rgb += lerp( dot(unity_LightColor[0], grayscaleVec), (unity_LightColor[0]), smoothstep(-0.7, 1, atten.x)) * atten.x; 
-    lightColor.rgb += lerp( dot(unity_LightColor[1], grayscaleVec), (unity_LightColor[1]), smoothstep(-0.7, 1, atten.y)) * atten.y; 
-    lightColor.rgb += lerp( dot(unity_LightColor[2], grayscaleVec), (unity_LightColor[2]), smoothstep(-0.7, 1, atten.z)) * atten.z; 
-    lightColor.rgb += lerp( dot(unity_LightColor[3], grayscaleVec), (unity_LightColor[3]), smoothstep(-0.7, 1, atten.w)) * atten.w; 
+    lightColor.rgb += lerp( dot(gs0, grayscaleVec), unity_LightColor[0], colorFalloff.x) * atten.x; 
+    lightColor.rgb += lerp( dot(gs1, grayscaleVec), unity_LightColor[1], colorFalloff.y) * atten.y; 
+    lightColor.rgb += lerp( dot(gs2, grayscaleVec), unity_LightColor[2], colorFalloff.z) * atten.z; 
+    lightColor.rgb += lerp( dot(gs3, grayscaleVec), unity_LightColor[3], colorFalloff.w) * atten.w; 
 
     return lightColor;
 }
