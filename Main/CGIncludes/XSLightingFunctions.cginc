@@ -117,8 +117,12 @@ half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal, inout half4 verte
     lengthSq += toLightY * toLightY;
     lengthSq += toLightZ * toLightZ;
 
-    half4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
-    atten = saturate(atten*atten); // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect that Unity's normal integration of vertex lights has.
+    float4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
+    float4 atten2 = saturate(1 - (lengthSq * unity_4LightAtten0 / 25));
+    atten = min(atten, atten2 * atten2);
+
+    // half4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
+    // atten = saturate(atten*atten); // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect that Unity's normal integration of vertex lights has.
     half4 colorFalloff = smoothstep(-0.7, 1.3, atten);
     vertexLightAtten = atten;
 
