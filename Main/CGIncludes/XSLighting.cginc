@@ -3,8 +3,15 @@ half4 BRDF_XSLighting(XSLighting i)
     float3 untouchedNormal = i.normal;
     calcNormal(i);
     
+    half4 vertexLightAtten = half4(0,0,0,0); 
+    #if defined(VERTEXLIGHT_ON)
+        half3 indirectDiffuse = calcIndirectDiffuse(i) + get4VertexLightsColFalloff(i.worldPos, i.normal, vertexLightAtten);   
+    #else
+        half3 indirectDiffuse = calcIndirectDiffuse(i);
+    #endif
+
     bool lightEnv = any(_WorldSpaceLightPos0.xyz);
-    half3 lightDir = calcLightDir(i);
+    half3 lightDir = calcLightDir(i, vertexLightAtten);
     half3 viewDir = calcViewDir(i.worldPos);
     half3 stereoViewDir = calcStereoViewDir(i.worldPos);
     half4 metallicSmoothness = calcMetallicSmoothness(i);
@@ -12,7 +19,6 @@ half4 BRDF_XSLighting(XSLighting i)
     half3 reflView = calcReflView(viewDir, i.normal);
     half3 reflLight = calcReflLight(lightDir, i.normal);
     
-
     DotProducts d = (DotProducts)0;
     d.ndl = dot(i.normal, lightDir);
     d.vdn = abs(dot(viewDir, i.normal));
@@ -27,12 +33,6 @@ half4 BRDF_XSLighting(XSLighting i)
     i.albedo.rgb *= (1-metallicSmoothness.x);
     i.albedo.rgb = lerp(dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation);
     i.diffuseColor.rgb = lerp(dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation);
-
-    #if defined(VERTEXLIGHT_ON)
-        half3 indirectDiffuse = calcIndirectDiffuse(i) + get4VertexLightsColFalloff(i.worldPos, i.normal);   
-    #else
-        half3 indirectDiffuse = calcIndirectDiffuse(i);
-    #endif
 
     half4 lightCol = half4(0,0,0,0);
     calcLightCol(lightEnv, indirectDiffuse, lightCol);
