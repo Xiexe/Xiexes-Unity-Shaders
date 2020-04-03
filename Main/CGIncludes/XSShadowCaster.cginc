@@ -128,13 +128,15 @@ half4 fragShadowCaster(
                     float d = distance(_WorldSpaceCameraPos, i.worldPos);
                     d = smoothstep(_FadeDitherDistance, _FadeDitherDistance + 0.02, d);
                     clip(((1-tex2D(_CutoutMask, i.tex).r) + d) - dither);
+                    clip((tex2D(_MainTex, i.tex).a * _Color.a) - dither);
                 }
                 else
                 {
                     alpha = tex2D(_MainTex, i.tex).a * _Color.a;
                 }
+            #else
+                alpha = tex2D(_MainTex, i.tex).a * _Color.a;
             #endif
-            alpha = tex2D(_MainTex, i.tex).a * _Color.a;
         #else
             alpha = _Color.a;
         #endif
