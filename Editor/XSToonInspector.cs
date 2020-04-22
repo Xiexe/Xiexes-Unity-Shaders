@@ -425,16 +425,16 @@ public class XSToonInspector : ShaderGUI
 
     private void DrawTransmissionSettings(MaterialEditor materialEditor)
     {
-        showSubsurface = XSStyles.ShurikenFoldout("Subsurface Scattering", showSubsurface);
+        showSubsurface = XSStyles.ShurikenFoldout("Transmission", showSubsurface);
         if (showSubsurface)
         {
-            materialEditor.TexturePropertySingleLine(new GUIContent("Thickness Map", "Thickness Map, used to mask areas where subsurface can happen"), _ThicknessMap);
+            materialEditor.TexturePropertySingleLine(new GUIContent("Thickness Map", "Thickness Map, used to mask areas where transmission can happen"), _ThicknessMap);
             materialEditor.TextureScaleOffsetProperty(_ThicknessMap);
             materialEditor.ShaderProperty(_UVSetThickness, new GUIContent("UV Set", "The UV set to use for the Thickness Map"), 2);
-            XSStyles.constrainedShaderProperty(materialEditor, _SSColor, new GUIContent("Subsurface Color", "Subsurface Scattering Color"), 2);
-            materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Subsurface Distortion", "How much the subsurface should follow the normals of the mesh and/or normal map."), 2);
-            materialEditor.ShaderProperty(_SSPower, new GUIContent("Subsurface Power", "Subsurface Power"), 2);
-            materialEditor.ShaderProperty(_SSScale, new GUIContent("Subsurface Scale", "Subsurface Scale"), 2);
+            XSStyles.constrainedShaderProperty(materialEditor, _SSColor, new GUIContent("Transmission Color", "Transmission Color"), 2);
+            materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Transmission Distortion", "How much the Transmission should follow the normals of the mesh and/or normal map."), 2);
+            materialEditor.ShaderProperty(_SSPower, new GUIContent("Transmission Power", "Subsurface Power"), 2);
+            materialEditor.ShaderProperty(_SSScale, new GUIContent("Transmission Scale", "Subsurface Scale"), 2);
         }
     }
 
