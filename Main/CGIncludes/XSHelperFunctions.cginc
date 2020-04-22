@@ -227,6 +227,7 @@ void calcAlpha(inout XSLighting i)
             float d = distance(_WorldSpaceCameraPos, i.worldPos);
             d = smoothstep(_FadeDitherDistance, _FadeDitherDistance + 0.02, d);
             clip( ((1-i.cutoutMask.r) + d) - dither);
+            clip(i.albedo.a - dither);
         }
         else
         {

@@ -169,272 +169,318 @@ public class XSToonInspector : ShaderGUI
                 materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
                 materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
 
-            showMainSettings = XSStyles.ShurikenFoldout("Main Settings", showMainSettings);
-            if (showMainSettings)
-            {
-                materialEditor.TexturePropertySingleLine(new GUIContent("Main Texture", "The main Albedo texture."), _MainTex, _Color);
-                if (isCutout)
-                {
-                    materialEditor.ShaderProperty(_Cutoff, new GUIContent("Cutoff", "The Cutoff Amount"), 2);
-                }
-                if(isCutoutMasked)
-                {
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Mask", "Black and white cutout mask"), _CutoutMask);
-                    materialEditor.ShaderProperty(_Cutoff, new GUIContent("Dissolve Progress", "The Cutoff Amount"), 2);
-                }
-                materialEditor.ShaderProperty(_UVSetAlbedo, new GUIContent("UV Set", "The UV set to use for the Albedo Texture."), 2);
-                materialEditor.TextureScaleOffsetProperty(_MainTex);
-                materialEditor.ShaderProperty(_Saturation, new GUIContent("Saturation", "Controls saturation of the final output from the shader."));
-
-                if(isDithered)
-                {
-                    //Dither Fading
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Mask", "Black and white mask to control dithering."), _CutoutMask);
-                    materialEditor.ShaderProperty(_FadeDither, new GUIContent("Use Distance Fading", "Make the shader dither out based on the distance to the camera."), 2);
-                    materialEditor.ShaderProperty(_FadeDitherDistance, new GUIContent("Fade Distance", "The distance at which the fading starts happening."), 2);
-                }
-            }
-
-            showShadows = XSStyles.ShurikenFoldout("Shadows", showShadows);
-            if (showShadows)
-            {
-                materialEditor.TexturePropertySingleLine(new GUIContent("Ramp Selection Mask", "A black to white mask that determins how far up on the multi ramp to sample. 0 for bottom, 1 for top, 0.5 for middle, 0.25, and 0.75 for mid bottom and mid top respectively."), _RampSelectionMask);
-                
-                XSStyles.SeparatorThin();
-                if (_RampSelectionMask.textureValue != null) 
-                {
-                    string rampMaskPath = AssetDatabase.GetAssetPath(_RampSelectionMask.textureValue);
-                    TextureImporter ti = (TextureImporter)TextureImporter.GetAtPath(rampMaskPath);
-                    if (ti.sRGBTexture) 
-                    {
-                        if (XSStyles.HelpBoxWithButton(new GUIContent("This texture is not marked as Linear.", "This is recommended for the mask"), new GUIContent("Fix Now"))) {
-                            ti.sRGBTexture = false;
-                            AssetDatabase.ImportAsset(rampMaskPath, ImportAssetOptions.ForceUpdate);
-                            AssetDatabase.Refresh();
-                        }
-                    }
-                }
-                
-                materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), _Ramp);
-                materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
-
-                XSStyles.SeparatorThin();
-                materialEditor.TexturePropertySingleLine(new GUIContent("Occlusion Map", "Occlusion Map, used to darken areas on the model artifically."), _OcclusionMap);
-                XSStyles.constrainedShaderProperty(materialEditor, _OcclusionColor, new GUIContent("Occlusion Tint", "Occlusion shadow tint."), 2);
-                materialEditor.ShaderProperty(_UVSetOcclusion, new GUIContent("UV Set", "The UV set to use for the Occlusion Texture"), 2);
-                materialEditor.TextureScaleOffsetProperty(_OcclusionMap);
-
-                XSStyles.SeparatorThin();
-                XSStyles.constrainedShaderProperty(materialEditor, _ShadowRim, new GUIContent("Shadow Rim", "Shadow Rim Color. Set to white to disable."), 0);
-                materialEditor.ShaderProperty(_ShadowRimAlbedoTint, new GUIContent("Shadow Rim Albedo Tint", "How much the Albedo texture should effect the Shadow Rim color."));
-                materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
-                materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
-                materialEditor.ShaderProperty(_ShadowRimSharpness, new GUIContent("Sharpness", "Sharpness of the Shadow Rim"), 2);
-                XSStyles.callGradientEditor(material);
-            }
-
-            if (isOutlined)
-            {
-                showOutlines = XSStyles.ShurikenFoldout("Outlines", showOutlines);
-                if (showOutlines)
-                {
-                    materialEditor.ShaderProperty(_OutlineLighting, new GUIContent("Outline Lighting", "Makes outlines respect the lighting, or be emissive."));
-                    materialEditor.ShaderProperty(_OutlineAlbedoTint, new GUIContent("Outline Albedo Tint", "Includes the color of the Albedo Texture in the calculation for the color of the outline."));
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Outline Mask", "Outline width mask, black will make the outline minimum width."), _OutlineMask);
-                    materialEditor.ShaderProperty(_OutlineWidth, new GUIContent("Outline Width", "Width of the Outlines"));
-                    XSStyles.constrainedShaderProperty(materialEditor, _OutlineColor, new GUIContent("Outline Color", "Color of the outlines"), 0);
-                }
-            }
-
-            showNormalMapSettings = XSStyles.ShurikenFoldout("Normal Maps", showNormalMapSettings);
-            if (showNormalMapSettings)
-            {
-
-                materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map"), _BumpMap);
-                materialEditor.ShaderProperty(_BumpScale, new GUIContent("Normal Strength", "Strength of the main Normal Map"), 2);
-                materialEditor.ShaderProperty(_UVSetNormal, new GUIContent("UV Set", "The UV set to use for the Normal Map"), 2);
-                materialEditor.TextureScaleOffsetProperty(_BumpMap);
-
-                XSStyles.SeparatorThin();
-                materialEditor.TexturePropertySingleLine(new GUIContent("Detail Normal Map", "Detail Normal Map"), _DetailNormalMap);
-                materialEditor.ShaderProperty(_DetailNormalMapScale, new GUIContent("Detail Normal Strength", "Strength of the detail Normal Map"), 2);
-                materialEditor.ShaderProperty(_UVSetDetNormal, new GUIContent("UV Set", "The UV set to use for the Detail Normal Map"), 2);
-                materialEditor.TextureScaleOffsetProperty(_DetailNormalMap);
-
-                XSStyles.SeparatorThin();
-                materialEditor.TexturePropertySingleLine(new GUIContent("Detail Mask", "Mask for Detail Maps"), _DetailMask);
-                materialEditor.ShaderProperty(_UVSetDetMask, new GUIContent("UV Set", "The UV set to use for the Detail Mask"), 2);
-                materialEditor.TextureScaleOffsetProperty(_DetailMask);
-
-            }
-
-            showSpecular = XSStyles.ShurikenFoldout("Specular", showSpecular);
-            if (showSpecular)
-            {
-                materialEditor.ShaderProperty(_SpecMode, new GUIContent("Specular Mode", "Specular Mode."));
-                materialEditor.ShaderProperty(_SpecularStyle, new GUIContent("Specular Style", "Specular Style."));
-                
-                XSStyles.SeparatorThin();
-                materialEditor.TexturePropertySingleLine(new GUIContent("Specular Map(R,G,B)", "Specular Map. Red channel controls Intensity, Green controls how much specular is tinted by Albedo, and Blue controls Smoothness (Only for Blinn-Phong, and GGX)."), _SpecularMap);
-                materialEditor.TextureScaleOffsetProperty(_SpecularMap);
-                materialEditor.ShaderProperty(_UVSetSpecular, new GUIContent("UV Set", "The UV set to use for the Specular Map"), 2);
-                materialEditor.ShaderProperty(_SpecularIntensity, new GUIContent("Specular Intensity", "Specular Intensity."), 2);
-                materialEditor.ShaderProperty(_SpecularAlbedoTint, new GUIContent("Specular Albedo Tint", "How much the specular highlight should derive color from the albedo of the object."), 2);
-                if (_SpecMode.floatValue == 0 || _SpecMode.floatValue == 2)
-                {
-                    materialEditor.ShaderProperty(_SpecularArea, new GUIContent("Specular Area", "Specular Area."), 2);
-                }
-                else
-                {
-                    materialEditor.ShaderProperty(_AnisotropicAX, new GUIContent("Anisotropic Width", "Anisotropic Width, makes anistropic relfections more horizontal"), 2);
-                    materialEditor.ShaderProperty(_AnisotropicAY, new GUIContent("Anisotropic Height", "Anisotropic Height, makes anistropic relfections more vertical"), 2);
-                }
-            }
-
-            showReflection = XSStyles.ShurikenFoldout("Reflections", showReflection);
-            if (showReflection)
-            {
-                materialEditor.ShaderProperty(_ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
-
-                if (_ReflectionMode.floatValue == 0) // PBR
-                {
-                    materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
-                    materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
-                    
-                    XSStyles.SeparatorThin();
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
-                    
-                    XSStyles.SeparatorThin();
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel. \nIf Clearcoat is enabled, Clearcoat Smoothness on Green Channel, Clearcoat Reflectivity on Blue Channel."), _MetallicGlossMap);
-                    materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
-                    materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the Metallic Smoothness Map"), 2);
-                    materialEditor.ShaderProperty(_Metallic, new GUIContent("Metallic", "Metallic, set to 1 if using metallic map"), 2);
-                    materialEditor.ShaderProperty(_Glossiness, new GUIContent("Smoothness", "Smoothness, set to 1 if using metallic map"), 2);
-                    materialEditor.ShaderProperty(_ClearcoatSmoothness, new GUIContent("Clearcoat Smoothness", "Smoothness of the clearcoat."), 2);
-                    materialEditor.ShaderProperty(_ClearcoatStrength, new GUIContent("Clearcoat Reflectivity", "The strength of the clearcoat reflection."), 2);
-                }
-                else if (_ReflectionMode.floatValue == 1) //Baked cube
-                {
-                    materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
-                    materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
-                    
-                    XSStyles.SeparatorThin();
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Baked Cubemap", "Baked cubemap."), _BakedCubemap);
-                    
-                    XSStyles.SeparatorThin();
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel. \nIf Clearcoat is enabled, Clearcoat Smoothness on Green Channel, Clearcoat Reflectivity on Blue Channel."), _MetallicGlossMap);
-                    materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
-                    materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the MetallicSmoothness Map"), 2);
-                    materialEditor.ShaderProperty(_Metallic, new GUIContent("Metallic", "Metallic, set to 1 if using metallic map"), 2);
-                    materialEditor.ShaderProperty(_Glossiness, new GUIContent("Smoothness", "Smoothness, set to 1 if using metallic map"), 2);
-                    materialEditor.ShaderProperty(_ClearcoatSmoothness, new GUIContent("Clearcoat Smoothness", "Smoothness of the clearcoat."), 2);
-                    materialEditor.ShaderProperty(_ClearcoatStrength, new GUIContent("Clearcoat Reflectivity", "The strength of the clearcoat reflection."), 2);
-                }
-                else if (_ReflectionMode.floatValue == 2) //Matcap
-                {
-                    materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
-                    
-                    XSStyles.SeparatorThin();
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Matcap", "Matcap Texture"), _Matcap, _MatcapTint);
-                    materialEditor.ShaderProperty(_Glossiness, new GUIContent("Matcap Blur", "Matcap blur, blurs the Matcap, set to 1 for full clarity"), 2);
-                    material.SetFloat("_Metallic", 0);
-                    material.SetFloat("_ClearCoat", 0);
-                    material.SetTexture("_MetallicGlossMap", null);
-                }
-                if (_ReflectionMode.floatValue != 3)
-                {
-                    XSStyles.SeparatorThin();
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Reflectivity Mask", "Mask for reflections."), _ReflectivityMask);
-                    materialEditor.TextureScaleOffsetProperty(_ReflectivityMask);
-                    materialEditor.ShaderProperty(_UVSetReflectivity, new GUIContent("UV Set", "The UV set to use for the Reflectivity Mask"), 2);
-                    materialEditor.ShaderProperty(_Reflectivity, new GUIContent("Reflectivity", "The strength of the reflections."), 2);
-                }
-                if(_ReflectionMode.floatValue == 3)
-                {
-                    material.SetFloat("_Metallic", 0);
-                    material.SetFloat("_ReflectionBlendMode", 0);
-                    material.SetFloat("_ClearCoat", 0);
-                }
-            }
-
-            showEmission = XSStyles.ShurikenFoldout("Emission", showEmission);
-            if (showEmission)
-            {
-                materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map", "Emissive map. White to black, unless you want multiple colors."), _EmissionMap, _EmissionColor);
-                materialEditor.TextureScaleOffsetProperty(_EmissionMap);
-                materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
-                materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
-
-                XSStyles.SeparatorThin();
-                materialEditor.ShaderProperty(_ScaleWithLight, new GUIContent("Scale w/ Light", "Scales the emission intensity based on how dark or bright the environment is."));
-                if(_ScaleWithLight.floatValue == 0)
-                    materialEditor.ShaderProperty(_ScaleWithLightSensitivity, new GUIContent("Scaling Sensitivity", "How agressively the emission should scale with the light."));
-            }
-
-            showRimlight = XSStyles.ShurikenFoldout("Rimlight", showRimlight);
-            if (showRimlight)
-            {
-                materialEditor.ShaderProperty(_RimColor, new GUIContent("Rimlight Tint", "The Tint of the Rimlight."));
-                materialEditor.ShaderProperty(_RimAlbedoTint, new GUIContent("Rim Albedo Tint", "How much the Albedo texture should effect the rimlight color."));
-                materialEditor.ShaderProperty(_RimCubemapTint, new GUIContent("Rim Environment Tint", "How much the Environment cubemap should effect the rimlight color."));
-                materialEditor.ShaderProperty(_RimAttenEffect, new GUIContent("Rim Attenuation Effect","How much should realtime shadows mask out the rimlight?"));
-                materialEditor.ShaderProperty(_RimIntensity, new GUIContent("Rimlight Intensity", "Strength of the Rimlight."));
-                materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
-                materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);
-                materialEditor.ShaderProperty(_RimSharpness, new GUIContent("Sharpness", "Sharpness of the Rim"), 2);
-            }
-
-            showSubsurface = XSStyles.ShurikenFoldout("Subsurface Scattering", showSubsurface);
-            if (showSubsurface)
-            {
-                materialEditor.TexturePropertySingleLine(new GUIContent("Thickness Map", "Thickness Map, used to mask areas where subsurface can happen"), _ThicknessMap);
-                materialEditor.TextureScaleOffsetProperty(_ThicknessMap);
-                materialEditor.ShaderProperty(_UVSetThickness, new GUIContent("UV Set", "The UV set to use for the Thickness Map"), 2);
-                XSStyles.constrainedShaderProperty(materialEditor, _SSColor, new GUIContent("Subsurface Color", "Subsurface Scattering Color"), 2);
-                materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Subsurface Distortion", "How much the subsurface should follow the normals of the mesh and/or normal map."), 2);
-                materialEditor.ShaderProperty(_SSPower, new GUIContent("Subsurface Power", "Subsurface Power"), 2);
-                materialEditor.ShaderProperty(_SSScale, new GUIContent("Subsurface Scale", "Subsurface Scale"), 2);
-            }
-
-            if (_AdvMode.floatValue == 1)
-            {
-                showAdvanced = XSStyles.ShurikenFoldout("Advanced Settings", showAdvanced);
-                if (showAdvanced)
-                {
-                    materialEditor.ShaderProperty(_VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
-                    materialEditor.ShaderProperty(_Stencil, _Stencil.displayName);
-                    materialEditor.ShaderProperty(_StencilComp, _StencilComp.displayName);
-                    materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
-                }
-            }
-
-            //Plugins for Patreon releases
-            if(isPatreonShader)
-            {
-                if(isEyeTracking)
-                {
-                    showEyeTracking = XSStyles.ShurikenFoldout("Eye Tracking Settings", showEyeTracking);
-                    if(showEyeTracking)
-                    {
-                        materialEditor.ShaderProperty(_LeftRightPan, new GUIContent("Left Right Adj.", "Adjusts the eyes manually left or right."));
-                        materialEditor.ShaderProperty(_UpDownPan, new GUIContent("Up Down Adj.", "Adjusts the eyes manually up or down."));
-                        
-                        XSStyles.SeparatorThin();
-                        materialEditor.ShaderProperty(_AttentionSpan, new GUIContent("Attention Span", "How often should the eyes look at the target; 0 = never, 1 = always, 0.5 = half of the time."));
-                        materialEditor.ShaderProperty(_FollowPower, new GUIContent("Follow Power", "The influence the target has on the eye"));
-						materialEditor.ShaderProperty(_LookSpeed, new GUIContent("Look Speed","How fast the eye transitions to looking at the target"));
-                        materialEditor.ShaderProperty(_Twitchyness, new GUIContent("Refocus Frequency", "How much should the eyes look around near the target?"));
-
-                        XSStyles.SeparatorThin();
-                        materialEditor.ShaderProperty(_IrisSize, new GUIContent("Iris Size", "Size of the iris"));  
-                        materialEditor.ShaderProperty(_FollowLimit, new GUIContent("Follow Limit", "Limits the angle from the front of the face on how far the eyes can track/rotate."));               
-                        materialEditor.ShaderProperty(_EyeOffsetLimit, new GUIContent("Offset Limit", "Limit for how far the eyes can turn"));
-					}
-                }
-            }
-            //
-
+            DrawMainSettings(materialEditor);
+            DrawShadowSettings(materialEditor, material);
+            DrawOutlineSettings(materialEditor);
+            DrawNormalSettings(materialEditor);
+            DrawSpecularSettings(materialEditor);
+            DrawReflectionsSettings(materialEditor, material);
+            DrawEmissionSettings(materialEditor);
+            DrawRimlightSettings(materialEditor);
+            DrawTransmissionSettings(materialEditor);
+            DrawAdvancedSettings(materialEditor);
+            DrawPatreonSettings(materialEditor);
             XSStyles.DoFooter();
         }
+    }
+
+    private void DrawMainSettings(MaterialEditor materialEditor)
+    {
+        showMainSettings = XSStyles.ShurikenFoldout("Main Settings", showMainSettings);
+        if (showMainSettings)
+        {
+            materialEditor.TexturePropertySingleLine(new GUIContent("Main Texture", "The main Albedo texture."), _MainTex, _Color);
+            if (isCutout)
+            {
+                materialEditor.ShaderProperty(_Cutoff, new GUIContent("Cutoff", "The Cutoff Amount"), 2);
+            }
+            if(isCutoutMasked)
+            {
+                materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Mask", "Black and white cutout mask"), _CutoutMask);
+                materialEditor.ShaderProperty(_Cutoff, new GUIContent("Dissolve Progress", "The Cutoff Amount"), 2);
+            }
+            materialEditor.ShaderProperty(_UVSetAlbedo, new GUIContent("UV Set", "The UV set to use for the Albedo Texture."), 2);
+            materialEditor.TextureScaleOffsetProperty(_MainTex);
+            materialEditor.ShaderProperty(_Saturation, new GUIContent("Saturation", "Controls saturation of the final output from the shader."));
+
+            if(isDithered)
+            {
+                //Dither Fading
+                materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Mask", "Black and white mask to control dithering."), _CutoutMask);
+                materialEditor.ShaderProperty(_FadeDither, new GUIContent("Use Distance Fading", "Make the shader dither out based on the distance to the camera."), 2);
+                materialEditor.ShaderProperty(_FadeDitherDistance, new GUIContent("Fade Distance", "The distance at which the fading starts happening."), 2);
+            }
+        }
+    }
+
+    private void DrawShadowSettings(MaterialEditor materialEditor, Material material)
+    {
+        showShadows = XSStyles.ShurikenFoldout("Shadows", showShadows);
+        if (showShadows)
+        {
+            materialEditor.TexturePropertySingleLine(new GUIContent("Ramp Selection Mask", "A black to white mask that determins how far up on the multi ramp to sample. 0 for bottom, 1 for top, 0.5 for middle, 0.25, and 0.75 for mid bottom and mid top respectively."), _RampSelectionMask);
+            
+            XSStyles.SeparatorThin();
+            if (_RampSelectionMask.textureValue != null) 
+            {
+                string rampMaskPath = AssetDatabase.GetAssetPath(_RampSelectionMask.textureValue);
+                TextureImporter ti = (TextureImporter)TextureImporter.GetAtPath(rampMaskPath);
+                if (ti.sRGBTexture) 
+                {
+                    if (XSStyles.HelpBoxWithButton(new GUIContent("This texture is not marked as Linear.", "This is recommended for the mask"), new GUIContent("Fix Now"))) {
+                        ti.sRGBTexture = false;
+                        AssetDatabase.ImportAsset(rampMaskPath, ImportAssetOptions.ForceUpdate);
+                        AssetDatabase.Refresh();
+                    }
+                }
+            }
+            
+            materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), _Ramp);
+            materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
+
+            XSStyles.SeparatorThin();
+            materialEditor.TexturePropertySingleLine(new GUIContent("Occlusion Map", "Occlusion Map, used to darken areas on the model artifically."), _OcclusionMap);
+            XSStyles.constrainedShaderProperty(materialEditor, _OcclusionColor, new GUIContent("Occlusion Tint", "Occlusion shadow tint."), 2);
+            materialEditor.ShaderProperty(_UVSetOcclusion, new GUIContent("UV Set", "The UV set to use for the Occlusion Texture"), 2);
+            materialEditor.TextureScaleOffsetProperty(_OcclusionMap);
+
+            XSStyles.SeparatorThin();
+            XSStyles.constrainedShaderProperty(materialEditor, _ShadowRim, new GUIContent("Shadow Rim", "Shadow Rim Color. Set to white to disable."), 0);
+            materialEditor.ShaderProperty(_ShadowRimAlbedoTint, new GUIContent("Shadow Rim Albedo Tint", "How much the Albedo texture should effect the Shadow Rim color."));
+            materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
+            materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
+            materialEditor.ShaderProperty(_ShadowRimSharpness, new GUIContent("Sharpness", "Sharpness of the Shadow Rim"), 2);
+            XSStyles.callGradientEditor(material);
+        }
+    }
+
+    private void DrawOutlineSettings(MaterialEditor materialEditor)
+    {
+        if (isOutlined)
+        {
+            showOutlines = XSStyles.ShurikenFoldout("Outlines", showOutlines);
+            if (showOutlines)
+            {
+                materialEditor.ShaderProperty(_OutlineLighting, new GUIContent("Outline Lighting", "Makes outlines respect the lighting, or be emissive."));
+                materialEditor.ShaderProperty(_OutlineAlbedoTint, new GUIContent("Outline Albedo Tint", "Includes the color of the Albedo Texture in the calculation for the color of the outline."));
+                materialEditor.TexturePropertySingleLine(new GUIContent("Outline Mask", "Outline width mask, black will make the outline minimum width."), _OutlineMask);
+                materialEditor.ShaderProperty(_OutlineWidth, new GUIContent("Outline Width", "Width of the Outlines"));
+                XSStyles.constrainedShaderProperty(materialEditor, _OutlineColor, new GUIContent("Outline Color", "Color of the outlines"), 0);
+            }
+        }
+    }
+
+    private void DrawNormalSettings(MaterialEditor materialEditor)
+    {
+        showNormalMapSettings = XSStyles.ShurikenFoldout("Normal Maps", showNormalMapSettings);
+        if (showNormalMapSettings)
+        {
+
+            materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map"), _BumpMap);
+            materialEditor.ShaderProperty(_BumpScale, new GUIContent("Normal Strength", "Strength of the main Normal Map"), 2);
+            materialEditor.ShaderProperty(_UVSetNormal, new GUIContent("UV Set", "The UV set to use for the Normal Map"), 2);
+            materialEditor.TextureScaleOffsetProperty(_BumpMap);
+
+            XSStyles.SeparatorThin();
+            materialEditor.TexturePropertySingleLine(new GUIContent("Detail Normal Map", "Detail Normal Map"), _DetailNormalMap);
+            materialEditor.ShaderProperty(_DetailNormalMapScale, new GUIContent("Detail Normal Strength", "Strength of the detail Normal Map"), 2);
+            materialEditor.ShaderProperty(_UVSetDetNormal, new GUIContent("UV Set", "The UV set to use for the Detail Normal Map"), 2);
+            materialEditor.TextureScaleOffsetProperty(_DetailNormalMap);
+
+            XSStyles.SeparatorThin();
+            materialEditor.TexturePropertySingleLine(new GUIContent("Detail Mask", "Mask for Detail Maps"), _DetailMask);
+            materialEditor.ShaderProperty(_UVSetDetMask, new GUIContent("UV Set", "The UV set to use for the Detail Mask"), 2);
+            materialEditor.TextureScaleOffsetProperty(_DetailMask);
+
+        }
+    }
+
+    private void DrawSpecularSettings(MaterialEditor materialEditor)
+    {
+        showSpecular = XSStyles.ShurikenFoldout("Specular", showSpecular);
+        if (showSpecular)
+        {
+            materialEditor.ShaderProperty(_SpecMode, new GUIContent("Specular Mode", "Specular Mode."));
+            materialEditor.ShaderProperty(_SpecularStyle, new GUIContent("Specular Style", "Specular Style."));
+            
+            XSStyles.SeparatorThin();
+            materialEditor.TexturePropertySingleLine(new GUIContent("Specular Map(R,G,B)", "Specular Map. Red channel controls Intensity, Green controls how much specular is tinted by Albedo, and Blue controls Smoothness (Only for Blinn-Phong, and GGX)."), _SpecularMap);
+            materialEditor.TextureScaleOffsetProperty(_SpecularMap);
+            materialEditor.ShaderProperty(_UVSetSpecular, new GUIContent("UV Set", "The UV set to use for the Specular Map"), 2);
+            materialEditor.ShaderProperty(_SpecularIntensity, new GUIContent("Specular Intensity", "Specular Intensity."), 2);
+            materialEditor.ShaderProperty(_SpecularAlbedoTint, new GUIContent("Specular Albedo Tint", "How much the specular highlight should derive color from the albedo of the object."), 2);
+            if (_SpecMode.floatValue == 0 || _SpecMode.floatValue == 2)
+            {
+                materialEditor.ShaderProperty(_SpecularArea, new GUIContent("Specular Area", "Specular Area."), 2);
+            }
+            else
+            {
+                materialEditor.ShaderProperty(_AnisotropicAX, new GUIContent("Anisotropic Width", "Anisotropic Width, makes anistropic relfections more horizontal"), 2);
+                materialEditor.ShaderProperty(_AnisotropicAY, new GUIContent("Anisotropic Height", "Anisotropic Height, makes anistropic relfections more vertical"), 2);
+            }
+        }
+    }
+
+    private void DrawReflectionsSettings(MaterialEditor materialEditor, Material material)
+    {
+        showReflection = XSStyles.ShurikenFoldout("Reflections", showReflection);
+        if (showReflection)
+        {
+            materialEditor.ShaderProperty(_ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
+
+            if (_ReflectionMode.floatValue == 0) // PBR
+            {
+                materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
+                materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
+                
+                XSStyles.SeparatorThin();
+                materialEditor.TexturePropertySingleLine(new GUIContent("Fallback Cubemap", " Used as fallback in 'Unity' reflection mode if reflection probe is black."), _BakedCubemap);
+                
+                XSStyles.SeparatorThin();
+                materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel. \nIf Clearcoat is enabled, Clearcoat Smoothness on Green Channel, Clearcoat Reflectivity on Blue Channel."), _MetallicGlossMap);
+                materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
+                materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the Metallic Smoothness Map"), 2);
+                materialEditor.ShaderProperty(_Metallic, new GUIContent("Metallic", "Metallic, set to 1 if using metallic map"), 2);
+                materialEditor.ShaderProperty(_Glossiness, new GUIContent("Smoothness", "Smoothness, set to 1 if using metallic map"), 2);
+                materialEditor.ShaderProperty(_ClearcoatSmoothness, new GUIContent("Clearcoat Smoothness", "Smoothness of the clearcoat."), 2);
+                materialEditor.ShaderProperty(_ClearcoatStrength, new GUIContent("Clearcoat Reflectivity", "The strength of the clearcoat reflection."), 2);
+            }
+            else if (_ReflectionMode.floatValue == 1) //Baked cube
+            {
+                materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
+                materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
+                
+                XSStyles.SeparatorThin();
+                materialEditor.TexturePropertySingleLine(new GUIContent("Baked Cubemap", "Baked cubemap."), _BakedCubemap);
+                
+                XSStyles.SeparatorThin();
+                materialEditor.TexturePropertySingleLine(new GUIContent("Metallic Map", "Metallic Map, Metallic on Red Channel, Smoothness on Alpha Channel. \nIf Clearcoat is enabled, Clearcoat Smoothness on Green Channel, Clearcoat Reflectivity on Blue Channel."), _MetallicGlossMap);
+                materialEditor.TextureScaleOffsetProperty(_MetallicGlossMap);
+                materialEditor.ShaderProperty(_UVSetMetallic, new GUIContent("UV Set", "The UV set to use for the MetallicSmoothness Map"), 2);
+                materialEditor.ShaderProperty(_Metallic, new GUIContent("Metallic", "Metallic, set to 1 if using metallic map"), 2);
+                materialEditor.ShaderProperty(_Glossiness, new GUIContent("Smoothness", "Smoothness, set to 1 if using metallic map"), 2);
+                materialEditor.ShaderProperty(_ClearcoatSmoothness, new GUIContent("Clearcoat Smoothness", "Smoothness of the clearcoat."), 2);
+                materialEditor.ShaderProperty(_ClearcoatStrength, new GUIContent("Clearcoat Reflectivity", "The strength of the clearcoat reflection."), 2);
+            }
+            else if (_ReflectionMode.floatValue == 2) //Matcap
+            {
+                materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
+                
+                XSStyles.SeparatorThin();
+                materialEditor.TexturePropertySingleLine(new GUIContent("Matcap", "Matcap Texture"), _Matcap, _MatcapTint);
+                materialEditor.ShaderProperty(_Glossiness, new GUIContent("Matcap Blur", "Matcap blur, blurs the Matcap, set to 1 for full clarity"), 2);
+                material.SetFloat("_Metallic", 0);
+                material.SetFloat("_ClearCoat", 0);
+                material.SetTexture("_MetallicGlossMap", null);
+            }
+            if (_ReflectionMode.floatValue != 3)
+            {
+                XSStyles.SeparatorThin();
+                materialEditor.TexturePropertySingleLine(new GUIContent("Reflectivity Mask", "Mask for reflections."), _ReflectivityMask);
+                materialEditor.TextureScaleOffsetProperty(_ReflectivityMask);
+                materialEditor.ShaderProperty(_UVSetReflectivity, new GUIContent("UV Set", "The UV set to use for the Reflectivity Mask"), 2);
+                materialEditor.ShaderProperty(_Reflectivity, new GUIContent("Reflectivity", "The strength of the reflections."), 2);
+            }
+            if(_ReflectionMode.floatValue == 3)
+            {
+                material.SetFloat("_Metallic", 0);
+                material.SetFloat("_ReflectionBlendMode", 0);
+                material.SetFloat("_ClearCoat", 0);
+            }
+        }
+    }
+
+    private void DrawEmissionSettings(MaterialEditor materialEditor)
+    {
+        showEmission = XSStyles.ShurikenFoldout("Emission", showEmission);
+        if (showEmission)
+        {
+            materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map", "Emissive map. White to black, unless you want multiple colors."), _EmissionMap, _EmissionColor);
+            materialEditor.TextureScaleOffsetProperty(_EmissionMap);
+            materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
+            materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
+
+            XSStyles.SeparatorThin();
+            materialEditor.ShaderProperty(_ScaleWithLight, new GUIContent("Scale w/ Light", "Scales the emission intensity based on how dark or bright the environment is."));
+            if(_ScaleWithLight.floatValue == 0)
+                materialEditor.ShaderProperty(_ScaleWithLightSensitivity, new GUIContent("Scaling Sensitivity", "How agressively the emission should scale with the light."));
+        }
+    }
+
+    private void DrawRimlightSettings(MaterialEditor materialEditor)
+    {
+        showRimlight = XSStyles.ShurikenFoldout("Rimlight", showRimlight);
+        if (showRimlight)
+        {
+            materialEditor.ShaderProperty(_RimColor, new GUIContent("Rimlight Tint", "The Tint of the Rimlight."));
+            materialEditor.ShaderProperty(_RimAlbedoTint, new GUIContent("Rim Albedo Tint", "How much the Albedo texture should effect the rimlight color."));
+            materialEditor.ShaderProperty(_RimCubemapTint, new GUIContent("Rim Environment Tint", "How much the Environment cubemap should effect the rimlight color."));
+            materialEditor.ShaderProperty(_RimAttenEffect, new GUIContent("Rim Attenuation Effect","How much should realtime shadows mask out the rimlight?"));
+            materialEditor.ShaderProperty(_RimIntensity, new GUIContent("Rimlight Intensity", "Strength of the Rimlight."));
+            materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
+            materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);
+            materialEditor.ShaderProperty(_RimSharpness, new GUIContent("Sharpness", "Sharpness of the Rim"), 2);
+        }
+    }
+
+    private void DrawTransmissionSettings(MaterialEditor materialEditor)
+    {
+        showSubsurface = XSStyles.ShurikenFoldout("Transmission", showSubsurface);
+        if (showSubsurface)
+        {
+            materialEditor.TexturePropertySingleLine(new GUIContent("Thickness Map", "Thickness Map, used to mask areas where transmission can happen"), _ThicknessMap);
+            materialEditor.TextureScaleOffsetProperty(_ThicknessMap);
+            materialEditor.ShaderProperty(_UVSetThickness, new GUIContent("UV Set", "The UV set to use for the Thickness Map"), 2);
+            XSStyles.constrainedShaderProperty(materialEditor, _SSColor, new GUIContent("Transmission Color", "Transmission Color"), 2);
+            materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Transmission Distortion", "How much the Transmission should follow the normals of the mesh and/or normal map."), 2);
+            materialEditor.ShaderProperty(_SSPower, new GUIContent("Transmission Power", "Subsurface Power"), 2);
+            materialEditor.ShaderProperty(_SSScale, new GUIContent("Transmission Scale", "Subsurface Scale"), 2);
+        }
+    }
+
+    private void DrawAdvancedSettings(MaterialEditor materialEditor)
+    {
+        if (_AdvMode.floatValue == 1)
+        {
+            showAdvanced = XSStyles.ShurikenFoldout("Advanced Settings", showAdvanced);
+            if (showAdvanced)
+            {
+                materialEditor.ShaderProperty(_VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
+                materialEditor.ShaderProperty(_Stencil, _Stencil.displayName);
+                materialEditor.ShaderProperty(_StencilComp, _StencilComp.displayName);
+                materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
+
+                materialEditor.RenderQueueField();              
+            }
+        }
+    }
+
+    private void DrawPatreonSettings(MaterialEditor materialEditor)
+    {
+        //Plugins for Patreon releases
+        if(isPatreonShader)
+        {
+            if(isEyeTracking)
+            {
+                showEyeTracking = XSStyles.ShurikenFoldout("Eye Tracking Settings", showEyeTracking);
+                if(showEyeTracking)
+                {
+                    materialEditor.ShaderProperty(_LeftRightPan, new GUIContent("Left Right Adj.", "Adjusts the eyes manually left or right."));
+                    materialEditor.ShaderProperty(_UpDownPan, new GUIContent("Up Down Adj.", "Adjusts the eyes manually up or down."));
+                    
+                    XSStyles.SeparatorThin();
+                    materialEditor.ShaderProperty(_AttentionSpan, new GUIContent("Attention Span", "How often should the eyes look at the target; 0 = never, 1 = always, 0.5 = half of the time."));
+                    materialEditor.ShaderProperty(_FollowPower, new GUIContent("Follow Power", "The influence the target has on the eye"));
+                    materialEditor.ShaderProperty(_LookSpeed, new GUIContent("Look Speed","How fast the eye transitions to looking at the target"));
+                    materialEditor.ShaderProperty(_Twitchyness, new GUIContent("Refocus Frequency", "How much should the eyes look around near the target?"));
+
+                    XSStyles.SeparatorThin();
+                    materialEditor.ShaderProperty(_IrisSize, new GUIContent("Iris Size", "Size of the iris"));  
+                    materialEditor.ShaderProperty(_FollowLimit, new GUIContent("Follow Limit", "Limits the angle from the front of the face on how far the eyes can track/rotate."));               
+                    materialEditor.ShaderProperty(_EyeOffsetLimit, new GUIContent("Offset Limit", "Limit for how far the eyes can turn"));
+                }
+            }
+        }
+        //
     }
 }
