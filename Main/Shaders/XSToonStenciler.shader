@@ -18,7 +18,7 @@
 	}
 	SubShader
 	{
-		Tags { "RenderType"="" "Queue" = "AlphaTest+1" }
+		Tags { "RenderType"="" "Queue" = "Geometry-1" }
 		LOD 100
 
 		Cull [_Culling]

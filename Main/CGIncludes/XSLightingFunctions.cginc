@@ -55,10 +55,10 @@ half3 getVertexLightsDir(XSLighting i, half4 vertexLightAtten)
     half3 dirZ = toLightZ - i.worldPos;
     half3 dirW = toLightW - i.worldPos;
     
-    dirX *= length(toLightX) * vertexLightAtten.x;
-    dirY *= length(toLightY) * vertexLightAtten.y;
-    dirZ *= length(toLightZ) * vertexLightAtten.z;
-    dirW *= length(toLightW) * vertexLightAtten.w;
+    dirX *= length(toLightX) * vertexLightAtten.x * unity_LightColor[0];
+    dirY *= length(toLightY) * vertexLightAtten.y * unity_LightColor[1];
+    dirZ *= length(toLightZ) * vertexLightAtten.z * unity_LightColor[2];
+    dirW *= length(toLightW) * vertexLightAtten.w * unity_LightColor[3];
 
     half3 dir = (dirX + dirY + dirZ + dirW) / 4;
     return dir;
@@ -263,6 +263,8 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness
             {
                 spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
             }
+
+            spec *= lerp(1, i.diffuseColor, _MatcapTintToDiffuse);
         }
         spec = lerp(spec, spec * ramp, metallicSmoothness.w); // should only not see shadows on a perfect mirror.
     return spec;
@@ -296,7 +298,7 @@ half4 calcRamp(XSLighting i, DotProducts d)
 
 half3 calcIndirectDiffuse(XSLighting i)
 {// We don't care about anything other than the color from probes for toon lighting.
-    half3 indirectDiffuse = ShadeSH9(float4(0,1,0,1));//half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
+    half3 indirectDiffuse = ShadeSH9(float4(0,0.5,0,1));//half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
     return indirectDiffuse;
 }
 

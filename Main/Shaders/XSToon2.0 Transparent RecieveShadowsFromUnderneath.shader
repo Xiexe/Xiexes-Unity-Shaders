@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0_Cutout"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0_Transparent_ShadowFromUnderneath_Hack"
 {
     Properties
     {	
@@ -102,10 +102,10 @@
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
     }
-
+    
     SubShader
     {
-        Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
+        Tags { "RenderType"="Transparent" "Queue"="AlphaTest+49" }
         Cull [_Culling]
                 Stencil 
         {
@@ -113,6 +113,8 @@
             Comp [_StencilComp]
             Pass [_StencilOp]
         }
+        Blend SrcAlpha OneMinusSrcAlpha
+        ZWrite Off
         Pass
         {
             Name "FORWARD"
@@ -122,16 +124,16 @@
             #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
-
+            
             #pragma multi_compile _ VERTEXLIGHT_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase 
-            
+
             #ifndef UNITY_PASS_FORWARDBASE
                 #define UNITY_PASS_FORWARDBASE
             #endif
             
-            #define Cutout
+            #define Transparent
 
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -147,7 +149,7 @@
         {
             Name "FWDADD"
             Tags { "LightMode" = "ForwardAdd" }
-            Blend One One
+            Blend SrcAlpha One
 
             CGPROGRAM
             #pragma target 3.0
@@ -156,12 +158,10 @@
             
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
-
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
-            
-            #define Cutout
+            #define Transparent
             
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -173,26 +173,26 @@
             ENDCG
         }
 
-        Pass
-        {
-            Name "ShadowCaster"
-            Tags{ "LightMode" = "ShadowCaster" }
-            ZWrite On ZTest LEqual
-            CGPROGRAM
-            #pragma vertex vertShadowCaster
-            #pragma fragment fragShadowCaster
-            #pragma target 3.0
-            #pragma multi_compile_shadowcaster
-            #ifndef UNITY_PASS_SHADOWCASTER
-                #define UNITY_PASS_SHADOWCASTER
-            #endif
-            #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-            #define Cutout
+        // Pass
+        // {
+        //     Name "ShadowCaster"
+        //     Tags{ "LightMode" = "ShadowCaster" }
+        //     ZWrite On ZTest LEqual
+        //     CGPROGRAM
+        //     #pragma vertex vertShadowCaster
+        //     #pragma fragment fragShadowCaster
+        //     #pragma target 3.0
+        //     #pragma multi_compile_shadowcaster
+        //     #ifndef UNITY_PASS_SHADOWCASTER
+        //         #define UNITY_PASS_SHADOWCASTER
+        //     #endif
+        //     #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
+        //     #define Transparent
 
-            #include "../CGIncludes/XSShadowCaster.cginc"
-            ENDCG
-        }
+        //     #include "../CGIncludes/XSShadowCaster.cginc"
+        //     ENDCG
+        // }
     }
-    Fallback "Transparent/Cutout/Diffuse"
+    Fallback "Transparent/Diffuse"
     CustomEditor "XSToonInspector"
 }

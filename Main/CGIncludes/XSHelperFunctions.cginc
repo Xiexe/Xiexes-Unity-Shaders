@@ -243,48 +243,50 @@ void calcAlpha(inout XSLighting i)
 }
 
 // //Halftone functions, finish implementing later.. Not correct right now.
-// half2 rotateUV(half2 uv, half rotation)
-// {
-//     half mid = 0.5;
-//     return half2(
-//         cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
-//         cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
-//     );
-// }
+float2 SphereUV( float3 coords /*viewDir?*/)
+{
+    float3 nc = normalize(coords);
+    float lat = acos(nc.y);
+    float lon = atan2(nc.z, nc.x);
+    float2 coord = 1.0 - (float2(lon, lat) * float2(1.0/UNITY_PI, 1.0/UNITY_PI));
+    return (coord + float4(0, 1-unity_StereoEyeIndex,1,1.0).xy) * float4(0, 1-unity_StereoEyeIndex,1,1.0).zw;
+}
 
-// half DotHalftone(XSLighting i, half scalar) //Scalar can be anything from attenuation to a dot product
-// {
-// 	bool inMirror = IsInMirror();
-// 	half2 uv = i.screenUV;
-// 	#if UNITY_SINGLE_PASS_STEREO
-// 		uv *= 2;
-// 	#endif
-    
-//     half2 nearest = 2 * frac(100 * uv) - 1;
-//     half dist = length(nearest);
-// 	half dotSize = 10 * scalar;
-//     half dotMask = step(dotSize, dist);
+half2 rotateUV(half2 uv, half rotation)
+{
+    half mid = 0.5;
+    return half2(
+        cos(rotation) * (uv.x - mid) + sin(rotation) * (uv.y - mid) + mid,
+        cos(rotation) * (uv.y - mid) - sin(rotation) * (uv.x - mid) + mid
+    );
+}
 
-// 	return dotMask;
-// }
+half DotHalftone(XSLighting i, half scalar) //Scalar can be anything from attenuation to a dot product
+{
+	bool inMirror = IsInMirror();
+	half2 uv = SphereUV(calcViewDir(i.worldPos));
+    uv.xy *= _HalftoneDotAmount;
+    half2 nearest = 2 * frac(100 * uv) - 1;
+    half dist = length(nearest);
+	half dotSize = 100 * _HalftoneDotSize * scalar;
+    half dotMask = step(dotSize, dist);
 
-// half LineHalftone(XSLighting i, half scalar)
-// {	
-// 	// #if defined(DIRECTIONAL)
-// 	// 	scalar = saturate(scalar + ((1-i.attenuation) * 0.2));
-// 	// #endif
-// 	bool inMirror = IsInMirror();
-// 	half2 uv = i.screenUV;
-// 	uv = rotateUV(uv, -0.785398);
-// 	#if UNITY_SINGLE_PASS_STEREO
-// 		_HalftoneLineAmount = _HalftoneLineAmount * 2;
+	return lerp(1, 1-dotMask, smoothstep(0, 0.4, 1/distance(i.worldPos, _WorldSpaceCameraPos)));;
+}
 
-// 	#endif
-// 	uv.x = sin(uv.x * _HalftoneLineAmount);
+half LineHalftone(XSLighting i, half scalar)
+{	
+	// #if defined(DIRECTIONAL)
+	// 	scalar = saturate(scalar + ((1-i.attenuation) * 0.2));
+	// #endif
+	bool inMirror = IsInMirror();
+	half2 uv = SphereUV(calcViewDir(i.worldPos));
+	uv = rotateUV(uv, -0.785398);
+	uv.x = sin(uv.x * _HalftoneLineAmount * scalar);
 
-// 	half2 steppedUV = smoothstep(0,0.2,uv.x);
-// 	half lineMask = steppedUV * 0.2 * scalar;
+	half2 steppedUV = smoothstep(0,0.2,uv.x);
+	half lineMask = lerp(1, steppedUV, smoothstep(0, 0.4, 1/distance(i.worldPos, _WorldSpaceCameraPos)));
 
-// 	return saturate(lineMask);
-// }
+	return saturate(lineMask);
+}
 //

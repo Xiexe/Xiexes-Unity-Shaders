@@ -152,6 +152,7 @@ half4 _Color, _ShadowRim,
     _OutlineColor, _SSColor, _OcclusionColor,
     _EmissionColor, _MatcapTint, _RimColor;
 
+half _MatcapTintToDiffuse;
 half _Cutoff;
 half _FadeDitherDistance;
 half _EmissionToDiffuse, _ScaleWithLightSensitivity;
@@ -166,6 +167,7 @@ half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;
 
+int _HalftoneType;
 int _FadeDither;
 int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 int _TilingMode, _VertexColorAlbedo, _ScaleWithLight;
@@ -175,7 +177,7 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
     _UVSetEmission;
 
-// half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount;
+half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount, _HalftoneLineIntensity;
 
 //Defines for helper functions
 #define grayscaleVec float3(0.2125, 0.7154, 0.0721)
