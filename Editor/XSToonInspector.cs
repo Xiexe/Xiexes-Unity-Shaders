@@ -36,6 +36,7 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _MetallicGlossMap = null;
     MaterialProperty _BakedCubemap = null;
     MaterialProperty _Matcap = null;
+    MaterialProperty _MatcapTintToDiffuse = null;
     MaterialProperty _MatcapTint = null;
     MaterialProperty _ReflectivityMask = null;
     MaterialProperty _Metallic = null;
@@ -79,9 +80,11 @@ public class XSToonInspector : ShaderGUI
     MaterialProperty _SSDistortion = null;
     MaterialProperty _SSPower = null;
     MaterialProperty _SSScale = null;
-    //MaterialProperty _HalftoneDotSize = null;
-    //MaterialProperty _HalftoneDotAmount = null;
-    //MaterialProperty _HalftoneLineAmount = null;
+    MaterialProperty _HalftoneDotSize = null;
+    MaterialProperty _HalftoneDotAmount = null;
+    MaterialProperty _HalftoneLineAmount = null;
+    MaterialProperty _HalftoneLineIntensity = null;
+    MaterialProperty _HalftoneType = null;
     MaterialProperty _UVSetAlbedo = null;
     MaterialProperty _UVSetNormal = null;
     MaterialProperty _UVSetDetNormal = null;
@@ -122,6 +125,7 @@ public class XSToonInspector : ShaderGUI
     static bool showSpecular = false;
     static bool showReflection = false;
     static bool showRimlight = false;
+    static bool showHalftones = false;
     static bool showSubsurface = false;
     static bool showOutlines = false;
     static bool showEmission = false;
@@ -177,6 +181,7 @@ public class XSToonInspector : ShaderGUI
             DrawReflectionsSettings(materialEditor, material);
             DrawEmissionSettings(materialEditor);
             DrawRimlightSettings(materialEditor);
+            DrawHalfToneSettings(materialEditor);
             DrawTransmissionSettings(materialEditor);
             DrawAdvancedSettings(materialEditor);
             DrawPatreonSettings(materialEditor);
@@ -369,6 +374,7 @@ public class XSToonInspector : ShaderGUI
                 XSStyles.SeparatorThin();
                 materialEditor.TexturePropertySingleLine(new GUIContent("Matcap", "Matcap Texture"), _Matcap, _MatcapTint);
                 materialEditor.ShaderProperty(_Glossiness, new GUIContent("Matcap Blur", "Matcap blur, blurs the Matcap, set to 1 for full clarity"), 2);
+                materialEditor.ShaderProperty(_MatcapTintToDiffuse, new GUIContent("Tint To Diffuse", "Tints matcap to diffuse color."), 2);
                 material.SetFloat("_Metallic", 0);
                 material.SetFloat("_ClearCoat", 0);
                 material.SetTexture("_MetallicGlossMap", null);
@@ -420,6 +426,27 @@ public class XSToonInspector : ShaderGUI
             materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
             materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);
             materialEditor.ShaderProperty(_RimSharpness, new GUIContent("Sharpness", "Sharpness of the Rim"), 2);
+        }
+    }
+
+    private void DrawHalfToneSettings(MaterialEditor materialEditor)
+    {
+        showHalftones = XSStyles.ShurikenFoldout("Halftones", showHalftones);
+        if (showHalftones)
+        {
+            materialEditor.ShaderProperty(_HalftoneType, new GUIContent("Halftone Style", "Controls where halftone and stippling effects are drawn."));
+
+            if(_HalftoneType.floatValue == 1 || _HalftoneType.floatValue == 2)
+            {
+                materialEditor.ShaderProperty(_HalftoneDotSize, new GUIContent("Stippling Scale", "How large should the stippling pattern be?"));
+                materialEditor.ShaderProperty(_HalftoneDotAmount, new GUIContent("Stippling Density", "How dense is the stippling effect?"));
+            }
+
+            if(_HalftoneType.floatValue == 0 || _HalftoneType.floatValue == 2)
+            {
+                materialEditor.ShaderProperty(_HalftoneLineAmount, new GUIContent("Halftone Line Count", "How many lines should the halftone shadows have?"));
+                materialEditor.ShaderProperty(_HalftoneLineIntensity, new GUIContent("Halftone Line Intensity", "How dark should the halftone lines be?"));
+            }
         }
     }
 

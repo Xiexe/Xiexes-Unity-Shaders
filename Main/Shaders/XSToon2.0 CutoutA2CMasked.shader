@@ -25,6 +25,7 @@
         _BakedCubemap("Baked Cubemap", CUBE) = "black" {}
         _Matcap("Matcap", 2D) = "black" {}
         [HDR]_MatcapTint("Matcap Tint", Color) = (1,1,1,1)
+        _MatcapTintToDiffuse("Matcap Tint To Diffuse", Range(0,1)) = 0
         _ReflectivityMask("Reflection Mask" , 2D) = "white" {}
         _Metallic("Metallic", Range(0,1)) = 0
         _Glossiness("Smoothness", Range(0,1)) = 0
@@ -80,9 +81,11 @@
         _SSPower("Subsurface Power", Range(0,3)) = 1
         _SSScale("Subsurface Scale", Range(0,3)) = 1
 
-        _HalftoneDotSize("Halftone Dot Size", Float) = 1.7
-        _HalftoneDotAmount("Halftone Dot Amount", Float) = 50
-        _HalftoneLineAmount("Halftone Line Amount", Float) = 150
+        [Enum(Shadows, 0, Highlights, 1, Shadows And Highlights, 2, Off, 3)] _HalftoneType("Halftones Type", Int) = 3
+        _HalftoneDotSize("Halftone Dot Size", Float) = 0.5
+        _HalftoneDotAmount("Halftone Dot Amount", Float) = 5
+        _HalftoneLineAmount("Halftone Line Amount", Float) = 2000
+        _HalftoneLineIntensity("Halftone Line Intensity", Range(0,1)) = 1
 
         [Enum(UV1,0,UV2,1)] _UVSetAlbedo("Albedo UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetNormal("Normal Map UVs", Int) = 0
