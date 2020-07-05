@@ -51,7 +51,9 @@ half4 BRDF_XSLighting(XSLighting i)
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
 
     half lineHalftone = 0;
-    half stippling = 0;
+    half stipplingDirect = 0;
+    half stipplingRim = 0;
+    half stipplingIndirect = 0;
     bool usingLineHalftone = 0;
     if(_HalftoneType == 0 || _HalftoneType == 2)
     {
@@ -61,10 +63,13 @@ half4 BRDF_XSLighting(XSLighting i)
 
     if(_HalftoneType == 1 || _HalftoneType == 2)
     {
-        stippling = DotHalftone(i, saturate(dot(directSpecular + rimLight + directSpecular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
-        directSpecular *= stippling; 
-        indirectSpecular *= lerp(0.5, 1, stippling); // Don't want these to go completely black, looks weird
-        rimLight *= stippling;
+        stipplingDirect = DotHalftone(i, saturate(dot(directSpecular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
+        stipplingRim = DotHalftone(i, saturate(dot(rimLight, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
+        stipplingIndirect = DotHalftone(i, saturate(dot(indirectSpecular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
+        
+        directSpecular *= stipplingDirect; 
+        rimLight *= stipplingRim;
+        indirectSpecular *= lerp(0.5, 1, stipplingIndirect); // Don't want these to go completely black, looks weird
     }
 
     half4 col;
@@ -77,6 +82,6 @@ half4 BRDF_XSLighting(XSLighting i)
     col += calcEmission(i, lightAvg);
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline) * lerp(1, lineHalftone, _HalftoneLineIntensity * usingLineHalftone);
-    //finalColor = lerp(finalColor, stippling, 0.9999);
+    //finalColor = lerp(finalColor, rimLight.xyzz, 0.9999);
     return finalColor;
 }
