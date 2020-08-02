@@ -8,6 +8,15 @@ float4 frag (
     ) : SV_Target
 {
     UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
+	
+	// fix for rare bug where light atten is 0 when there is no directional light in the scene
+	#ifdef UNITY_PASS_FORWARDBASE
+		if(all(_LightColor0.rgb == 0.0))
+		{
+			attenuation = 1.0;
+		}
+	#endif
+	
     #if defined(DIRECTIONAL)
         attenuation = lerp(attenuation, round(attenuation), _ShadowSharpness);
     #endif
