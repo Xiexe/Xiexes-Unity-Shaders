@@ -192,5 +192,5 @@
         }
     }
     Fallback "Diffuse"
-    CustomEditor "XSToonInspector"
+    CustomEditor "XSToon.XSToonInspector"
 }

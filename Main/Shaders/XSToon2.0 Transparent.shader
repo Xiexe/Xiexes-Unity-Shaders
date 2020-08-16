@@ -194,5 +194,5 @@
         }
     }
     Fallback "Transparent/Diffuse"
-    CustomEditor "XSToonInspector"
+    CustomEditor "XSToon.XSToonInspector"
 }

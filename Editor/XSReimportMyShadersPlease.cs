@@ -3,38 +3,40 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-
-public class XSReimportMyShadersPlease : AssetPostprocessor 
+namespace XSToon
 {
-    private static string xsFilePath = null;
-    static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+    public class XSReimportMyShadersPlease : AssetPostprocessor 
     {
-        if (xsFilePath == null) 
+        private static string xsFilePath = null;
+        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
         {
-            xsFilePath = XSStyles.findAssetPath("");
-        }
-        foreach (string str in importedAssets)
-        {
-            if (str.StartsWith(xsFilePath + "/Main/CGIncludes")) 
+            if (xsFilePath == null) 
             {
-                Debug.Log("XS CGInclude updated: " + str.Replace(xsFilePath + "/Main/CGIncludes/",""));
-                string[] files = Directory.GetFiles(xsFilePath + "/Main/Shaders", "*.shader");
-                foreach (string file in files)
-                {
-                    AssetDatabase.ImportAsset(file, ImportAssetOptions.ForceUpdate);
-                }
+                xsFilePath = XSStyles.findAssetPath("");
             }
-
-            if (str.StartsWith(xsFilePath + "/Main/Patreon/CGIncludes")) 
+            foreach (string str in importedAssets)
             {
-                Debug.Log("XS CGInclude updated: " + str.Replace(xsFilePath + "/Main/Patreon/CGIncludes/",""));
-                string[] files = Directory.GetFiles(xsFilePath + "/Main/Patreon/Shaders", "*.shader");
-                foreach (string file in files)
+                if (str.StartsWith(xsFilePath + "/Main/CGIncludes")) 
                 {
-                    AssetDatabase.ImportAsset(file, ImportAssetOptions.ForceUpdate);
+                    Debug.Log("XS CGInclude updated: " + str.Replace(xsFilePath + "/Main/CGIncludes/",""));
+                    string[] files = Directory.GetFiles(xsFilePath + "/Main/Shaders", "*.shader");
+                    foreach (string file in files)
+                    {
+                        AssetDatabase.ImportAsset(file, ImportAssetOptions.ForceUpdate);
+                    }
                 }
-            }
 
+                if (str.StartsWith(xsFilePath + "/Main/Patreon/CGIncludes")) 
+                {
+                    Debug.Log("XS CGInclude updated: " + str.Replace(xsFilePath + "/Main/Patreon/CGIncludes/",""));
+                    string[] files = Directory.GetFiles(xsFilePath + "/Main/Patreon/Shaders", "*.shader");
+                    foreach (string file in files)
+                    {
+                        AssetDatabase.ImportAsset(file, ImportAssetOptions.ForceUpdate);
+                    }
+                }
+
+            }
         }
     }
 }
