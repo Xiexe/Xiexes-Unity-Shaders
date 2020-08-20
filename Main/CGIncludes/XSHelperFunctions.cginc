@@ -201,45 +201,45 @@ void calcAlpha(inout XSLighting i)
 {	
     //Default to 1 alpha || Opaque
     i.alpha = 1;
-
-    #if defined(AlphaBlend)
+    #if defined(AlphaBlend) || defined(Transparent)
         i.alpha = i.albedo.a;
     #endif
 
-    #if defined(Transparent)
-        i.alpha = i.albedo.a;
-    #endif
-
-    #if defined(AlphaToMask) && !defined(Masked)// mix of dithering and alpha blend to provide best results.
+    #if defined(AlphaToMask)
         half dither = calcDither(i.screenUV.xy);
-        i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);
-    #endif
+        _ClipAgainstVertexColor = saturate(_ClipAgainstVertexColor); //So the lerp doesn't go crazy
+        i.albedo.a -= lerp(i.color.r, 0, _ClipAgainstVertexColor.r);
+        i.albedo.a -= lerp(i.color.g, 0, _ClipAgainstVertexColor.g);
+        i.albedo.a -= lerp(i.color.b, 0, _ClipAgainstVertexColor.b);
 
-    #if defined(AlphaToMask) && defined(Masked)
-        i.alpha = saturate(i.cutoutMask.r + _Cutoff);
-        i.alpha = lerp(1-i.alpha, i.alpha, i.albedo.a);
+        i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);
     #endif
 
     #if defined(Dithered)
         half dither = calcDither(i.screenUV.xy);
-        if(_FadeDither)
-        {   
-            float d = distance(_WorldSpaceCameraPos, i.worldPos);
-            d = smoothstep(_FadeDitherDistance, _FadeDitherDistance + 0.02, d);
-            clip( ((1-i.cutoutMask.r) + d) - dither);
-            clip(i.albedo.a - dither);
-        }
-        else
-        {
-            clip(i.albedo.a - dither);
-        }
+
+        float fadeDist = abs(_FadeDitherDistance);
+        float d = distance(_WorldSpaceCameraPos, i.worldPos);
+        d = smoothstep(fadeDist, fadeDist + 0.05, d);
+        d = lerp(d, 1-d, saturate(step(0, _FadeDitherDistance)));
+        dither += lerp(0, d, saturate(_FadeDither));
+
+        _ClipAgainstVertexColor = saturate(_ClipAgainstVertexColor); //So the lerp doesn't go crazy
+        dither += lerp(i.color.r, 0, _ClipAgainstVertexColor.r);
+        dither += lerp(i.color.g, 0, _ClipAgainstVertexColor.g);
+        dither += lerp(i.color.b, 0, _ClipAgainstVertexColor.b);
+
+        clip(i.albedo.a - dither);
     #endif
 
     #if defined(Cutout)
+        _ClipAgainstVertexColor = saturate(_ClipAgainstVertexColor); //So the lerp doesn't go crazy
+        _Cutoff *= lerp(i.color.r, 1, _ClipAgainstVertexColor.r);
+        _Cutoff *= lerp(i.color.g, 1, _ClipAgainstVertexColor.g);
+        _Cutoff *= lerp(i.color.b, 1, _ClipAgainstVertexColor.b);
+
         clip(i.albedo.a - _Cutoff);
     #endif
-
-
 }
 
 // //Halftone functions, finish implementing later.. Not correct right now.

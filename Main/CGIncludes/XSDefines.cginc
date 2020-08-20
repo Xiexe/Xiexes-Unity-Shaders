@@ -84,10 +84,6 @@ struct XSLighting
     half4 occlusion;
     half4 emissionMap;
     half4 rampMask;
-    #if defined(AlphaToMask) && defined(Masked) || defined(Dithered)
-        half4 cutoutMask;
-    #endif
-
     half3 diffuseColor;
     half attenuation;
     half3 normal;
@@ -163,6 +159,8 @@ half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _Specula
 
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _RimCubemapTint, _RimAttenEffect;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
+
+half4 _ClipAgainstVertexColor;
 
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;

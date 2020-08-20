@@ -6,7 +6,6 @@
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         _MainTex("Texture", 2D) = "white" {}
-        _CutoutMask("Dissolve Mask", 2D) = "white" {}
         _Saturation("Main Texture Saturation", Range(0,10)) = 1
         _Color("Color Tint", Color) = (1,1,1,1)
         _Cutoff("Cutoff", Float) = 0.5
@@ -89,6 +88,8 @@
         _HalftoneDotAmount("Halftone Dot Amount", Float) = 5
         _HalftoneLineAmount("Halftone Line Amount", Float) = 2000
         _HalftoneLineIntensity("Halftone Line Intensity", Range(0,1)) = 1
+
+        _ClipAgainstVertexColor("Clip Vert Color RGBA", Vector) = (1,1,1,1)
 
         [Enum(UV1,0,UV2,1)] _UVSetAlbedo("Albedo UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetNormal("Normal Map UVs", Int) = 0

@@ -1,6 +1,6 @@
 ﻿Shader "Xiexe/Toon2.0/XSToon2.0_CutoutA2C"
 {
-        Properties
+    Properties
     {	
         [Enum(Off, 0, On, 1)] _VertexColorAlbedo ("Vertex Color Albedo", Int) = 0
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
@@ -85,6 +85,8 @@
         _HalftoneDotAmount("Halftone Dot Amount", Float) = 5
         _HalftoneLineAmount("Halftone Line Amount", Float) = 2000
         _HalftoneLineIntensity("Halftone Line Intensity", Range(0,1)) = 1
+        
+        _ClipAgainstVertexColor("Clip Vert Color RGBA", Vector) = (1,1,1,1)
 
         [Enum(UV1,0,UV2,1)] _UVSetAlbedo("Albedo UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetNormal("Normal Map UVs", Int) = 0

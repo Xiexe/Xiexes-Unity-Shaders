@@ -25,7 +25,6 @@ namespace XSToon
         MaterialProperty _Saturation = null;
         MaterialProperty _Color = null;
         MaterialProperty _Cutoff = null;
-        MaterialProperty _DitherMask = null;
         MaterialProperty _FadeDither = null;
         MaterialProperty _FadeDitherDistance = null;
         MaterialProperty _BumpMap = null;
@@ -108,6 +107,7 @@ namespace XSToon
         MaterialProperty _ShadowSharpness = null;
         MaterialProperty _AdvMode = null;
         MaterialProperty _CutoutMask = null;
+        MaterialProperty _ClipAgainstVertexColor = null;
 
         //Material Properties for Patreon Plugins
             MaterialProperty _LeftRightPan = null;
@@ -148,7 +148,6 @@ namespace XSToon
 
             isDithered = shader.name.Contains("Dithered");
             isCutout = shader.name.Contains("Cutout") && !shader.name.Contains("A2C");
-            isCutoutMasked = shader.name.Contains("A2C") && shader.name.Contains("Masked");
             isOutlined = shader.name.Contains("Outline");
             isPatreonShader = shader.name.Contains("Patreon");
             isEyeTracking = shader.name.Contains("EyeTracking");
@@ -201,19 +200,12 @@ namespace XSToon
                 {
                     materialEditor.ShaderProperty(_Cutoff, new GUIContent("Cutoff", "The Cutoff Amount"), 2);
                 }
-                if(isCutoutMasked)
-                {
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Mask", "Black and white cutout mask"), _CutoutMask);
-                    materialEditor.ShaderProperty(_Cutoff, new GUIContent("Dissolve Progress", "The Cutoff Amount"), 2);
-                }
                 materialEditor.ShaderProperty(_UVSetAlbedo, new GUIContent("UV Set", "The UV set to use for the Albedo Texture."), 2);
                 materialEditor.TextureScaleOffsetProperty(_MainTex);
                 materialEditor.ShaderProperty(_Saturation, new GUIContent("Saturation", "Controls saturation of the final output from the shader."));
 
                 if(isDithered)
                 {
-                    //Dither Fading
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Mask", "Black and white mask to control dithering."), _CutoutMask);
                     materialEditor.ShaderProperty(_FadeDither, new GUIContent("Use Distance Fading", "Make the shader dither out based on the distance to the camera."), 2);
                     materialEditor.ShaderProperty(_FadeDitherDistance, new GUIContent("Fade Distance", "The distance at which the fading starts happening."), 2);
                 }
@@ -475,6 +467,14 @@ namespace XSToon
                 if (showAdvanced)
                 {
                     materialEditor.ShaderProperty(_VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
+                    materialEditor.ShaderProperty(_ClipAgainstVertexColor, new GUIContent("Vertex Color Opacity", "Uses the associated RGBA vertex color channel as a multiplier for clipping, can be used to clip parts of the mesh with R/G/B/A individually using the vertex colors as a mask."));
+                    Vector4 clipVal = _ClipAgainstVertexColor.vectorValue;
+                    clipVal.x = Mathf.Clamp01(clipVal.x);
+                    clipVal.y = Mathf.Clamp01(clipVal.y);
+                    clipVal.z = Mathf.Clamp01(clipVal.z);
+                    clipVal.w = Mathf.Clamp01(clipVal.w);
+                    _ClipAgainstVertexColor.vectorValue = clipVal;
+
                     materialEditor.ShaderProperty(_Stencil, _Stencil.displayName);
                     materialEditor.ShaderProperty(_StencilComp, _StencilComp.displayName);
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
