@@ -107,7 +107,8 @@ namespace XSToon
         MaterialProperty _ShadowSharpness = null;
         MaterialProperty _AdvMode = null;
         MaterialProperty _CutoutMask = null;
-        MaterialProperty _ClipAgainstVertexColor = null;
+        MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null; //So the lerp doesn't go crazy
+        MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
 
         //Material Properties for Patreon Plugins
             MaterialProperty _LeftRightPan = null;
@@ -467,14 +468,12 @@ namespace XSToon
                 if (showAdvanced)
                 {
                     materialEditor.ShaderProperty(_VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
-                    materialEditor.ShaderProperty(_ClipAgainstVertexColor, new GUIContent("Vertex Color Opacity", "Uses the associated RGBA vertex color channel as a multiplier for clipping, can be used to clip parts of the mesh with R/G/B/A individually using the vertex colors as a mask."));
-                    Vector4 clipVal = _ClipAgainstVertexColor.vectorValue;
-                    clipVal.x = Mathf.Clamp01(clipVal.x);
-                    clipVal.y = Mathf.Clamp01(clipVal.y);
-                    clipVal.z = Mathf.Clamp01(clipVal.z);
-                    clipVal.w = Mathf.Clamp01(clipVal.w);
-                    _ClipAgainstVertexColor.vectorValue = clipVal;
+                    materialEditor.ShaderProperty(_ClipAgainstVertexColorGreaterZeroFive, new GUIContent("Vertex Color > 0.5 Opacity", "Uses the associated RGBA vertex color channel as a multiplier for clipping, can be used to clip parts of the mesh with R/G/B/A individually using the vertex colors as a mask."));
+                    _ClipAgainstVertexColorGreaterZeroFive.vectorValue = ClampVec4(_ClipAgainstVertexColorGreaterZeroFive.vectorValue);
 
+                    materialEditor.ShaderProperty(_ClipAgainstVertexColorLessZeroFive, new GUIContent("Vertex Color < 0.5 Opacity", "Uses the associated RGBA vertex color channel as a multiplier for clipping, can be used to clip parts of the mesh with R/G/B/A individually using the vertex colors as a mask."));
+                    _ClipAgainstVertexColorLessZeroFive.vectorValue = ClampVec4(_ClipAgainstVertexColorLessZeroFive.vectorValue);
+                    
                     materialEditor.ShaderProperty(_Stencil, _Stencil.displayName);
                     materialEditor.ShaderProperty(_StencilComp, _StencilComp.displayName);
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
@@ -511,6 +510,16 @@ namespace XSToon
                 }
             }
             //
+        }
+
+        private Vector4 ClampVec4(Vector4 vec)
+        {
+            Vector4 value = vec;
+            value.x = Mathf.Clamp01(value.x);
+            value.y = Mathf.Clamp01(value.y);
+            value.z = Mathf.Clamp01(value.z);
+            value.w = Mathf.Clamp01(value.w);
+            return value;
         }
     }
 }

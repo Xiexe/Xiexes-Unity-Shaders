@@ -197,22 +197,36 @@ half3 getEnvMap(XSLighting i, DotProducts d, float blur, half3 reflDir, half3 in
     return envMap;
 }
 
+float AlphaAdjust(float alphaToAdj, float3 vColor)
+{
+    _ClipAgainstVertexColorGreaterZeroFive = saturate(_ClipAgainstVertexColorGreaterZeroFive); //So the lerp doesn't go crazy
+    _ClipAgainstVertexColorLessZeroFive = saturate(_ClipAgainstVertexColorLessZeroFive);
+
+    float modR = vColor.r < 0.5 ? _ClipAgainstVertexColorLessZeroFive.r : _ClipAgainstVertexColorGreaterZeroFive.r;
+    float modG = vColor.g < 0.5 ? _ClipAgainstVertexColorLessZeroFive.g : _ClipAgainstVertexColorGreaterZeroFive.g;
+    float modB = vColor.b < 0.5 ? _ClipAgainstVertexColorLessZeroFive.b : _ClipAgainstVertexColorGreaterZeroFive.b;
+
+    alphaToAdj *= lerp(0, 1, lerp(1, modR, step(0.01, vColor.r)));
+    alphaToAdj *= lerp(0, 1, lerp(1, modG, step(0.01, vColor.g)));
+    alphaToAdj *= lerp(0, 1, lerp(1, modB, step(0.01, vColor.b)));
+
+    return alphaToAdj;
+}
+
 void calcAlpha(inout XSLighting i)
 {	
     //Default to 1 alpha || Opaque
     i.alpha = 1;
+
+    float modifiedAlpha = AlphaAdjust(i.albedo.a, i.color);
+
     #if defined(AlphaBlend) || defined(Transparent)
         i.alpha = i.albedo.a;
     #endif
 
     #if defined(AlphaToMask)
         half dither = calcDither(i.screenUV.xy);
-        _ClipAgainstVertexColor = saturate(_ClipAgainstVertexColor); //So the lerp doesn't go crazy
-        i.albedo.a -= lerp(i.color.r, 0, _ClipAgainstVertexColor.r);
-        i.albedo.a -= lerp(i.color.g, 0, _ClipAgainstVertexColor.g);
-        i.albedo.a -= lerp(i.color.b, 0, _ClipAgainstVertexColor.b);
-
-        i.alpha = i.albedo.a - (dither * (1-i.albedo.a) * 0.15);
+        i.alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
     #endif
 
     #if defined(Dithered)
@@ -223,22 +237,11 @@ void calcAlpha(inout XSLighting i)
         d = smoothstep(fadeDist, fadeDist + 0.05, d);
         d = lerp(d, 1-d, saturate(step(0, _FadeDitherDistance)));
         dither += lerp(0, d, saturate(_FadeDither));
-
-        _ClipAgainstVertexColor = saturate(_ClipAgainstVertexColor); //So the lerp doesn't go crazy
-        dither += lerp(i.color.r, 0, _ClipAgainstVertexColor.r);
-        dither += lerp(i.color.g, 0, _ClipAgainstVertexColor.g);
-        dither += lerp(i.color.b, 0, _ClipAgainstVertexColor.b);
-
-        clip(i.albedo.a - dither);
+        clip(modifiedAlpha - dither);
     #endif
 
     #if defined(Cutout)
-        _ClipAgainstVertexColor = saturate(_ClipAgainstVertexColor); //So the lerp doesn't go crazy
-        _Cutoff *= lerp(i.color.r, 1, _ClipAgainstVertexColor.r);
-        _Cutoff *= lerp(i.color.g, 1, _ClipAgainstVertexColor.g);
-        _Cutoff *= lerp(i.color.b, 1, _ClipAgainstVertexColor.b);
-
-        clip(i.albedo.a - _Cutoff);
+        clip(modifiedAlpha - _Cutoff);
     #endif
 }
 

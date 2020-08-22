@@ -14,6 +14,7 @@
     #define UNITY_STANDARD_USE_SHADOW_UVS 1
 #endif
 
+uniform float4      _ClipAgainstVertexColorGreaterZeroFive, _ClipAgainstVertexColorLessZeroFive;
 uniform float4      _Color;
 uniform float       _Cutoff;
 uniform sampler2D   _MainTex;
@@ -30,6 +31,7 @@ struct VertexInput
     float4 vertex   : POSITION;
     float3 normal   : NORMAL;
     float2 uv0      : TEXCOORD0;
+    float4 color    : COLOR;
 };
 
 
@@ -47,6 +49,8 @@ struct VertexOutputShadowCaster
         float4 worldPos : TEXCOORD2;
         float4 screenPos : TEXCOORD3;
     #endif
+
+    float4 color : COLOR;
 };
 #endif
 
@@ -103,8 +107,24 @@ void vertShadowCaster(VertexInput v,
         o.worldPos = mul(unity_ObjectToWorld, v.vertex);
         o.screenPos = ComputeScreenPos(opos);
     #endif
+    o.color = v.color;
 }
 
+float AlphaAdjust(float alphaToAdj, float3 vColor)
+{
+    _ClipAgainstVertexColorGreaterZeroFive = saturate(_ClipAgainstVertexColorGreaterZeroFive); //So the lerp doesn't go crazy
+    _ClipAgainstVertexColorLessZeroFive = saturate(_ClipAgainstVertexColorLessZeroFive);
+
+    float modR = vColor.r < 0.5 ? _ClipAgainstVertexColorLessZeroFive.r : _ClipAgainstVertexColorGreaterZeroFive.r;
+    float modG = vColor.g < 0.5 ? _ClipAgainstVertexColorLessZeroFive.g : _ClipAgainstVertexColorGreaterZeroFive.g;
+    float modB = vColor.b < 0.5 ? _ClipAgainstVertexColorLessZeroFive.b : _ClipAgainstVertexColorGreaterZeroFive.b;
+
+    alphaToAdj *= lerp(0, 1, lerp(1, modR, step(0.01, vColor.r)));
+    alphaToAdj *= lerp(0, 1, lerp(1, modG, step(0.01, vColor.g)));
+    alphaToAdj *= lerp(0, 1, lerp(1, modB, step(0.01, vColor.b)));
+
+    return alphaToAdj;
+}
 
 half4 fragShadowCaster(
     #if !defined(V2F_SHADOW_CASTER_NOPOS_IS_EMPTY) || defined(UNITY_STANDARD_USE_SHADOW_UVS)
@@ -117,7 +137,9 @@ half4 fragShadowCaster(
 {
     #if defined(UNITY_STANDARD_USE_SHADOW_UVS)
         half alpha = 1;
-        
+        float4 albedo = tex2D(_MainTex, i.tex).a * _Color.a;
+        float modifiedAlpha = AlphaAdjust(albedo.a, i.color);
+
         #if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask) || defined(Cutout)
             #if defined(Dithered)
                 if(_FadeDither)
@@ -132,25 +154,31 @@ half4 fragShadowCaster(
                 }
                 else
                 {
-                    alpha = tex2D(_MainTex, i.tex).a * _Color.a;
+                    alpha = modifiedAlpha;
                 }
             #else
-                alpha = tex2D(_MainTex, i.tex).a * _Color.a;
+                alpha = modifiedAlpha;
             #endif
         #else
-            alpha = _Color.a;
+            alpha = modifiedAlpha;
         #endif
 
 		#if defined(Cutout)
-			clip(alpha - _Cutoff);
+            float cutoff = 1;
+			clip(modifiedAlpha - _Cutoff);
 		#endif
 
     	#if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask) || defined(Transparent)
 			#if defined(UNITY_STANDARD_USE_DITHER_MASK)
-				half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy*0.25,alpha*0.9375)).a;
+                #if defined(Dithered) || defined(AlphaToMask)
+                    alpha = modifiedAlpha;
+                #endif
+
+				half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy*0.25,modifiedAlpha*0.9375)).a;
 				clip(alphaRef - 0.01);
 			#else
-				clip(alpha - _Cutoff);
+                float cutoff = 1;
+                clip(modifiedAlpha - _Cutoff);
 			#endif
         #endif
     #endif

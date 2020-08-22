@@ -160,7 +160,7 @@ half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _Specula
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _RimCubemapTint, _RimAttenEffect;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
 
-half4 _ClipAgainstVertexColor;
+half4 _ClipAgainstVertexColorGreaterZeroFive, _ClipAgainstVertexColorLessZeroFive;
 
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;

@@ -46,7 +46,7 @@
             o.ntb[2] = IN[i].ntb[2];
             o.uv = IN[i].uv;
             o.uv1 = IN[i].uv1;
-            o.color = float4(_OutlineColor.rgb, 1); // store if outline in alpha channel of vertex colors | 1 = is an outline
+            o.color = float4(IN[i].color.rgb, 1); // store if outline in alpha channel of vertex colors | 1 = is an outline
             o.screenPos = ComputeScreenPos(o.pos);
             o.objPos = normalize(outlinePos);
 
