@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0_CutoutA2C_Outlined"
+﻿Shader "Xiexe/Toon2.0/XSToon2.0_Glass_Transparent"
 {
     Properties
     {	
@@ -84,14 +84,13 @@
         _SSPower("Subsurface Power", Range(0,3)) = 1
         _SSScale("Subsurface Scale", Range(0,3)) = 1
 
+        _IOR("Index of Refraction", Float) = 1.5
+
         [Enum(Shadows, 0, Highlights, 1, Shadows And Highlights, 2, Off, 3)] _HalftoneType("Halftones Type", Int) = 3
         _HalftoneDotSize("Halftone Dot Size", Float) = 0.5
         _HalftoneDotAmount("Halftone Dot Amount", Float) = 5
         _HalftoneLineAmount("Halftone Line Amount", Float) = 2000
         _HalftoneLineIntensity("Halftone Line Intensity", Range(0,1)) = 1
-
-        _ClipAgainstVertexColorGreaterZeroFive("Clip Vert Color > 0.5", Vector) = (1,1,1,1)
-        _ClipAgainstVertexColorLessZeroFive("Clip Vert Color < 0.5", Vector) = (1,1,1,1)
 
         [Enum(UV1,0,UV2,1)] _UVSetAlbedo("Albedo UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetNormal("Normal Map UVs", Int) = 0
@@ -112,7 +111,7 @@
     
     SubShader
     {
-        Tags { "RenderType"="TransparentCutout" "Queue"="AlphaTest" }
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
         Cull [_Culling]
                 Stencil 
         {
@@ -120,26 +119,30 @@
             Comp [_StencilComp]
             Pass [_StencilOp]
         }
+
+        //Needed for refraction
+        Grabpass{"_GrabTexture"}
+
         Pass
         {
             Name "FORWARD"
             Tags { "LightMode" = "ForwardBase" }
-            AlphaToMask On
+            
             CGPROGRAM
-            #define Geometry
-
+            #pragma target 3.0
             #pragma vertex vert
-            #pragma geometry geom
             #pragma fragment frag
             
             #pragma multi_compile _ VERTEXLIGHT_ON
+            #pragma multi_compile_fog
             #pragma multi_compile_fwdbase 
-            
+
             #ifndef UNITY_PASS_FORWARDBASE
                 #define UNITY_PASS_FORWARDBASE
             #endif
             
-            #define AlphaToMask
+            #define Transparent
+            #define Glass
 
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -155,19 +158,20 @@
         {
             Name "FWDADD"
             Tags { "LightMode" = "ForwardAdd" }
-            Blend One One
-            AlphaToMask On
-            CGPROGRAM
-            #define Geometry
+            Blend SrcAlpha One
 
+            CGPROGRAM
+            #pragma target 3.0
             #pragma vertex vert
-            #pragma geometry geom
             #pragma fragment frag
+            
+            #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
-            #define AlphaToMask
+            #define Transparent
+            #define Glass
             
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -193,12 +197,13 @@
                 #define UNITY_PASS_SHADOWCASTER
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-            #define AlphaToMask
+            #define Transparent
+            #define Glass
 
             #include "../CGIncludes/XSShadowCaster.cginc"
             ENDCG
         }
     }
-    Fallback "Transparent/Cutout/Diffuse"
+    Fallback "Transparent/Diffuse"
     CustomEditor "XSToon.XSToonInspector"
 }

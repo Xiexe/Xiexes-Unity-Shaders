@@ -30,7 +30,6 @@ struct VertexOutput
     float4 screenPos : TEXCOORD9;
     float3 objPos : TEXCOORD11;
 
-    //float distanceToOrigin : TEXCOORD10;
     SHADOW_COORDS(7)
     UNITY_FOG_COORDS(10)
 };
@@ -49,7 +48,6 @@ struct VertexOutput
         float4 screenPos : TEXCOORD9;
         float3 objPos : TEXCOORD11;
 
-        //float distanceToOrigin : TEXCOORD10;
         SHADOW_COORDS(7)
         UNITY_FOG_COORDS(10)
     };
@@ -65,7 +63,6 @@ struct VertexOutput
         float4 screenPos : TEXCOORD8;
         float3 objPos : TEXCOORD10;
 
-        //float distanceToOrigin : TEXCOORD9;
         SHADOW_COORDS(7)
         UNITY_FOG_COORDS(9)
     };
@@ -84,6 +81,7 @@ struct XSLighting
     half4 occlusion;
     half4 emissionMap;
     half4 rampMask;
+    half4 hsvMask;
     half3 diffuseColor;
     half attenuation;
     half3 normal;
@@ -93,6 +91,7 @@ struct XSLighting
     half3 color;
     half alpha;
     float isOutline;
+    float4 screenPos;
     float2 screenUV;
     float3 objPos;
 };
@@ -138,11 +137,17 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_ThicknessMap); half4 _ThicknessMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_CutoutMask); half4 _CutoutMask_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
+
+#if defined(Glass)
+    sampler2D _GrabTexture;
+    half _IOR;
+#endif
 
 half4 _Color, _ShadowRim, 
     _OutlineColor, _SSColor, _OcclusionColor,
@@ -152,7 +157,7 @@ half _MatcapTintToDiffuse;
 half _Cutoff;
 half _FadeDitherDistance;
 half _EmissionToDiffuse, _ScaleWithLightSensitivity;
-half _Saturation;
+half _Hue, _Saturation, _Value;
 half _Metallic, _Glossiness, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _SpecularAlbedoTint;

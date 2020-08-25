@@ -22,7 +22,10 @@ namespace XSToon
         MaterialProperty _TilingMode = null;
         MaterialProperty _Culling = null;
         MaterialProperty _MainTex = null;
+        MaterialProperty _HSVMask = null;
         MaterialProperty _Saturation = null;
+        MaterialProperty _Hue = null;
+        MaterialProperty _Value = null;
         MaterialProperty _Color = null;
         MaterialProperty _Cutoff = null;
         MaterialProperty _FadeDither = null;
@@ -106,9 +109,9 @@ namespace XSToon
         MaterialProperty _OutlineColor = null;
         MaterialProperty _ShadowSharpness = null;
         MaterialProperty _AdvMode = null;
-        MaterialProperty _CutoutMask = null;
-        MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null; //So the lerp doesn't go crazy
+        MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null;
         MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
+        MaterialProperty _IOR = null;
 
         //Material Properties for Patreon Plugins
             MaterialProperty _LeftRightPan = null;
@@ -134,6 +137,7 @@ namespace XSToon
         static bool showEmission = false;
         static bool showAdvanced = false;
         static bool showEyeTracking = false;
+        static bool showGlassSettings = false;
 
         bool isPatreonShader = false;
         bool isEyeTracking = false;
@@ -141,6 +145,7 @@ namespace XSToon
         bool isCutout = false;
         bool isCutoutMasked = false;
         bool isDithered = false;
+        bool isRefractive = false;
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
         {
@@ -152,6 +157,7 @@ namespace XSToon
             isOutlined = shader.name.Contains("Outline");
             isPatreonShader = shader.name.Contains("Patreon");
             isEyeTracking = shader.name.Contains("EyeTracking");
+            isRefractive = shader.name.Contains("Glass");
 
 		    //Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty. 
 		    //This makes things a lot nicer to maintain and cleaner to look at.
@@ -185,6 +191,7 @@ namespace XSToon
                 DrawRimlightSettings(materialEditor);
                 DrawHalfToneSettings(materialEditor);
                 DrawTransmissionSettings(materialEditor);
+                DrawGlassSettings(materialEditor);
                 DrawAdvancedSettings(materialEditor);
                 DrawPatreonSettings(materialEditor);
                 XSStyles.DoFooter();
@@ -203,7 +210,11 @@ namespace XSToon
                 }
                 materialEditor.ShaderProperty(_UVSetAlbedo, new GUIContent("UV Set", "The UV set to use for the Albedo Texture."), 2);
                 materialEditor.TextureScaleOffsetProperty(_MainTex);
+
+                materialEditor.TexturePropertySingleLine(new GUIContent("HSV Mask", "RGB Mask: R = Hue,  G = Saturation, B = Brightness"), _HSVMask);
+                materialEditor.ShaderProperty(_Hue, new GUIContent("Hue", "Controls Hue of the final output from the shader."));
                 materialEditor.ShaderProperty(_Saturation, new GUIContent("Saturation", "Controls saturation of the final output from the shader."));
+                materialEditor.ShaderProperty(_Value, new GUIContent("Brightness", "Controls value of the final output from the shader."));
 
                 if(isDithered)
                 {
@@ -457,6 +468,18 @@ namespace XSToon
                 materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Transmission Distortion", "How much the Transmission should follow the normals of the mesh and/or normal map."), 2);
                 materialEditor.ShaderProperty(_SSPower, new GUIContent("Transmission Power", "Subsurface Power"), 2);
                 materialEditor.ShaderProperty(_SSScale, new GUIContent("Transmission Scale", "Subsurface Scale"), 2);
+            }
+        }
+
+        private void DrawGlassSettings(MaterialEditor materialEditor)
+        {   
+            if(isRefractive)
+            {
+                showGlassSettings = XSStyles.ShurikenFoldout("Refraction", showGlassSettings);
+                if(showGlassSettings)
+                {
+                    materialEditor.ShaderProperty(_IOR, new GUIContent("Index of Refraction", "The index of refraction of the material. Glass: 1.5, Crystal: 2.0, Ice: 1.309, Water: 1.325"));
+                }
             }
         }
 

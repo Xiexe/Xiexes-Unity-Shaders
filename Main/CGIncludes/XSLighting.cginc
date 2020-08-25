@@ -30,9 +30,14 @@ half4 BRDF_XSLighting(XSLighting i)
     d.ldh = DotClamped(lightDir, halfVector);
     d.svdn = abs(dot(stereoViewDir, i.normal));
     
+    i.albedo.rgb = rgb2hsv(i.albedo.rgb);
+    i.albedo.x += fmod(lerp(0, _Hue, i.hsvMask.r), 360);
+    i.albedo.y = saturate(i.albedo.y * lerp(1, _Saturation, i.hsvMask.g));
+    i.albedo.z *= lerp(1, _Value, i.hsvMask.b);
+    i.albedo.rgb = hsv2rgb(i.albedo.rgb);
+
+    i.diffuseColor.rgb = i.albedo.rgb;
     i.albedo.rgb *= (1-metallicSmoothness.x);
-    i.albedo.rgb = lerp(dot(i.albedo.rgb, grayscaleVec), i.albedo.rgb, _Saturation);
-    i.diffuseColor.rgb = lerp(dot(i.diffuseColor.rgb, grayscaleVec), i.diffuseColor.rgb, _Saturation);
 
     half4 lightCol = half4(0,0,0,0);
     calcLightCol(lightEnv, indirectDiffuse, lightCol);
@@ -71,9 +76,17 @@ half4 BRDF_XSLighting(XSLighting i)
         rimLight *= stipplingRim;
         indirectSpecular *= lerp(0.5, 1, stipplingIndirect); // Don't want these to go completely black, looks weird
     }
+    
+    #if defined(Glass)
+        float4 backgroundColor = tex2Dproj(_GrabTexture, UNITY_PROJ_COORD(i.screenPos + (float4(i.normal,0) * _IOR)));
+    #endif
 
     half4 col;
-    col = diffuse * shadowRim;
+    #if !defined(Glass)
+        col = diffuse * shadowRim;
+    #else
+        col = backgroundColor;
+    #endif
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
     col += max(directSpecular.xyzz, rimLight);
     col += subsurface;

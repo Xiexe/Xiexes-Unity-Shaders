@@ -101,13 +101,13 @@ void vertShadowCaster(VertexInput v,
     TRANSFER_SHADOW_CASTER_NOPOS(o, opos)
     #if defined(UNITY_STANDARD_USE_SHADOW_UVS)
         o.tex = TRANSFORM_TEX(v.uv0, _MainTex);
+        o.color = v.color;
     #endif
 
     #if defined(Dithered)
         o.worldPos = mul(unity_ObjectToWorld, v.vertex);
         o.screenPos = ComputeScreenPos(opos);
     #endif
-    o.color = v.color;
 }
 
 float AlphaAdjust(float alphaToAdj, float3 vColor)

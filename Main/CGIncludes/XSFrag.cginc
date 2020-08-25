@@ -54,6 +54,7 @@ float4 frag (
     o.reflectivityMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectivityMask, _MainTex, t.reflectivityMaskUV) * _Reflectivity;
     o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV) * _EmissionColor;
     o.rampMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RampSelectionMask, _MainTex, i.uv); // This texture doesn't need to ever be on a second uv channel, and doesn't need tiling, convince me otherwise.
+    o.hsvMask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVMask, _MainTex, t.albedoUV);
 
     o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
     o.attenuation = attenuation;
@@ -64,6 +65,7 @@ float4 frag (
     o.color = i.color.rgb;
     o.isOutline = i.color.a;
     o.screenUV = calcScreenUVs(i.screenPos);
+    o.screenPos = i.screenPos;
     o.objPos = i.objPos;
 
     float4 col = BRDF_XSLighting(o);

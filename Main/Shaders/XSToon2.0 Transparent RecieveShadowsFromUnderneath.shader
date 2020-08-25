@@ -6,7 +6,11 @@
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         _MainTex("Texture", 2D) = "white" {}
-        _Saturation("Main Texture Saturation", Range(0,10)) = 1
+        _HSVMask("HSV Mask", 2D) = "white" {}
+        _Hue("Hue", Range(0,1)) = 0
+        _Saturation("Main Texture Saturation", Range(0,3)) = 1
+        _Value("Value", Range(0,3)) = 1
+
         _Color("Color Tint", Color) = (1,1,1,1)
         _Cutoff("Cutoff", Float) = 0.5
 

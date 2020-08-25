@@ -214,8 +214,7 @@ float AlphaAdjust(float alphaToAdj, float3 vColor)
 }
 
 void calcAlpha(inout XSLighting i)
-{	
-    //Default to 1 alpha || Opaque
+{
     i.alpha = 1;
 
     float modifiedAlpha = AlphaAdjust(i.albedo.a, i.color);
