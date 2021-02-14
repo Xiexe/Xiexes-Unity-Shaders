@@ -19,6 +19,7 @@ uniform float4      _Color;
 uniform float       _Cutoff;
 uniform sampler2D   _MainTex;
 uniform sampler2D   _CutoutMask;
+uniform sampler2D   _ClipMap;
 uniform float4      _MainTex_ST;
 uniform float       _FadeDither;
 uniform float       _FadeDitherDistance;
@@ -138,7 +139,8 @@ half4 fragShadowCaster(
     #if defined(UNITY_STANDARD_USE_SHADOW_UVS)
         half alpha = 1;
         float4 albedo = tex2D(_MainTex, i.tex).a * _Color.a;
-        float modifiedAlpha = AlphaAdjust(albedo.a, i.color);
+        float4 clipMap = tex2D(_ClipMap, i.tex); 
+        float modifiedAlpha = AlphaAdjust(albedo.a, clipMap.rgb);
 
         #if defined(AlphaBlend) || defined(Dithered) || defined(AlphaToMask) || defined(Cutout)
             #if defined(Dithered)

@@ -33,7 +33,32 @@
             half outlineWidthMask = tex2Dlod(_OutlineMask, float4(IN[i].uv, 0, 0));
             float3 outlineWidth = outlineWidthMask * _OutlineWidth * .01;
             outlineWidth *= min(distance(worldPos, _WorldSpaceCameraPos) * 3, 1);
-            float4 outlinePos = float4(IN[i].vertex + normalize(IN[i].normal) * outlineWidth, 1);
+
+            float3 vc = IN[i].color.rgb;
+            if(_OutlineNormalMode == 2)
+            {
+                float2 xy = IN[i].uv1;
+                if(_OutlineUVSelect == 1)
+                    xy = IN[i].uv2;
+
+                float reconstructedZ = sqrt(1-saturate(dot(xy, xy)));
+                vc = normalize(float3(xy, reconstructedZ));
+            }
+            vc = vc * 2 - 1;
+            float3 t = mul(unity_WorldToObject, IN[i].ntb[1]);
+            float3 b = mul(unity_WorldToObject, IN[i].ntb[2]);
+            float3 n = mul(unity_WorldToObject, IN[i].ntb[0]);
+            half3 tspace0 = half3(t.x, b.x, n.x);
+            half3 tspace1 = half3(t.y, b.y, n.y);
+            half3 tspace2 = half3(t.z, b.z, n.z);
+
+            half3 calcedNormal;
+            calcedNormal.x = dot(tspace0, vc);
+            calcedNormal.y = dot(tspace1, vc);
+            calcedNormal.z = dot(tspace2, vc);
+
+            half3 normalDir = normalize(lerp(IN[i].normal, calcedNormal, saturate(_OutlineNormalMode)));
+            float4 outlinePos = float4(IN[i].vertex + normalDir * outlineWidth, 1);
             
             if(outlineWidthMask == 0)
                 return;

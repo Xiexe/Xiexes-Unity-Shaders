@@ -1,64 +1,84 @@
 //Helper Functions for Reflections
-    half3 XSFresnelTerm (half3 F0, half cosA)
-    {
-        half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
-        return F0 + (1-F0) * t;
-    }
-    
-    half3 XSFresnelLerp (half3 F0, half3 F90, half cosA)
-    {
-        half t = Pow5 (1 - cosA);   // ala Schlick interpoliation
-        return lerp (F0, F90, t);
-    }
+float pow5(float a)
+{
+    return a * a * a * a * a;
+}
 
-    half XSGGXTerm (half NdotH, half roughness)
-    {
-        half a2 = roughness * roughness;
-        half d = (NdotH * a2 - NdotH) * NdotH + 1.0f; // 2 mad
-        return UNITY_INV_PI * a2 / (d * d + 1e-7f); // This function is not intended to be running on Mobile,
-                                                // therefore epsilon is smaller than what can be represented by half
-    }
-    
-    half3 F_Schlick(half3 SpecularColor, half VoH)
-    {
-        return SpecularColor + (1.0 - SpecularColor) * exp2((-5.55473 * VoH) - (6.98316 * VoH));
-    }
+float3 F_Schlick(float u, float3 f0)
+{
+    return f0 + (1.0 - f0) * pow(1.0 - u, 5.0);
+}
 
-    // From HDRenderPipeline
-    half D_GGXAnisotropic(half TdotH, half BdotH, half NdotH, half roughnessT, half roughnessB)
-    {	
-        half f = TdotH * TdotH / (roughnessT * roughnessT) + BdotH * BdotH / (roughnessB * roughnessB) + NdotH * NdotH;
-        half aniso = 1.0 / (roughnessT * roughnessB * f * f);
-        return aniso;
-    }
+float3 F_Schlick(const float3 f0, float f90, float VoH)
+{
+    // Schlick 1994, "An Inexpensive BRDF Model for Physically-Based Rendering"
+    return f0 + (f90 - f0) * pow5(1.0 - VoH);
+}
 
-    half3 calcReflView(half3 viewDir, half3 normal)
-    {
-        return reflect(-viewDir, normal);
-    }
-    
-    half3 calcReflLight(half3 lightDir, half3 normal)
-    {
-        return reflect(lightDir, normal);
-    }
+float3 F_FresnelLerp (float3 F0, float3 F90, float cosA)
+{
+    float t = pow5(1 - cosA);   // ala Schlick interpoliation
+    return lerp (F0, F90, t);
+}
 
-    half3 rgb2hsv(half3 c)
-    {
-        half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-        half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
-        half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
+float D_GGX(float NoH, float roughness)
+{
+    float a2 = roughness * roughness;
+    float f = (NoH * a2 - NoH) * NoH + 1.0;
+    return a2 / (UNITY_PI * f * f);
+}
 
-        float d = q.x - min(q.w, q.y);
-        float e = 1.0e-10;
-        return half3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-    }
+half3 F_Schlick(half3 SpecularColor, half VoH)
+{
+    return SpecularColor + (1.0 - SpecularColor) * exp2((-5.55473 * VoH) - (6.98316 * VoH));
+}
 
-    half3 hsv2rgb(half3 c)
-    {
-        half4 K = half4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-        half3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
-        return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-    }
+float D_GGX_Anisotropic(float NoH, const float3 h, const float3 t, const float3 b, float at, float ab)
+{
+    float ToH = dot(t, h);
+    float BoH = dot(b, h);
+    float a2 = at * ab;
+    float3 v = float3(ab * ToH, at * BoH, a2 * NoH);
+    float v2 = dot(v, v);
+    float w2 = a2 / v2;
+    return a2 * w2 * w2 * (1.0 / UNITY_PI);
+}
+
+float V_SmithGGXCorrelated(float NoV, float NoL, float a)
+{
+    float a2 = a * a;
+    float GGXL = NoV * sqrt((-NoL * a2 + NoL) * NoL + a2);
+    float GGXV = NoL * sqrt((-NoV * a2 + NoV) * NoV + a2);
+    return 0.5 / (GGXV + GGXL);
+}
+
+half3 calcReflView(half3 viewDir, half3 normal)
+{
+    return reflect(-viewDir, normal);
+}
+
+half3 calcReflLight(half3 lightDir, half3 normal)
+{
+    return reflect(lightDir, normal);
+}
+
+half3 rgb2hsv(half3 c)
+{
+    half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
+    half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return half3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+half3 hsv2rgb(half3 c)
+{
+    half4 K = half4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    half3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 //
 
 half3 getVertexLightsDir(XSLighting i, half4 vertexLightAtten)
@@ -72,7 +92,7 @@ half3 getVertexLightsDir(XSLighting i, half4 vertexLightAtten)
     half3 dirY = toLightY - i.worldPos;
     half3 dirZ = toLightZ - i.worldPos;
     half3 dirW = toLightW - i.worldPos;
-    
+
     dirX *= length(toLightX) * vertexLightAtten.x * unity_LightColor[0];
     dirY *= length(toLightY) * vertexLightAtten.y * unity_LightColor[1];
     dirZ *= length(toLightZ) * vertexLightAtten.z * unity_LightColor[2];
@@ -84,12 +104,12 @@ half3 getVertexLightsDir(XSLighting i, half4 vertexLightAtten)
 
 // Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
 half3 calcLightDir(XSLighting i, half4 vertexLightAtten)
-{   
+{
     half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
 
     half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
     lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
-    
+
     #if defined(VERTEXLIGHT_ON)
         half3 vertexDir = getVertexLightsDir(i, vertexLightAtten);
         lightDir = (lightDir + probeLightDir + vertexDir);
@@ -118,7 +138,7 @@ void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightC
     {
         lightColor = indirectDiffuse.xyzz * 0.6;    // ...Otherwise
         indirectDiffuse = indirectDiffuse * 0.4;    // Keep overall light to 100% - these should never go over 100%
-                                                    // ex. If we have indirect 100% as the light color and Indirect 50% as the indirect color, 
+                                                    // ex. If we have indirect 100% as the light color and Indirect 50% as the indirect color,
                                                     // we end up with 150% of the light from the scene.
     }
 }
@@ -151,10 +171,10 @@ half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal, inout half4 verte
     //This is lerping between a white color and the actual color of the light based on the falloff, that way with our lighting model
     //we don't end up with *very* red/green/blue lights. This is a stylistic choice and can be removed for other lighting models.
     //without it, it would just be "lightColor.rgb = unity_Lightcolor[i] * atten.x/y/z/w;"
-    lightColor.rgb += unity_LightColor[0]* atten.x; 
-    lightColor.rgb += unity_LightColor[1]* atten.y; 
-    lightColor.rgb += unity_LightColor[2]* atten.z; 
-    lightColor.rgb += unity_LightColor[3]* atten.w; 
+    lightColor.rgb += unity_LightColor[0]* atten.x;
+    lightColor.rgb += unity_LightColor[1]* atten.y;
+    lightColor.rgb += unity_LightColor[2]* atten.z;
+    lightColor.rgb += unity_LightColor[3]* atten.w;
 
     return lightColor;
 }
@@ -185,106 +205,101 @@ half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
     return shadowRim ;
 }
 
-half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half4 metallicSmoothness, half ax, half ay)
+float3 getAnisotropicReflectionVector(float3 viewDir, float3 bitangent, float3 tangent, float3 normal, float roughness, float anisotropy)
+{
+    //_Anisotropy = lerp(-0.2, 0.2, sin(_Time.y / 20)); //This is pretty fun
+    float3 anisotropicDirection = anisotropy >= 0.0 ? bitangent : tangent;
+    float3 anisotropicTangent = cross(anisotropicDirection, viewDir);
+    float3 anisotropicNormal = cross(anisotropicTangent, anisotropicDirection);
+    float bendFactor = abs(anisotropy) * saturate(5.0 * roughness);
+    float3 bentNormal = normalize(lerp(normal, anisotropicNormal, bendFactor));
+    return reflect(-viewDir, bentNormal);
+}
+
+half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 halfVector, half3 indirectDiffuse, half anisotropy)
 {
     half specularIntensity = _SpecularIntensity * i.specularMap.r;
     half3 specular = half3(0,0,0);
     half smoothness = max(0.01, (_SpecularArea * i.specularMap.b));
     smoothness *= 1.7 - 0.7 * smoothness;
-    
-    if(_SpecMode == 0)
-    {
-        half reflectionUntouched = saturate(pow(d.rdv, smoothness * 128));
-        specular = lerp(reflectionUntouched, round(reflectionUntouched), _SpecularStyle) * specularIntensity * (_SpecularArea + 0.5);
-    }
-    else if(_SpecMode == 1)
-    {
-        half smooth = saturate(D_GGXAnisotropic(d.tdh, d.bdh, d.ndh, ax, ay));
-        half sharp = round(smooth) * 2 * 0.5;
-        specular = lerp(smooth, sharp, _SpecularStyle) * specularIntensity;
-    }
-    else if(_SpecMode == 2)
-    {
-        half sndl = saturate(d.ndl);
-        half roughness = 1-smoothness;
-        half V = SmithJointGGXVisibilityTerm(sndl, d.vdn, roughness);
-        half F = F_Schlick(half3(0.0, 0.0, 0.0), d.ldh);
-        half D = XSGGXTerm(d.ndh, roughness*roughness);
 
-        half reflection = V * D * UNITY_PI;
-        half smooth = (max(0, reflection * sndl) * F * i.attenuation) * specularIntensity;
-        half sharp = round(smooth);
-        specular = lerp(smooth, sharp, _SpecularStyle);
-    }
-    specular *= i.attenuation * lightCol;
-    half3 tintedAlbedoSpecular = specular * i.diffuseColor;
-    specular = lerp(specular, tintedAlbedoSpecular, _SpecularAlbedoTint * i.specularMap.g); // Should specular highlight be tinted based on the albedo of the object?
+    float rough = max(smoothness * smoothness, 0.0045);
+    float Dn = D_GGX(d.ndh, rough);
+    float3 F = F_Schlick(d.ldh, 1);
+    float V = V_SmithGGXCorrelated(d.vdn, d.ndl, rough);
+    float3 directSpecularNonAniso = max(0, (Dn * V) * F);
+
+    anisotropy *= saturate(5.0 * smoothness);
+    float at = max(rough * (1.0 + anisotropy), 0.001);
+    float ab = max(rough * (1.0 - anisotropy), 0.001);
+    float D = D_GGX_Anisotropic(d.ndh, halfVector, i.tangent, i.bitangent, at, ab);
+    float3 directSpecularAniso = max(0, (D * V) * F);
+
+    specular = lerp(directSpecularNonAniso, directSpecularAniso, saturate(abs(anisotropy * 100)));
+    specular = lerp(specular, smoothstep(0.5, 0.51, specular), _SpecularSharpness) * i.attenuation * lightCol * specularIntensity;
+    specular *= lerp(1, i.diffuseColor, _SpecularAlbedoTint * i.specularMap.g);
     return specular;
 }
 
-half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness, half3 reflDir, half3 indirectLight, half3 viewDir, half4 ramp)
+half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness, half3 reflDir, half3 indirectLight, half3 viewDir, float3 fresnel, half4 ramp)
 {//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
-        half3 spec = half3(0,0,0);
+    half3 spec = half3(0,0,0);
 
-        UNITY_BRANCH
-        if(_ReflectionMode == 0) // PBR
-        {
-            #if defined(UNITY_PASS_FORWARDBASE) //Indirect PBR specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light. 
-                half3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
-                half4 probe0 = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflectionUV1, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
-                half3 probe0sample = DecodeHDR(probe0, unity_SpecCube0_HDR);
+    UNITY_BRANCH
+    if(_ReflectionMode == 0) // PBR
+    {
+        #if defined(UNITY_PASS_FORWARDBASE) //Indirect PBR specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light.
+            half3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
+            half4 probe0 = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflectionUV1, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
+            half3 probe0sample = DecodeHDR(probe0, unity_SpecCube0_HDR);
 
-                half3 indirectSpecular;
-                half interpolator = unity_SpecCube0_BoxMin.w;
-                
-                UNITY_BRANCH
-                if (interpolator < 0.99999) 
-                {
-                    half3 reflectionUV2 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube1_ProbePosition, unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax);
-                    half4 probe1 = UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0, reflectionUV2, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
-                    half3 probe1sample = DecodeHDR(probe1, unity_SpecCube1_HDR);
-                    indirectSpecular = lerp(probe1sample, probe0sample, interpolator);
-                }
-                else 
-                {
-                    indirectSpecular = probe0sample;
-                }
+            half3 indirectSpecular;
+            half interpolator = unity_SpecCube0_BoxMin.w;
 
-                if (!any(indirectSpecular))
-                {
-                    indirectSpecular = texCUBElod(_BakedCubemap, half4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));
-                    indirectSpecular *= indirectLight;
-                }
-
-                half3 metallicColor = indirectSpecular * lerp(0.05,i.diffuseColor.rgb, metallicSmoothness.x);
-                spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
-            #endif
-        }
-        else if(_ReflectionMode == 1) //Baked Cubemap
-        {
-            half3 indirectSpecular = texCUBElod(_BakedCubemap, half4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
-            half3 metallicColor = indirectSpecular * lerp(0.1,i.diffuseColor.rgb, metallicSmoothness.x);
-            spec = lerp(indirectSpecular, metallicColor, pow(d.vdn, 0.05));
-            
-            if(_ReflectionBlendMode != 1)
+            UNITY_BRANCH
+            if (interpolator < 0.99999)
             {
-                spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
+                half3 reflectionUV2 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube1_ProbePosition, unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax);
+                half4 probe1 = UNITY_SAMPLE_TEXCUBE_SAMPLER_LOD(unity_SpecCube1, unity_SpecCube0, reflectionUV2, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS);
+                half3 probe1sample = DecodeHDR(probe1, unity_SpecCube1_HDR);
+                indirectSpecular = lerp(probe1sample, probe0sample, interpolator);
             }
-        }
-        else if (_ReflectionMode == 2) //Matcap
-        {
-            half3 upVector = half3(0,1,0);
-            half2 remapUV = matcapSample(upVector, viewDir, i.normal);
-            spec = tex2Dlod(_Matcap, half4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS))) * _MatcapTint;
-            
-            if(_ReflectionBlendMode != 1)
+            else
             {
-                spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
+                indirectSpecular = probe0sample;
             }
 
-            spec *= lerp(1, i.diffuseColor, _MatcapTintToDiffuse);
+            if (!any(indirectSpecular))
+            {
+                indirectSpecular = texCUBElod(_BakedCubemap, half4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));
+                indirectSpecular *= indirectLight;
+            }
+            spec = indirectSpecular * fresnel;
+        #endif
+    }
+    else if(_ReflectionMode == 1) //Baked Cubemap
+    {
+        half3 indirectSpecular = texCUBElod(_BakedCubemap, half4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
+        spec = indirectSpecular * fresnel;
+
+        if(_ReflectionBlendMode != 1)
+        {
+            spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
         }
-        spec = lerp(spec, spec * ramp, metallicSmoothness.w); // should only not see shadows on a perfect mirror.
+    }
+    else if (_ReflectionMode == 2) //Matcap
+    {
+        half3 upVector = half3(0,1,0);
+        half2 remapUV = matcapSample(upVector, viewDir, i.normal);
+        spec = tex2Dlod(_Matcap, half4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS))) * _MatcapTint;
+
+        if(_ReflectionBlendMode != 1)
+        {
+            spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
+        }
+
+        spec *= lerp(1, i.diffuseColor, _MatcapTintToDiffuse);
+    }
     return spec;
 }
 
@@ -302,9 +317,9 @@ half4 calcOutlineColor(XSLighting i, DotProducts d, half3 indirectDiffuse, half4
 
 half4 calcRamp(XSLighting i, DotProducts d)
 {
-    half remapRamp; 
-    remapRamp = (d.ndl * 0.5 + 0.5);
-    
+    half remapRamp;
+    remapRamp = (d.ndl * lerp(1, i.occlusion.r, _OcclusionMode) * 0.5 + 0.5);
+
     #if defined(UNITY_PASS_FORWARDBASE)
        remapRamp *= i.attenuation;
     #endif
@@ -320,9 +335,9 @@ half3 calcIndirectDiffuse(XSLighting i)
     return indirectDiffuse;
 }
 
-half4 calcDiffuse(XSLighting i, DotProducts d, half3 indirectDiffuse, half4 lightCol, half4 ramp) 
+half4 calcDiffuse(XSLighting i, DotProducts d, half3 indirectDiffuse, half4 lightCol, half4 ramp)
 {
-    half4 diffuse; 
+    half4 diffuse;
     half4 indirect = indirectDiffuse.xyzz;
     diffuse = ramp * i.attenuation * lightCol + indirect;
     diffuse = i.albedo * diffuse;
@@ -359,7 +374,7 @@ half4 calcEmission(XSLighting i, half lightAvg)
         half4 scaledEmission = emission * saturate(smoothstep(1-_ScaleWithLightSensitivity, 1+_ScaleWithLightSensitivity, 1-lightAvg));
 
         return lerp(scaledEmission, emission, _ScaleWithLight);
-    #else 
+    #else
         return 0;
     #endif
 }
@@ -382,11 +397,11 @@ void calcClearcoat(inout half4 col, XSLighting i, DotProducts d, half3 untouched
         untouchedNormal = normalize(untouchedNormal);
         half clearcoatSmoothness = _ClearcoatSmoothness * i.metallicGlossMap.g;
         half clearcoatStrength = _ClearcoatStrength * i.metallicGlossMap.b;
-        
+
         half3 reflView = calcReflView(viewDir, untouchedNormal);
         half3 reflLight = calcReflLight(lightDir, untouchedNormal);
         half rdv = saturate( dot( reflLight, half4(-viewDir, 0) ));
-        half3 clearcoatIndirect = calcIndirectSpecular(i, d, half4(0, 0, 0, 1-clearcoatSmoothness), reflView, indirectDiffuse, viewDir, ramp);
+        half3 clearcoatIndirect = calcIndirectSpecular(i, d, half4(0, 0, 0, 1-clearcoatSmoothness), reflView, indirectDiffuse, viewDir, 1, ramp);
         half3 clearcoatDirect = saturate(pow(rdv, clearcoatSmoothness * 256)) * i.attenuation * lightCol;
 
         half3 clearcoat = (clearcoatIndirect + clearcoatDirect) * clearcoatStrength;

@@ -7,13 +7,14 @@ struct VertexInput
     float4 vertex : POSITION;
     float2 uv : TEXCOORD0;
     float2 uv1 : TEXCOORD1;
+    float2 uv2 : TEXCOORD2;
     float3 normal : NORMAL;
     float4 tangent : TANGENT;
     float4 color : COLOR;
 };
 
 struct VertexOutput
-{	
+{
     #if defined(Geometry)
         float4 pos : CLIP_POS;
         float4 vertex : SV_POSITION; // We need both of these in order to shadow Outlines correctly
@@ -29,6 +30,7 @@ struct VertexOutput
     float3 normal : TEXCOORD8;
     float4 screenPos : TEXCOORD9;
     float3 objPos : TEXCOORD11;
+    float2 uv2 : TEXCOORD12;
 
     SHADOW_COORDS(7)
     UNITY_FOG_COORDS(10)
@@ -47,6 +49,7 @@ struct VertexOutput
         float3 normal : TEXCOORD8;
         float4 screenPos : TEXCOORD9;
         float3 objPos : TEXCOORD11;
+        float2 uv2 : TEXCOORD12;
 
         SHADOW_COORDS(7)
         UNITY_FOG_COORDS(10)
@@ -82,6 +85,7 @@ struct XSLighting
     half4 emissionMap;
     half4 rampMask;
     half4 hsvMask;
+    half4 clipMap;
     half3 diffuseColor;
     half attenuation;
     half3 normal;
@@ -97,7 +101,7 @@ struct XSLighting
 };
 
 struct TextureUV
-{	
+{
     half2 uv0;
     half2 uv1;
     half2 albedoUV;
@@ -111,6 +115,7 @@ struct TextureUV
     half2 reflectivityMaskUV;
     half2 emissionMapUV;
     half2 outlineMaskUV;
+    half2 clipMapUV;
 };
 
 struct DotProducts
@@ -138,6 +143,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_CutoutMask); half4 _CutoutMask_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
+UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _Matcap;
@@ -149,18 +155,18 @@ samplerCUBE _BakedCubemap;
     half _IOR;
 #endif
 
-half4 _Color, _ShadowRim, 
-    _OutlineColor, _SSColor, _OcclusionColor,
-    _EmissionColor, _MatcapTint, _RimColor;
+half4 _Color, _ShadowRim,
+      _OutlineColor, _SSColor,
+      _EmissionColor, _MatcapTint, _RimColor;
 
 half _MatcapTintToDiffuse;
 half _Cutoff;
 half _FadeDitherDistance;
 half _EmissionToDiffuse, _ScaleWithLightSensitivity;
 half _Hue, _Saturation, _Value;
-half _Metallic, _Glossiness, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
+half _Metallic, _Glossiness, _OcclusionIntensity, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
 half _BumpScale, _DetailNormalMapScale;
-half _SpecularIntensity, _SpecularArea, _AnisotropicAX, _AnisotropicAY, _SpecularAlbedoTint;
+half _SpecularIntensity, _SpecularSharpness, _SpecularArea, _AnisotropicSpecular, _AnisotropicReflection, _SpecularAlbedoTint;
 
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _RimCubemapTint, _RimAttenEffect;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
@@ -172,13 +178,16 @@ half _OutlineWidth;
 
 int _HalftoneType;
 int _FadeDither;
-int _SpecMode, _SpecularStyle, _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
+int _BlendMode;
+int _OcclusionMode;
+int _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 int _TilingMode, _VertexColorAlbedo, _ScaleWithLight;
-int _OutlineAlbedoTint, _OutlineLighting;
-int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal, 
+int _OutlineAlbedoTint, _OutlineLighting, _OutlineNormalMode;
+int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
-    _UVSetEmission;
+    _UVSetEmission, _UVSetClipMap;
+int _NormalMapMode, _OutlineUVSelect;
 
 half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount, _HalftoneLineIntensity;
 

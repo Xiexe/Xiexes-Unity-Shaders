@@ -1,11 +1,13 @@
 half4 BRDF_XSLighting(XSLighting i)
 {
     float3 untouchedNormal = i.normal;
+    i.tangent = normalize(i.tangent);
+    i.bitangent = normalize(i.bitangent);
     calcNormal(i);
-    
-    half4 vertexLightAtten = half4(0,0,0,0); 
+
+    half4 vertexLightAtten = half4(0,0,0,0);
     #if defined(VERTEXLIGHT_ON)
-        half3 indirectDiffuse = calcIndirectDiffuse(i) + get4VertexLightsColFalloff(i.worldPos, i.normal, vertexLightAtten);   
+        half3 indirectDiffuse = calcIndirectDiffuse(i) + get4VertexLightsColFalloff(i.worldPos, i.normal, vertexLightAtten);
     #else
         half3 indirectDiffuse = calcIndirectDiffuse(i);
     #endif
@@ -18,7 +20,8 @@ half4 BRDF_XSLighting(XSLighting i)
     half3 halfVector = normalize(lightDir + viewDir);
     half3 reflView = calcReflView(viewDir, i.normal);
     half3 reflLight = calcReflLight(lightDir, i.normal);
-    
+    half3 reflViewAniso = getAnisotropicReflectionVector(viewDir, i.bitangent, i.tangent, i.normal, metallicSmoothness.a, _AnisotropicReflection);
+
     DotProducts d = (DotProducts)0;
     d.ndl = dot(i.normal, lightDir);
     d.vdn = abs(dot(viewDir, i.normal));
@@ -29,7 +32,7 @@ half4 BRDF_XSLighting(XSLighting i)
     d.rdv = saturate(dot(reflLight, float4(-viewDir, 0)));
     d.ldh = DotClamped(lightDir, halfVector);
     d.svdn = abs(dot(stereoViewDir, i.normal));
-    
+
     i.albedo.rgb = rgb2hsv(i.albedo.rgb);
     i.albedo.x += fmod(lerp(0, _Hue, i.hsvMask.r), 360);
     i.albedo.y = saturate(i.albedo.y * lerp(1, _Saturation, i.hsvMask.g));
@@ -45,14 +48,18 @@ half4 BRDF_XSLighting(XSLighting i)
     half lightAvg = (indirectDiffuse.r + indirectDiffuse.g + indirectDiffuse.b + lightCol.r + lightCol.g + lightCol.b) / 6;
     half3 envMapBlurred = getEnvMap(i, d, 5, reflView, indirectDiffuse, i.normal);
 
+    half occlusion = lerp(1, i.occlusion.r, _OcclusionIntensity);
+    indirectDiffuse *= lerp(occlusion, 1, _OcclusionMode);
     half4 ramp = calcRamp(i,d);
     half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
     half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse, envMapBlurred);
     half4 shadowRim = calcShadowRim(i, d, indirectDiffuse);
-    half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflView, indirectDiffuse, viewDir, ramp);
-    half3 directSpecular = calcDirectSpecular(i, d, lightCol, indirectDiffuse, metallicSmoothness, _AnisotropicAX * 0.1, _AnisotropicAY * 0.1);
+
+    float3 f0 = 0.16 * 0.5 * 0.5 * (1.0 - metallicSmoothness.r) + i.diffuseColor * metallicSmoothness.r;
+    float3 fresnel = F_Schlick(d.vdn, f0);
+    half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflViewAniso, indirectDiffuse, viewDir, fresnel, ramp) * occlusion;
+    half3 directSpecular = calcDirectSpecular(i, d, lightCol, halfVector, indirectDiffuse, _AnisotropicSpecular) * 3 * d.ndl * occlusion;
     half4 subsurface = calcSubsurfaceScattering(i, d, lightDir, viewDir, i.normal, lightCol, indirectDiffuse);
-    half4 occlusion = lerp(_OcclusionColor, 1, i.occlusion.r);
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
 
     half lineHalftone = 0;
@@ -71,12 +78,12 @@ half4 BRDF_XSLighting(XSLighting i)
         stipplingDirect = DotHalftone(i, saturate(dot(directSpecular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
         stipplingRim = DotHalftone(i, saturate(dot(rimLight, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
         stipplingIndirect = DotHalftone(i, saturate(dot(indirectSpecular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
-        
-        directSpecular *= stipplingDirect; 
+
+        directSpecular *= stipplingDirect;
         rimLight *= stipplingRim;
         indirectSpecular *= lerp(0.5, 1, stipplingIndirect); // Don't want these to go completely black, looks weird
     }
-    
+
     #if defined(Glass)
         float4 backgroundColor = tex2Dproj(_GrabTexture, UNITY_PROJ_COORD(i.screenPos + (float4(i.normal,0) * _IOR)));
     #endif
@@ -90,11 +97,10 @@ half4 BRDF_XSLighting(XSLighting i)
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
     col += max(directSpecular.xyzz, rimLight);
     col += subsurface;
-    col *= occlusion;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
     col += calcEmission(i, lightAvg);
 
     float4 finalColor = lerp(col, outlineColor, i.isOutline) * lerp(1, lineHalftone, _HalftoneLineIntensity * usingLineHalftone);
-    //finalColor = lerp(finalColor, float4(i.color.rgb, 1), 0.9999);
+    // finalColor = lerp(finalColor, float4(i.clipMap.rgb, 1), 0.9999);
     return finalColor;
 }

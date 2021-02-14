@@ -55,6 +55,7 @@ float4 frag (
     o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV) * _EmissionColor;
     o.rampMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RampSelectionMask, _MainTex, i.uv); // This texture doesn't need to ever be on a second uv channel, and doesn't need tiling, convince me otherwise.
     o.hsvMask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVMask, _MainTex, t.albedoUV);
+    o.clipMap = UNITY_SAMPLE_TEX2D_SAMPLER(_ClipMap, _MainTex, t.clipMapUV);
 
     o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
     o.attenuation = attenuation;
