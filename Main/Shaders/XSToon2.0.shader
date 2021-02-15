@@ -37,7 +37,7 @@
         _ReflectivityMask("Reflection Mask" , 2D) = "white" {}
         _Metallic("Metallic", Range(0,1)) = 0
         _Glossiness("Smoothness", Range(0,1)) = 0
-        _Reflectivity("Reflectivity", Range(0,1)) = 1
+        _Reflectivity("Reflectivity", Range(0,1)) = 0.5
         _ClearcoatStrength("Clearcoat Reflectivity", Range(0, 1)) = 1
         _ClearcoatSmoothness("Clearcoat Smoothness", Range(0, 1)) = 0.8
 

@@ -81,47 +81,46 @@ half3 hsv2rgb(half3 c)
 }
 //
 
-half3 getVertexLightsDir(XSLighting i, half4 vertexLightAtten)
+//Returns the average direction of all lights and writes to a struct contraining individual directions
+float3 getVertexLightsDir(inout VertexLightInformation vLights, float3 worldPos, float4 vertexLightAtten)
 {
-    half3 toLightX = half3(unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x);
-    half3 toLightY = half3(unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y);
-    half3 toLightZ = half3(unity_4LightPosX0.z, unity_4LightPosY0.z, unity_4LightPosZ0.z);
-    half3 toLightW = half3(unity_4LightPosX0.w, unity_4LightPosY0.w, unity_4LightPosZ0.w);
+    float3 dir = float3(0,0,0);
+    float3 toLightX = float3(unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x);
+    float3 toLightY = float3(unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y);
+    float3 toLightZ = float3(unity_4LightPosX0.z, unity_4LightPosY0.z, unity_4LightPosZ0.z);
+    float3 toLightW = float3(unity_4LightPosX0.w, unity_4LightPosY0.w, unity_4LightPosZ0.w);
 
-    half3 dirX = toLightX - i.worldPos;
-    half3 dirY = toLightY - i.worldPos;
-    half3 dirZ = toLightZ - i.worldPos;
-    half3 dirW = toLightW - i.worldPos;
+    float3 dirX = toLightX - worldPos;
+    float3 dirY = toLightY - worldPos;
+    float3 dirZ = toLightZ - worldPos;
+    float3 dirW = toLightW - worldPos;
 
-    dirX *= length(toLightX) * vertexLightAtten.x * unity_LightColor[0];
-    dirY *= length(toLightY) * vertexLightAtten.y * unity_LightColor[1];
-    dirZ *= length(toLightZ) * vertexLightAtten.z * unity_LightColor[2];
-    dirW *= length(toLightW) * vertexLightAtten.w * unity_LightColor[3];
+    dirX *= length(toLightX) * vertexLightAtten.x;
+    dirY *= length(toLightY) * vertexLightAtten.y;
+    dirZ *= length(toLightZ) * vertexLightAtten.z;
+    dirW *= length(toLightW) * vertexLightAtten.w;
 
-    half3 dir = (dirX + dirY + dirZ + dirW) / 4;
+    vLights.Direction[0] = dirX;
+    vLights.Direction[1] = dirY;
+    vLights.Direction[2] = dirZ;
+    vLights.Direction[3] = dirW;
+
+    dir = (dirX + dirY + dirZ + dirW) / 4;
     return dir;
 }
 
 // Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
-half3 calcLightDir(XSLighting i, half4 vertexLightAtten)
+half3 calcLightDir(XSLighting i)
 {
     half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
-
     half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
     lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
-
-    #if defined(VERTEXLIGHT_ON)
-        half3 vertexDir = getVertexLightsDir(i, vertexLightAtten);
-        lightDir = (lightDir + probeLightDir + vertexDir);
-    #endif
-
-    #if !defined(POINT) && !defined(SPOT) && !defined(VERTEXLIGHT_ON) // if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
+    #if !defined(POINT) && !defined(SPOT)// if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
         if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0 && length(lightDir) < 0.1)
         {
             lightDir = half4(1, 1, 1, 0);
         }
     #endif
-
     return normalize(lightDir);
 }
 
@@ -143,14 +142,15 @@ void calcLightCol(bool lightEnv, inout half3 indirectDiffuse, inout half4 lightC
     }
 }
 
-half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal, inout half4 vertexLightAtten)
+float3 get4VertexLightsColFalloff(inout VertexLightInformation vLight, float3 worldPos, float3 normal, inout float4 vertexLightAtten)
 {
-    half3 lightColor = 0;
-    half4 toLightX = unity_4LightPosX0 - worldPos.x;
-    half4 toLightY = unity_4LightPosY0 - worldPos.y;
-    half4 toLightZ = unity_4LightPosZ0 - worldPos.z;
+    float3 lightColor = 0;
+    #if defined(VERTEXLIGHT_ON)
+    float4 toLightX = unity_4LightPosX0 - worldPos.x;
+    float4 toLightY = unity_4LightPosY0 - worldPos.y;
+    float4 toLightZ = unity_4LightPosZ0 - worldPos.z;
 
-    half4 lengthSq = 0;
+    float4 lengthSq = 0;
     lengthSq += toLightX * toLightX;
     lengthSq += toLightY * toLightY;
     lengthSq += toLightZ * toLightZ;
@@ -158,25 +158,57 @@ half3 get4VertexLightsColFalloff(half3 worldPos, half3 normal, inout half4 verte
     float4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
     float4 atten2 = saturate(1 - (lengthSq * unity_4LightAtten0 / 25));
     atten = min(atten, atten2 * atten2);
-
-    // half4 atten = 1.0 / (1.0 + lengthSq * unity_4LightAtten0);
-    // atten = saturate(atten*atten); // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect that Unity's normal integration of vertex lights has.
-    half4 colorFalloff = smoothstep(-0.7, 1.3, atten);
+    // Cleaner, nicer looking falloff. Also prevents the "Snapping in" effect that Unity's normal integration of vertex lights has.
     vertexLightAtten = atten;
 
-    half gs0 = dot(unity_LightColor[0], grayscaleVec);
-    half gs1 = dot(unity_LightColor[1], grayscaleVec);
-    half gs2 = dot(unity_LightColor[2], grayscaleVec);
-    half gs3 = dot(unity_LightColor[3], grayscaleVec);
-    //This is lerping between a white color and the actual color of the light based on the falloff, that way with our lighting model
-    //we don't end up with *very* red/green/blue lights. This is a stylistic choice and can be removed for other lighting models.
-    //without it, it would just be "lightColor.rgb = unity_Lightcolor[i] * atten.x/y/z/w;"
-    lightColor.rgb += unity_LightColor[0]* atten.x;
-    lightColor.rgb += unity_LightColor[1]* atten.y;
-    lightColor.rgb += unity_LightColor[2]* atten.z;
-    lightColor.rgb += unity_LightColor[3]* atten.w;
+    lightColor.rgb += unity_LightColor[0] * atten.x;
+    lightColor.rgb += unity_LightColor[1] * atten.y;
+    lightColor.rgb += unity_LightColor[2] * atten.z;
+    lightColor.rgb += unity_LightColor[3] * atten.w;
 
+    vLight.ColorFalloff[0] = unity_LightColor[0] * atten.x;
+    vLight.ColorFalloff[1] = unity_LightColor[1] * atten.y;
+    vLight.ColorFalloff[2] = unity_LightColor[2] * atten.z;
+    vLight.ColorFalloff[3] = unity_LightColor[3] * atten.w;
+
+    vLight.Attenuation[0] = atten.x;
+    vLight.Attenuation[1] = atten.y;
+    vLight.Attenuation[2] = atten.z;
+    vLight.Attenuation[3] = atten.w;
+    #endif
     return lightColor;
+}
+
+half4 calcRamp(XSLighting i, DotProducts d)
+{
+    half remapRamp;
+    remapRamp = (d.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode) ;
+    #if defined(UNITY_PASS_FORWARDBASE)
+    remapRamp *= i.attenuation;
+    #endif
+    half4 ramp = tex2D(_Ramp, half2(remapRamp, i.rampMask.r));
+    return ramp;
+}
+
+half4 calcRampShadowOverride(XSLighting i, float ndl)
+{
+    half remapRamp;
+    remapRamp = (ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode);
+    half4 ramp = tex2D(_Ramp, half2(remapRamp, i.rampMask.r));
+    return ramp;
+}
+
+float3 getVertexLightsDiffuse(XSLighting i, VertexLightInformation vLight)
+{
+    float3 vertexLightsDiffuse = 0;
+    #if defined(VERTEXLIGHT_ON)
+        for(int light = 0; light < 4; light++) // I know, I know, not using i. Blame my structs.
+        {
+            float vLightNdl = dot(vLight.Direction[light], i.normal);
+            vertexLightsDiffuse += calcRampShadowOverride(i, vLightNdl) * vLight.ColorFalloff[light];
+        }
+    #endif
+    return vertexLightsDiffuse;
 }
 
 half4 calcMetallicSmoothness(XSLighting i)
@@ -216,7 +248,7 @@ float3 getAnisotropicReflectionVector(float3 viewDir, float3 bitangent, float3 t
     return reflect(-viewDir, bentNormal);
 }
 
-half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 halfVector, half3 indirectDiffuse, half anisotropy)
+half3 calcDirectSpecular(XSLighting i, float ndl, float ndh, float vdn, float ldh, half4 lightCol, half3 halfVector, half anisotropy)
 {
     half specularIntensity = _SpecularIntensity * i.specularMap.r;
     half3 specular = half3(0,0,0);
@@ -224,21 +256,38 @@ half3 calcDirectSpecular(XSLighting i, DotProducts d, half4 lightCol, half3 half
     smoothness *= 1.7 - 0.7 * smoothness;
 
     float rough = max(smoothness * smoothness, 0.0045);
-    float Dn = D_GGX(d.ndh, rough);
-    float3 F = F_Schlick(d.ldh, 1);
-    float V = V_SmithGGXCorrelated(d.vdn, d.ndl, rough);
+    float Dn = D_GGX(ndh, rough);
+    float3 F = F_Schlick(ldh, 1);
+    float V = V_SmithGGXCorrelated(vdn, ndl, rough);
     float3 directSpecularNonAniso = max(0, (Dn * V) * F);
 
     anisotropy *= saturate(5.0 * smoothness);
     float at = max(rough * (1.0 + anisotropy), 0.001);
     float ab = max(rough * (1.0 - anisotropy), 0.001);
-    float D = D_GGX_Anisotropic(d.ndh, halfVector, i.tangent, i.bitangent, at, ab);
+    float D = D_GGX_Anisotropic(ndh, halfVector, i.tangent, i.bitangent, at, ab);
     float3 directSpecularAniso = max(0, (D * V) * F);
 
     specular = lerp(directSpecularNonAniso, directSpecularAniso, saturate(abs(anisotropy * 100)));
-    specular = lerp(specular, smoothstep(0.5, 0.51, specular), _SpecularSharpness) * i.attenuation * lightCol * specularIntensity;
+    specular = lerp(specular, smoothstep(0.5, 0.51, specular), _SpecularSharpness) * lightCol * specularIntensity;
     specular *= lerp(1, i.diffuseColor, _SpecularAlbedoTint * i.specularMap.g);
     return specular;
+}
+
+float3 getVertexLightSpecular(XSLighting i, DotProducts d, VertexLightInformation vLight, float3 normal, float3 viewDir, float anisotropy)
+{
+    float3 vertexLightSpec = 0;
+    #if defined(VERTEXLIGHT_ON)
+        for(int light = 0; light < 4; light++)
+        {
+            // All of these need to be recalculated for each individual light to treat them how we want to treat them.
+            float3 vHalfVector = normalize(vLight.Direction[light] + viewDir);
+            float vNDL = saturate(dot(vLight.Direction[light], normal));
+            float vLDH = saturate(dot(vLight.Direction[light], vHalfVector));
+            float vNDH = saturate(dot(normal, vHalfVector));
+            vertexLightSpec += calcDirectSpecular(i, vNDL, vNDH, d.vdn, vLDH, vLight.ColorFalloff[light].rgbb, vHalfVector, anisotropy) * vNDL;
+        }
+    #endif
+    return vertexLightSpec;
 }
 
 half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness, half3 reflDir, half3 indirectLight, half3 viewDir, float3 fresnel, half4 ramp)
@@ -313,20 +362,6 @@ half4 calcOutlineColor(XSLighting i, DotProducts d, half3 indirectDiffuse, half4
         outlineColor = lerp(outlineColor, ol, _OutlineLighting);
     #endif
     return half4(outlineColor,1);
-}
-
-half4 calcRamp(XSLighting i, DotProducts d)
-{
-    half remapRamp;
-    remapRamp = (d.ndl * lerp(1, i.occlusion.r, _OcclusionMode) * 0.5 + 0.5);
-
-    #if defined(UNITY_PASS_FORWARDBASE)
-       remapRamp *= i.attenuation;
-    #endif
-
-    half4 ramp = tex2D( _Ramp, half2(remapRamp, i.rampMask.r) );
-
-    return ramp;
 }
 
 half3 calcIndirectDiffuse(XSLighting i)

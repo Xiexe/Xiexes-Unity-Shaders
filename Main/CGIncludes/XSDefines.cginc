@@ -131,6 +131,12 @@ struct DotProducts
     half svdn;
 };
 
+struct VertexLightInformation {
+    float3 Direction[4];
+    float3 ColorFalloff[4];
+    float Attenuation[4];
+};
+
 UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_BumpMap); half4 _BumpMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_DetailNormalMap); half4 _DetailNormalMap_ST;
