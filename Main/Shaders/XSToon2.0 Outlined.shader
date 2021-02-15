@@ -2,10 +2,12 @@
 {
     Properties
     {
-                [Enum(Off, 0, On, 1)] _VertexColorAlbedo ("Vertex Color Albedo", Int) = 0
+        [Enum(Off, 0, On, 1)] _VertexColorAlbedo ("Vertex Color Albedo", Int) = 0
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         [Enum(Opaque, 0, Cutout, 1, Dithered, 2, Alpha To Coverage, 3, Transparent, 4, Fade, 5, Additive, 6)]_BlendMode("Blend Mode", Int) = 0
+        [Enum(None, 0, Plane, 1, Sphere, 2)]_RefractionModel("Refraction Model", Int) = 0
+        [Toggle(_COLOROVERLAY_ON)]_UseRefraction("Refraction", Int) = 0
         _MainTex("Texture", 2D) = "white" {}
         _HSVMask("HSV Mask", 2D) = "white" {}
         _Hue("Hue", Range(0,1)) = 0
@@ -38,6 +40,7 @@
         _Metallic("Metallic", Range(0,1)) = 0
         _Glossiness("Smoothness", Range(0,1)) = 0
         _Reflectivity("Reflectivity", Range(0,1)) = 0.5
+        _IOR("Index of Refraction", Range(1, 4)) = 0
         _ClearcoatStrength("Clearcoat Reflectivity", Range(0, 1)) = 1
         _ClearcoatSmoothness("Clearcoat Smoothness", Range(0, 1)) = 0.8
 
@@ -135,6 +138,11 @@
             Comp [_StencilComp]
             Pass [_StencilOp]
         }
+        Grabpass // Gets disabled via the editor script when not in use through the Lightmode Tag.
+        {
+            Tags{"LightMode" = "Always"}
+            "_GrabTexture"
+        }
         Pass
         {
             Name "FORWARD"
@@ -150,6 +158,7 @@
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
             #pragma multi_compile _ VERTEXLIGHT_ON
+            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase
 
@@ -183,6 +192,7 @@
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
             #ifndef UNITY_PASS_FORWARDADD
@@ -209,6 +219,7 @@
             #pragma fragment fragShadowCaster
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_shadowcaster
             #ifndef UNITY_PASS_SHADOWCASTER
                 #define UNITY_PASS_SHADOWCASTER

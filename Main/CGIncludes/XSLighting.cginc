@@ -50,8 +50,8 @@ half4 BRDF_XSLighting(XSLighting i)
         float3 vertexLightDir = getVertexLightsDir(vLight, i.worldPos, vertexLightAtten);
         vertexLightDiffuse = getVertexLightsDiffuse(i, vLight);
         indirectDiffuse += vertexLightDiffuse;
-    
-        vertexLightSpec = getVertexLightSpecular(i, d, vLight, i.normal, viewDir, _AnisotropicSpecular) * 3 * occlusion;
+
+        vertexLightSpec = getVertexLightSpecular(i, d, vLight, i.normal, viewDir, _AnisotropicSpecular) * occlusion;
     #endif
 
     half lightAvg = (dot(indirectDiffuse.rgb, grayscaleVec) + dot(lightCol.rgb, grayscaleVec)) / 2;
@@ -65,7 +65,7 @@ half4 BRDF_XSLighting(XSLighting i)
     float3 f0 = 0.16 * _Reflectivity * _Reflectivity * (1.0 - metallicSmoothness.r) + i.diffuseColor * metallicSmoothness.r;
     float3 fresnel = F_Schlick(d.vdn, f0);
     half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflViewAniso, indirectDiffuse, viewDir, fresnel, ramp) * occlusion;
-    half3 directSpecular = calcDirectSpecular(i, d.ndl, d.ndh, d.vdn, d.ldh, lightCol, halfVector, _AnisotropicSpecular) * 3 * d.ndl * occlusion * i.attenuation;
+    half3 directSpecular = calcDirectSpecular(i, d.ndl, d.ndh, d.vdn, d.ldh, lightCol, halfVector, _AnisotropicSpecular) * d.ndl * occlusion * i.attenuation;
     half4 subsurface = calcSubsurfaceScattering(i, d, lightDir, viewDir, i.normal, lightCol, indirectDiffuse);
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
 
@@ -91,19 +91,25 @@ half4 BRDF_XSLighting(XSLighting i)
         indirectSpecular *= lerp(0.5, 1, stipplingIndirect); // Don't want these to go completely black, looks weird
     }
 
-    #if defined(Glass)
-        float4 backgroundColor = tex2Dproj(_GrabTexture, UNITY_PROJ_COORD(i.screenPos + (float4(i.normal,0) * _IOR)));
+    #if defined(_COLOROVERLAY_ON)
+        float refractFresnel = 1-d.vdn;
+        float distanceToPixel = distance(_WorldSpaceCameraPos, i.worldPos);
+        float distanceScalar = saturate(1 / distanceToPixel) * saturate(distanceToPixel);
+        float3 refractDir = refract(viewDir, i.normal, max(0, _IOR - 1) * 0.03 * distanceScalar * refractFresnel);
+        float3x3 worldToTangentMatrix = float3x3(i.tangent, i.bitangent, i.normal);
+        refractDir = mul(worldToTangentMatrix, refractDir);
+        float4 backgroundColor = tex2Dproj(_GrabTexture, float4(i.screenPos.xyz + refractDir, i.screenPos.w));
     #endif
 
     half4 col;
-    #if !defined(Glass)
+    #if !defined(_COLOROVERLAY_ON)
         col = diffuse * shadowRim;
     #else
-        col = backgroundColor;
+        col = backgroundColor * diffuse * shadowRim;
     #endif
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
     col += max(directSpecular.xyzz, rimLight);
-    col.rgb += vertexLightSpec.rgb;
+    col.rgb += max(vertexLightSpec.rgb, rimLight);
     col += subsurface;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
     col += calcEmission(i, lightAvg);

@@ -116,6 +116,8 @@ namespace XSToon
         MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null;
         MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
         MaterialProperty _IOR = null;
+        MaterialProperty _UseRefraction = null;
+        MaterialProperty _RefractionModel = null;
         MaterialProperty _NormalMapMode = null;
 
         //Material Properties for Patreon Plugins
@@ -142,7 +144,7 @@ namespace XSToon
         static bool showEmission = false;
         static bool showAdvanced = false;
         static bool showEyeTracking = false;
-        static bool showGlassSettings = false;
+        static bool showRefractionSettings = false;
 
         bool isPatreonShader = false;
         bool isEyeTracking = false;
@@ -159,9 +161,11 @@ namespace XSToon
 
             isCutout = material.GetInt("_BlendMode") == 1;
             isDithered = material.GetInt("_BlendMode") == 2;
+            isRefractive = material.GetInt("_UseRefraction") == 1;
             isOutlined = shader.name.Contains("Outline");
             isPatreonShader = shader.name.Contains("Patreon");
             isEyeTracking = shader.name.Contains("EyeTracking");
+
 
             //Find all material properties listed in the script using reflection, and set them using a loop only if they're of type MaterialProperty.
             //This makes things a lot nicer to maintain and cleaner to look at.
@@ -176,10 +180,12 @@ namespace XSToon
             EditorGUI.BeginChangeCheck();
             {
                 XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
+                material.SetShaderPassEnabled("Always", isRefractive);
                 materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
                 materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
                 materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
                 materialEditor.ShaderProperty(_BlendMode, new GUIContent("Blend Mode", "Blend mode of the material. (Opaque, transparent, cutout, etc.)"));
+                materialEditor.ShaderProperty(_UseRefraction, new GUIContent("Refraction", "Should this material be refractive? (Warning, this can be expensive!)"));
 
                 DoBlendModeSettings(material);
                 DrawMainSettings(materialEditor);
@@ -188,11 +194,11 @@ namespace XSToon
                 DrawNormalSettings(materialEditor);
                 DrawSpecularSettings(materialEditor);
                 DrawReflectionsSettings(materialEditor, material);
+                DrawRefractionSettings(materialEditor);
                 DrawEmissionSettings(materialEditor);
                 DrawRimlightSettings(materialEditor);
                 DrawHalfToneSettings(materialEditor);
                 DrawTransmissionSettings(materialEditor);
-                DrawGlassSettings(materialEditor);
                 DrawAdvancedSettings(materialEditor);
                 DrawPatreonSettings(materialEditor);
                 XSStyles.DoFooter();
@@ -254,7 +260,8 @@ namespace XSToon
             material.SetInt("_DstBlend", dst);
             material.SetInt("_ZWrite", zwrite);
             material.SetInt("_AlphaToCoverage", alphatocoverage);
-            material.renderQueue = renderQueue;
+
+            material.renderQueue = isRefractive ? (int)UnityEngine.Rendering.RenderQueue.Overlay - 1 : renderQueue;
         }
 
         private void DrawMainSettings(MaterialEditor materialEditor)
@@ -534,13 +541,14 @@ namespace XSToon
             }
         }
 
-        private void DrawGlassSettings(MaterialEditor materialEditor)
+        private void DrawRefractionSettings(MaterialEditor materialEditor)
         {
             if (isRefractive)
             {
-                showGlassSettings = XSStyles.ShurikenFoldout("Refraction", showGlassSettings);
-                if (showGlassSettings)
+                showRefractionSettings = XSStyles.ShurikenFoldout("Refraction", showRefractionSettings);
+                if (showRefractionSettings)
                 {
+                    materialEditor.ShaderProperty(_RefractionModel, new GUIContent("Refraction Model", "Refraction technique"));
                     materialEditor.ShaderProperty(_IOR, new GUIContent("Index of Refraction", "The index of refraction of the material. Glass: 1.5, Crystal: 2.0, Ice: 1.309, Water: 1.325"));
                 }
             }

@@ -6,6 +6,8 @@
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         [Enum(Opaque, 0, Cutout, 1, Dithered, 2, Alpha To Coverage, 3, Transparent, 4, Fade, 5, Additive, 6)]_BlendMode("Blend Mode", Int) = 0
+        [Enum(None, 0, Plane, 1, Sphere, 2)]_RefractionModel("Refraction Model", Int) = 0
+        [Toggle(_COLOROVERLAY_ON)]_UseRefraction("Refraction", Int) = 0
         _MainTex("Texture", 2D) = "white" {}
         _HSVMask("HSV Mask", 2D) = "white" {}
         _Hue("Hue", Range(0,1)) = 0
@@ -38,6 +40,7 @@
         _Metallic("Metallic", Range(0,1)) = 0
         _Glossiness("Smoothness", Range(0,1)) = 0
         _Reflectivity("Reflectivity", Range(0,1)) = 0.5
+        _IOR("Index of Refraction", Range(1, 4)) = 0
         _ClearcoatStrength("Clearcoat Reflectivity", Range(0, 1)) = 1
         _ClearcoatSmoothness("Clearcoat Smoothness", Range(0, 1)) = 0.8
 
@@ -79,6 +82,8 @@
 
         [Enum(Off, 0, On, 1)]_OutlineAlbedoTint("Outline Albedo Tint", Int) = 0
         [Enum(Lit, 0, Emissive, 1)]_OutlineLighting("Outline Lighting", Int) = 0
+        [Enum(Mesh Normals, 0, Vertex Color Normals, 1, UVChannel, 2)]_OutlineNormalMode("Outline Normal Mode", Int) = 0
+        [Enum(UV2, 1, UV3, 2)]_OutlineUVSelect("Altered Normal UV Channel", Int) = 2
         _OutlineMask("Outline Mask", 2D) = "white" {}
         _OutlineWidth("Outline Width", Range(0, 5)) = 1
         [HDR]_OutlineColor("Outline Color", Color) = (0,0,0,1)
@@ -124,7 +129,7 @@
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry" "DisableBatching"="true"}
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         Cull [_Culling]
         AlphaToMask [_AlphaToMask]
         Stencil
@@ -133,6 +138,11 @@
             Comp [_StencilComp]
             Pass [_StencilOp]
         }
+        Grabpass // Gets disabled via the editor script when not in use through the Lightmode Tag.
+        {
+            Tags{"LightMode" = "Always"}
+            "_GrabTexture"
+        }
         Pass
         {
             Name "FORWARD"
@@ -140,15 +150,13 @@
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
             CGPROGRAM
-            //#define Geometry
 
-            #pragma target 3.0
             #pragma vertex vert
-            //#pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
             #pragma multi_compile _ VERTEXLIGHT_ON
+            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase
 
@@ -175,21 +183,17 @@
             ZTest LEqual
             Fog { Color (0,0,0,0) }
             CGPROGRAM
-            //#define Geometry
 
-            #pragma target 3.0
             #pragma vertex vert
-            //#pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
-
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
-
 
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
@@ -209,14 +213,13 @@
             CGPROGRAM
             #pragma vertex vertShadowCaster
             #pragma fragment fragShadowCaster
-            #pragma target 3.0
+            #pragma shader_feature _ALPHABLEND_ON
+            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_shadowcaster
-
             #ifndef UNITY_PASS_SHADOWCASTER
                 #define UNITY_PASS_SHADOWCASTER
             #endif
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
             #include "../CGIncludes/XSShadowCaster.cginc"

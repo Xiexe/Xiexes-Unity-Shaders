@@ -9,12 +9,6 @@ float3 F_Schlick(float u, float3 f0)
     return f0 + (1.0 - f0) * pow(1.0 - u, 5.0);
 }
 
-float3 F_Schlick(const float3 f0, float f90, float VoH)
-{
-    // Schlick 1994, "An Inexpensive BRDF Model for Physically-Based Rendering"
-    return f0 + (f90 - f0) * pow5(1.0 - VoH);
-}
-
 float3 F_FresnelLerp (float3 F0, float3 F90, float cosA)
 {
     float t = pow5(1 - cosA);   // ala Schlick interpoliation
@@ -26,11 +20,6 @@ float D_GGX(float NoH, float roughness)
     float a2 = roughness * roughness;
     float f = (NoH * a2 - NoH) * NoH + 1.0;
     return a2 / (UNITY_PI * f * f);
-}
-
-half3 F_Schlick(half3 SpecularColor, half VoH)
-{
-    return SpecularColor + (1.0 - SpecularColor) * exp2((-5.55473 * VoH) - (6.98316 * VoH));
 }
 
 float D_GGX_Anisotropic(float NoH, const float3 h, const float3 t, const float3 b, float at, float ab)
@@ -257,7 +246,7 @@ half3 calcDirectSpecular(XSLighting i, float ndl, float ndh, float vdn, float ld
 
     float rough = max(smoothness * smoothness, 0.0045);
     float Dn = D_GGX(ndh, rough);
-    float3 F = F_Schlick(ldh, 1);
+    float3 F = 1-F_Schlick(ldh, 0);
     float V = V_SmithGGXCorrelated(vdn, ndl, rough);
     float3 directSpecularNonAniso = max(0, (Dn * V) * F);
 
@@ -268,7 +257,7 @@ half3 calcDirectSpecular(XSLighting i, float ndl, float ndh, float vdn, float ld
     float3 directSpecularAniso = max(0, (D * V) * F);
 
     specular = lerp(directSpecularNonAniso, directSpecularAniso, saturate(abs(anisotropy * 100)));
-    specular = lerp(specular, smoothstep(0.5, 0.51, specular), _SpecularSharpness) * lightCol * specularIntensity;
+    specular = lerp(specular, smoothstep(0.5, 0.51, specular), _SpecularSharpness) * 3 * lightCol * specularIntensity; // Multiply by 3 to bring up to brightness of standard
     specular *= lerp(1, i.diffuseColor, _SpecularAlbedoTint * i.specularMap.g);
     return specular;
 }

@@ -155,11 +155,8 @@ sampler2D _OutlineMask;
 sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
-
-#if defined(Glass)
-    sampler2D _GrabTexture;
-    half _IOR;
-#endif
+sampler2D _GrabTexture;
+float4 _GrabTexture_TexelSize;
 
 half4 _Color, _ShadowRim,
       _OutlineColor, _SSColor,
@@ -173,6 +170,7 @@ half _Hue, _Saturation, _Value;
 half _Metallic, _Glossiness, _OcclusionIntensity, _Reflectivity, _ClearcoatStrength, _ClearcoatSmoothness;
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularSharpness, _SpecularArea, _AnisotropicSpecular, _AnisotropicReflection, _SpecularAlbedoTint;
+half _IOR;
 
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _RimCubemapTint, _RimAttenEffect;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
@@ -186,6 +184,7 @@ int _HalftoneType;
 int _FadeDither;
 int _BlendMode;
 int _OcclusionMode;
+int _UseRefraction;
 int _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 int _TilingMode, _VertexColorAlbedo, _ScaleWithLight;
 int _OutlineAlbedoTint, _OutlineLighting, _OutlineNormalMode;
@@ -199,3 +198,4 @@ half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount, _HalftoneLineInt
 
 //Defines for helper functions
 #define grayscaleVec float3(0.2125, 0.7154, 0.0721)
+#define WorldNormalVector(normal0, normal) half3(dot(normal0,normal), dot(normal0, normal), dot(normal0,normal))
