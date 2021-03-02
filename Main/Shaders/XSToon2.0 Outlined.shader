@@ -100,6 +100,13 @@
         _HalftoneLineAmount("Halftone Line Amount", Float) = 2000
         _HalftoneLineIntensity("Halftone Line Intensity", Range(0,1)) = 1
 
+        [Enum(UV, 0, Root Distance (Spherical), 1, Height, 2)]_DissolveCoordinates("Dissolve Shape", Int) = 0
+        _DissolveTexture("Dissolve Texture", 2D) = "black" {}
+        _DissolveStrength("Dissolve Sharpness", Float) = 1
+        [HDR]_DissolveColor("Dissolve Color", Color) = (1,1,1,1)
+        _DissolveProgress("Dissolve Amount", Range(0,1)) = 0
+        [ToggleUI]_UseClipsForDissolve("Do Dissolve", Int) = 0
+
         _ClipAgainstVertexColorGreaterZeroFive("Clip Vert Color > 0.5", Vector) = (1,1,1,1)
         _ClipAgainstVertexColorLessZeroFive("Clip Vert Color < 0.5", Vector) = (1,1,1,1)
 
@@ -114,6 +121,7 @@
         [Enum(UV1,0,UV2,1)] _UVSetOcclusion("Occlusion Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetEmission("Emission Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetClipMap("Clip Map UVs", Int) = 0
+        [Enum(UV1,0,UV2,1)] _UVSetDissolve("Dissolve Map UVs", Int) = 0
 
         _ClipMap("Clip Map", 2D) = "black" {}
         [HideInInspector][Enum(Basic, 0, Advanced, 1)]_AdvMode("Shader Mode", Int) = 0

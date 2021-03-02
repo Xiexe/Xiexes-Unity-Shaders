@@ -86,6 +86,7 @@ struct XSLighting
     half4 rampMask;
     half4 hsvMask;
     half4 clipMap;
+    half4 dissolveMask;
     half3 diffuseColor;
     half attenuation;
     half3 normal;
@@ -116,6 +117,7 @@ struct TextureUV
     half2 emissionMapUV;
     half2 outlineMaskUV;
     half2 clipMapUV;
+    half2 dissolveUV;
 };
 
 struct DotProducts
@@ -150,6 +152,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_CutoutMask); half4 _CutoutMask_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_DissolveTexture); half4 _DissolveTexture_ST;
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _Matcap;
@@ -160,7 +163,8 @@ float4 _GrabTexture_TexelSize;
 
 half4 _Color, _ShadowRim,
       _OutlineColor, _SSColor,
-      _EmissionColor, _MatcapTint, _RimColor;
+      _EmissionColor, _MatcapTint,
+      _RimColor, _DissolveColor;
 
 half _MatcapTintToDiffuse;
 half _Cutoff;
@@ -171,6 +175,7 @@ half _Metallic, _Glossiness, _OcclusionIntensity, _Reflectivity, _ClearcoatStren
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularSharpness, _SpecularArea, _AnisotropicSpecular, _AnisotropicReflection, _SpecularAlbedoTint;
 half _IOR;
+half _DissolveProgress, _DissolveStrength;
 
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _RimCubemapTint, _RimAttenEffect;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
@@ -191,8 +196,10 @@ int _OutlineAlbedoTint, _OutlineLighting, _OutlineNormalMode;
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
-    _UVSetEmission, _UVSetClipMap;
+    _UVSetEmission, _UVSetClipMap, _UVSetDissolve;
 int _NormalMapMode, _OutlineUVSelect;
+int _DissolveCoordinates;
+int _UseClipsForDissolve;
 
 half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount, _HalftoneLineIntensity;
 

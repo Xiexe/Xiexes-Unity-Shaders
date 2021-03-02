@@ -8,7 +8,7 @@ float4 frag (
     ) : SV_Target
 {
     UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
-	
+
 	// fix for rare bug where light atten is 0 when there is no directional light in the scene
 	#ifdef UNITY_PASS_FORWARDBASE
 		if(all(_LightColor0.rgb == 0.0))
@@ -16,15 +16,15 @@ float4 frag (
 			attenuation = 1.0;
 		}
 	#endif
-	
+
     #if defined(DIRECTIONAL)
         attenuation = lerp(attenuation, round(attenuation), _ShadowSharpness);
     #endif
-    
+
     bool face = facing > 0; // True if on front face, False if on back face
 
     if (!face) // Invert Normals based on face
-    { 
+    {
         if(i.color.a > 0.99) { discard; }//Discard outlines front face always. This way cull off and outlines can be enabled.
 
         i.ntb[0] = -i.ntb[0];
@@ -56,6 +56,7 @@ float4 frag (
     o.rampMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RampSelectionMask, _MainTex, i.uv); // This texture doesn't need to ever be on a second uv channel, and doesn't need tiling, convince me otherwise.
     o.hsvMask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVMask, _MainTex, t.albedoUV);
     o.clipMap = UNITY_SAMPLE_TEX2D_SAMPLER(_ClipMap, _MainTex, t.clipMapUV);
+    o.dissolveMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV);
 
     o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
     o.attenuation = attenuation;
@@ -71,6 +72,7 @@ float4 frag (
 
     float4 col = BRDF_XSLighting(o);
     calcAlpha(o);
+    calcDissolve(o, col);
     UNITY_APPLY_FOG(i.fogCoord, col);
     return float4(col.rgb, o.alpha);
 }

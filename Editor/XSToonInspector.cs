@@ -17,142 +17,150 @@ namespace XSToon
 
         //Assign all properties as null at first to stop hundreds of warnings spamming the log when script gets compiled.
         //If they aren't we get warnings, because assigning with reflection seems to make Unity think that the properties never actually get used.
-        MaterialProperty _VertexColorAlbedo = null;
-        MaterialProperty _TilingMode = null;
-        MaterialProperty _Culling = null;
-        MaterialProperty _BlendMode = null;
-        MaterialProperty _MainTex = null;
-        MaterialProperty _HSVMask = null;
-        MaterialProperty _Saturation = null;
-        MaterialProperty _Hue = null;
-        MaterialProperty _Value = null;
-        MaterialProperty _Color = null;
-        MaterialProperty _Cutoff = null;
-        MaterialProperty _FadeDither = null;
-        MaterialProperty _FadeDitherDistance = null;
-        MaterialProperty _BumpMap = null;
-        MaterialProperty _BumpScale = null;
-        MaterialProperty _DetailNormalMap = null;
-        MaterialProperty _DetailMask = null;
-        MaterialProperty _DetailNormalMapScale = null;
-        MaterialProperty _ReflectionMode = null;
-        MaterialProperty _ReflectionBlendMode = null;
-        MaterialProperty _MetallicGlossMap = null;
-        MaterialProperty _BakedCubemap = null;
-        MaterialProperty _Matcap = null;
-        MaterialProperty _MatcapTintToDiffuse = null;
-        MaterialProperty _MatcapTint = null;
-        MaterialProperty _ReflectivityMask = null;
-        MaterialProperty _Metallic = null;
-        MaterialProperty _Glossiness = null;
-        MaterialProperty _Reflectivity = null;
-        MaterialProperty _ClearCoat = null;
-        MaterialProperty _ClearcoatStrength = null;
-        MaterialProperty _ClearcoatSmoothness = null;
-        MaterialProperty _EmissionMap = null;
-        MaterialProperty _ScaleWithLight = null;
-        MaterialProperty _ScaleWithLightSensitivity = null;
-        MaterialProperty _EmissionColor = null;
-        MaterialProperty _EmissionToDiffuse = null;
-        MaterialProperty _RimColor = null;
-        MaterialProperty _RimIntensity = null;
-        MaterialProperty _RimRange = null;
-        MaterialProperty _RimThreshold = null;
-        MaterialProperty _RimSharpness = null;
-        MaterialProperty _RimAlbedoTint = null;
-        MaterialProperty _RimCubemapTint = null;
-        MaterialProperty _RimAttenEffect = null;
-        MaterialProperty _SpecularSharpness = null;
-        MaterialProperty _SpecularMap = null;
-        MaterialProperty _SpecularIntensity = null;
-        MaterialProperty _SpecularArea = null;
-        MaterialProperty _AnisotropicSpecular = null;
-        MaterialProperty _AnisotropicReflection = null;
-        MaterialProperty _SpecularAlbedoTint = null;
-        MaterialProperty _RampSelectionMask = null;
-        MaterialProperty _Ramp = null;
-        MaterialProperty _ShadowRim = null;
-        MaterialProperty _ShadowRimRange = null;
-        MaterialProperty _ShadowRimThreshold = null;
-        MaterialProperty _ShadowRimSharpness = null;
-        MaterialProperty _ShadowRimAlbedoTint = null;
-        MaterialProperty _OcclusionMap = null;
-        MaterialProperty _OcclusionIntensity = null;
-        MaterialProperty _OcclusionMode = null;
-        MaterialProperty _ThicknessMap = null;
-        MaterialProperty _SSColor = null;
-        MaterialProperty _SSDistortion = null;
-        MaterialProperty _SSPower = null;
-        MaterialProperty _SSScale = null;
-        MaterialProperty _HalftoneDotSize = null;
-        MaterialProperty _HalftoneDotAmount = null;
-        MaterialProperty _HalftoneLineAmount = null;
-        MaterialProperty _HalftoneLineIntensity = null;
-        MaterialProperty _HalftoneType = null;
-        MaterialProperty _UVSetAlbedo = null;
-        MaterialProperty _UVSetNormal = null;
-        MaterialProperty _UVSetDetNormal = null;
-        MaterialProperty _UVSetDetMask = null;
-        MaterialProperty _UVSetMetallic = null;
-        MaterialProperty _UVSetSpecular = null;
-        MaterialProperty _UVSetReflectivity = null;
-        MaterialProperty _UVSetThickness = null;
-        MaterialProperty _UVSetOcclusion = null;
-        MaterialProperty _UVSetEmission = null;
-        MaterialProperty _UVSetClipMap = null;
-        MaterialProperty _Stencil = null;
-        MaterialProperty _StencilComp = null;
-        MaterialProperty _StencilOp = null;
-        MaterialProperty _OutlineAlbedoTint = null;
-        MaterialProperty _OutlineLighting = null;
-        MaterialProperty _OutlineMask = null;
-        MaterialProperty _OutlineWidth = null;
-        MaterialProperty _OutlineColor = null;
-        MaterialProperty _OutlineNormalMode = null;
-        MaterialProperty _OutlineUVSelect = null;
-        MaterialProperty _ShadowSharpness = null;
-        MaterialProperty _AdvMode = null;
-        MaterialProperty _ClipMap = null;
-        MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null;
-        MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
-        MaterialProperty _IOR = null;
-        MaterialProperty _UseRefraction = null;
-        MaterialProperty _RefractionModel = null;
-        MaterialProperty _NormalMapMode = null;
+        private MaterialProperty _VertexColorAlbedo = null;
+        private MaterialProperty _TilingMode = null;
+        private MaterialProperty _Culling = null;
+        private MaterialProperty _BlendMode = null;
+        private MaterialProperty _MainTex = null;
+        private MaterialProperty _HSVMask = null;
+        private MaterialProperty _Saturation = null;
+        private MaterialProperty _Hue = null;
+        private MaterialProperty _Value = null;
+        private MaterialProperty _Color = null;
+        private MaterialProperty _Cutoff = null;
+        private MaterialProperty _FadeDither = null;
+        private MaterialProperty _FadeDitherDistance = null;
+        private MaterialProperty _BumpMap = null;
+        private MaterialProperty _BumpScale = null;
+        private MaterialProperty _DetailNormalMap = null;
+        private MaterialProperty _DetailMask = null;
+        private MaterialProperty _DetailNormalMapScale = null;
+        private MaterialProperty _ReflectionMode = null;
+        private MaterialProperty _ReflectionBlendMode = null;
+        private MaterialProperty _MetallicGlossMap = null;
+        private MaterialProperty _BakedCubemap = null;
+        private MaterialProperty _Matcap = null;
+        private MaterialProperty _MatcapTintToDiffuse = null;
+        private MaterialProperty _MatcapTint = null;
+        private MaterialProperty _ReflectivityMask = null;
+        private MaterialProperty _Metallic = null;
+        private MaterialProperty _Glossiness = null;
+        private MaterialProperty _Reflectivity = null;
+        private MaterialProperty _ClearCoat = null;
+        private MaterialProperty _ClearcoatStrength = null;
+        private MaterialProperty _ClearcoatSmoothness = null;
+        private MaterialProperty _EmissionMap = null;
+        private MaterialProperty _ScaleWithLight = null;
+        private MaterialProperty _ScaleWithLightSensitivity = null;
+        private MaterialProperty _EmissionColor = null;
+        private MaterialProperty _EmissionToDiffuse = null;
+        private MaterialProperty _RimColor = null;
+        private MaterialProperty _RimIntensity = null;
+        private MaterialProperty _RimRange = null;
+        private MaterialProperty _RimThreshold = null;
+        private MaterialProperty _RimSharpness = null;
+        private MaterialProperty _RimAlbedoTint = null;
+        private MaterialProperty _RimCubemapTint = null;
+        private MaterialProperty _RimAttenEffect = null;
+        private MaterialProperty _SpecularSharpness = null;
+        private MaterialProperty _SpecularMap = null;
+        private MaterialProperty _SpecularIntensity = null;
+        private MaterialProperty _SpecularArea = null;
+        private MaterialProperty _AnisotropicSpecular = null;
+        private MaterialProperty _AnisotropicReflection = null;
+        private MaterialProperty _SpecularAlbedoTint = null;
+        private MaterialProperty _RampSelectionMask = null;
+        private MaterialProperty _Ramp = null;
+        private MaterialProperty _ShadowRim = null;
+        private MaterialProperty _ShadowRimRange = null;
+        private MaterialProperty _ShadowRimThreshold = null;
+        private MaterialProperty _ShadowRimSharpness = null;
+        private MaterialProperty _ShadowRimAlbedoTint = null;
+        private MaterialProperty _OcclusionMap = null;
+        private MaterialProperty _OcclusionIntensity = null;
+        private MaterialProperty _OcclusionMode = null;
+        private MaterialProperty _ThicknessMap = null;
+        private MaterialProperty _SSColor = null;
+        private MaterialProperty _SSDistortion = null;
+        private MaterialProperty _SSPower = null;
+        private MaterialProperty _SSScale = null;
+        private MaterialProperty _HalftoneDotSize = null;
+        private MaterialProperty _HalftoneDotAmount = null;
+        private MaterialProperty _HalftoneLineAmount = null;
+        private MaterialProperty _HalftoneLineIntensity = null;
+        private MaterialProperty _HalftoneType = null;
+        private MaterialProperty _UVSetAlbedo = null;
+        private MaterialProperty _UVSetNormal = null;
+        private MaterialProperty _UVSetDetNormal = null;
+        private MaterialProperty _UVSetDetMask = null;
+        private MaterialProperty _UVSetMetallic = null;
+        private MaterialProperty _UVSetSpecular = null;
+        private MaterialProperty _UVSetReflectivity = null;
+        private MaterialProperty _UVSetThickness = null;
+        private MaterialProperty _UVSetOcclusion = null;
+        private MaterialProperty _UVSetEmission = null;
+        private MaterialProperty _UVSetClipMap = null;
+        private MaterialProperty _UVSetDissolve = null;
+        private MaterialProperty _Stencil = null;
+        private MaterialProperty _StencilComp = null;
+        private MaterialProperty _StencilOp = null;
+        private MaterialProperty _OutlineAlbedoTint = null;
+        private MaterialProperty _OutlineLighting = null;
+        private MaterialProperty _OutlineMask = null;
+        private MaterialProperty _OutlineWidth = null;
+        private MaterialProperty _OutlineColor = null;
+        private MaterialProperty _OutlineNormalMode = null;
+        private MaterialProperty _OutlineUVSelect = null;
+        private MaterialProperty _ShadowSharpness = null;
+        private MaterialProperty _AdvMode = null;
+        private MaterialProperty _ClipMap = null;
+        private MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null;
+        private MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
+        private MaterialProperty _IOR = null;
+        private MaterialProperty _UseRefraction = null;
+        private MaterialProperty _RefractionModel = null;
+        private MaterialProperty _NormalMapMode = null;
+        private MaterialProperty _DissolveCoordinates = null;
+        private MaterialProperty _DissolveTexture = null;
+        private MaterialProperty _DissolveStrength = null;
+        private MaterialProperty _DissolveColor = null;
+        private MaterialProperty _DissolveProgress = null;
+        private MaterialProperty _UseClipsForDissolve = null;
 
         //Material Properties for Patreon Plugins
-        MaterialProperty _LeftRightPan = null;
-        MaterialProperty _UpDownPan = null;
-        MaterialProperty _Twitchyness = null;
-        MaterialProperty _AttentionSpan = null;
-        MaterialProperty _FollowPower = null;
-        MaterialProperty _FollowLimit = null;
-        MaterialProperty _LookSpeed = null;
-        MaterialProperty _IrisSize = null;
-        MaterialProperty _EyeOffsetLimit = null;
+        private MaterialProperty _LeftRightPan = null;
+        private MaterialProperty _UpDownPan = null;
+        private MaterialProperty _Twitchyness = null;
+        private MaterialProperty _AttentionSpan = null;
+        private MaterialProperty _FollowPower = null;
+        private MaterialProperty _FollowLimit = null;
+        private MaterialProperty _LookSpeed = null;
+        private MaterialProperty _IrisSize = null;
+        private MaterialProperty _EyeOffsetLimit = null;
         //--
 
-        static bool showMainSettings = true;
-        static bool showNormalMapSettings = false;
-        static bool showShadows = true;
-        static bool showSpecular = false;
-        static bool showReflection = false;
-        static bool showRimlight = false;
-        static bool showHalftones = false;
-        static bool showSubsurface = false;
-        static bool showOutlines = false;
-        static bool showEmission = false;
-        static bool showAdvanced = false;
-        static bool showEyeTracking = false;
-        static bool showRefractionSettings = false;
+        private static bool showMainSettings = true;
+        private static bool showNormalMapSettings = false;
+        private static bool showShadows = true;
+        private static bool showSpecular = false;
+        private static bool showReflection = false;
+        private static bool showRimlight = false;
+        private static bool showHalftones = false;
+        private static bool showSubsurface = false;
+        private static bool showOutlines = false;
+        private static bool showEmission = false;
+        private static bool showAdvanced = false;
+        private static bool showEyeTracking = false;
+        private static bool showRefractionSettings = false;
+        private static bool showDissolveSettings = false;
 
-        bool isPatreonShader = false;
-        bool isEyeTracking = false;
-        bool isOutlined = false;
-        bool isCutout = false;
-        bool isCutoutMasked = false;
-        bool isDithered = false;
-        bool isRefractive = false;
+        private bool isPatreonShader = false;
+        private bool isEyeTracking = false;
+        private bool isOutlined = false;
+        private bool isCutout = false;
+        private bool isCutoutMasked = false;
+        private bool isDithered = false;
+        private bool isRefractive = false;
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
         {
@@ -189,6 +197,7 @@ namespace XSToon
 
                 DoBlendModeSettings(material);
                 DrawMainSettings(materialEditor);
+                DrawDissolveSettings(materialEditor);
                 DrawShadowSettings(materialEditor, material);
                 DrawOutlineSettings(materialEditor);
                 DrawNormalSettings(materialEditor);
@@ -287,6 +296,24 @@ namespace XSToon
                     XSStyles.SeparatorThin();
                     materialEditor.ShaderProperty(_FadeDither, new GUIContent("Distance Fading", "Make the shader dither out based on the distance to the camera."));
                     materialEditor.ShaderProperty(_FadeDitherDistance, new GUIContent("Fade Threshold", "The distance at which the fading starts happening."));
+                }
+            }
+        }
+
+        private void DrawDissolveSettings(MaterialEditor materialEditor)
+        {
+            if (isCutout || isDithered)
+            {
+                showDissolveSettings = XSStyles.ShurikenFoldout("Dissolve", showDissolveSettings);
+                if (showDissolveSettings)
+                {
+                    materialEditor.ShaderProperty(_DissolveCoordinates, new GUIContent("Dissolve Coordinates", "Should Dissolve happen in world space, texture space, or vertically?"));
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Texture", "Noise texture used to control up dissolve pattern"), _DissolveTexture, _DissolveColor);
+                    materialEditor.TextureScaleOffsetProperty(_DissolveTexture);
+                    materialEditor.ShaderProperty(_UVSetDissolve, new GUIContent("UV Set", "The UV set to use for the Dissolve Texture."), 2);
+
+                    materialEditor.ShaderProperty(_DissolveStrength, new GUIContent("Dissolve Sharpness", "Sharpness of the dissolve texture."));
+                    materialEditor.ShaderProperty(_DissolveProgress, new GUIContent("Dissolve Progress", "Progress of the dissolve effect."));
                 }
             }
         }
@@ -564,6 +591,7 @@ namespace XSToon
                     materialEditor.ShaderProperty(_VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
                     if (isDithered || isCutout)
                     {
+                        materialEditor.ShaderProperty(_UseClipsForDissolve, new GUIContent("Control Dissolve With Clip"));
                         materialEditor.TexturePropertySingleLine(new GUIContent("Clip Map (RGBA)", "Used to control clipping in an advanced manner, read tooltip for Clip Mask Vectors below."), _ClipMap);
                         materialEditor.TextureScaleOffsetProperty(_ClipMap);
                         materialEditor.ShaderProperty(_UVSetClipMap, new GUIContent("UV Set", "The UV set to use for the Clip Map"), 2);

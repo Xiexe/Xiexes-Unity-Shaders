@@ -114,6 +114,5 @@ half4 BRDF_XSLighting(XSLighting i)
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
     col += calcEmission(i, lightAvg);
     float4 finalColor = lerp(col, outlineColor, i.isOutline) * lerp(1, lineHalftone, _HalftoneLineIntensity * usingLineHalftone);
-    // finalColor = lerp(finalColor, float4(i.clipMap.rgb, 1), 0.9999);
     return finalColor;
 }

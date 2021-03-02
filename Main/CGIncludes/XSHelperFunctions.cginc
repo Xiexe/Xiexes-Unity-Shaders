@@ -89,6 +89,14 @@ void InitializeTextureUVs(
 
     half2 uvSetClipMap = (_UVSetClipMap == 0) ? i.uv : i.uv1;
     t.clipMapUV = TRANSFORM_TEX(uvSetClipMap, _ClipMap);
+
+    half2 uvSetDissolveMap = (_UVSetDissolve == 0) ? i.uv : i.uv1;
+    t.dissolveUV = TRANSFORM_TEX(uvSetDissolveMap, _DissolveTexture);
+}
+
+float Remap_Float(float In, float2 InMinMax, float2 OutMinMax)
+{
+    return OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
 }
 
 void InitializeTextureUVsMerged(
@@ -111,6 +119,10 @@ void InitializeTextureUVsMerged(
     t.thicknessMapUV = t.albedoUV;
     t.reflectivityMaskUV = t.albedoUV;
     t.clipMapUV = t.albedoUV;
+
+    //Dissolve map makes sense to be on a sep. UV always.
+    half2 uvSetDissolveMap = (_UVSetDissolve == 0) ? i.uv : i.uv1;
+    t.dissolveUV = TRANSFORM_TEX(uvSetDissolveMap, _DissolveTexture);
 }
 
 bool IsInMirror()
@@ -235,6 +247,39 @@ float AlphaAdjust(float alphaToAdj, float3 vColor)
     return alphaToAdj;
 }
 
+void calcDissolve(inout XSLighting i, inout float4 col)
+{
+    #ifdef _ALPHATEST_ON
+        half dissolveAmt = Remap_Float(i.dissolveMask.x, float2(0,1), float2(0.1, 0.9));
+        half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AlphaAdjust(1, i.clipMap.rgb), _UseClipsForDissolve));
+        if (_DissolveCoordinates == 0)
+        {
+            half dissolve = dissolveAmt - dissolveProgress;
+            half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            clip(dissolve);
+            col.rgb += (1-dissolveEdge) * _DissolveColor.rgb;
+        }
+
+        if(_DissolveCoordinates == 1)
+        {
+            half distToCenter = 1-length(i.objPos);
+            half dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
+            half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            clip(dissolve);
+            col.rgb += (1-dissolveEdge) * _DissolveColor.rgb;
+        }
+
+        if(_DissolveCoordinates == 2)
+        {
+            half distToCenter = (1-i.objPos.y) * 0.5 + 0.5;
+            half dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
+            half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            clip(dissolve);
+            col.rgb += (1-dissolveEdge) * _DissolveColor.rgb;
+        }
+    #endif
+}
+
 void calcAlpha(inout XSLighting i)
 {
     i.alpha = 1;
@@ -244,7 +289,7 @@ void calcAlpha(inout XSLighting i)
     #endif
 
     #ifdef _ALPHATEST_ON
-        float modifiedAlpha = AlphaAdjust(i.albedo.a, i.clipMap.rgb);
+        float modifiedAlpha = lerp(AlphaAdjust(i.albedo.a, i.clipMap.rgb), i.albedo.a, _UseClipsForDissolve);
         if(_BlendMode >= 3)
         {
             half dither = calcDither(i.screenUV.xy);
@@ -254,7 +299,6 @@ void calcAlpha(inout XSLighting i)
         if(_BlendMode == 2)
         {
             half dither = calcDither(i.screenUV.xy);
-
             float fadeDist = abs(_FadeDitherDistance);
             float d = distance(_WorldSpaceCameraPos, i.worldPos);
             d = smoothstep(fadeDist, fadeDist + 0.05, d);
