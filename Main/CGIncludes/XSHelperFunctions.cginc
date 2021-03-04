@@ -50,53 +50,72 @@ void InitializeTextureUVs(
     #endif
         inout TextureUV t)
 {
-
     #if defined(PatreonEyeTracking)
         float2 eyeUvOffset = eyeOffsets(i.uv, i.objPos, i.worldPos, i.ntb[0]);
         i.uv = eyeUvOffset;
         i.uv1 = eyeUvOffset;
     #endif
 
-    half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
-    t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
-
-    half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
-    t.emissionMapUV = TRANSFORM_TEX(uvSetEmissionMap, _EmissionMap);
-
-    half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
-    t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
-
-    half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
-    t.occlusionUV = TRANSFORM_TEX(uvSetOcclusion, _OcclusionMap);
-
-    half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
-    t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
-
-    half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
-    t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
-
     half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
-
-    half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
-    t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
-
-    half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
-    t.thicknessMapUV = TRANSFORM_TEX(uvSetThickness, _ThicknessMap);
-
-    half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
-    t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);
 
     half2 uvSetClipMap = (_UVSetClipMap == 0) ? i.uv : i.uv1;
     t.clipMapUV = TRANSFORM_TEX(uvSetClipMap, _ClipMap);
 
     half2 uvSetDissolveMap = (_UVSetDissolve == 0) ? i.uv : i.uv1;
     t.dissolveUV = TRANSFORM_TEX(uvSetDissolveMap, _DissolveTexture);
+
+    #if !defined(UNITY_PASS_SHADOWCASTER)
+        half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
+            t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
+
+            half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
+            t.emissionMapUV = TRANSFORM_TEX(uvSetEmissionMap, _EmissionMap);
+
+            half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
+            t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
+
+            half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
+            t.occlusionUV = TRANSFORM_TEX(uvSetOcclusion, _OcclusionMap);
+
+            half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
+            t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
+
+            half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
+            t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
+
+            half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
+            t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
+
+            half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
+            t.thicknessMapUV = TRANSFORM_TEX(uvSetThickness, _ThicknessMap);
+
+            half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
+            t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);
+    #endif
 }
 
 float Remap_Float(float In, float2 InMinMax, float2 OutMinMax)
 {
     return OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
+}
+
+half3 rgb2hsv(half3 c)
+{
+    half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
+    half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return half3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+half3 hsv2rgb(half3 c)
+{
+    half4 K = half4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    half3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
 void InitializeTextureUVsMerged(
@@ -252,31 +271,38 @@ void calcDissolve(inout XSLighting i, inout float4 col)
     #ifdef _ALPHATEST_ON
         half dissolveAmt = Remap_Float(i.dissolveMask.x, float2(0,1), float2(0.1, 0.9));
         half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AlphaAdjust(1, i.clipMap.rgb), _UseClipsForDissolve));
+        half dissolve = 0;
         if (_DissolveCoordinates == 0)
         {
-            half dissolve = dissolveAmt - dissolveProgress;
-            half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            dissolve = dissolveAmt - dissolveProgress;
             clip(dissolve);
-            col.rgb += (1-dissolveEdge) * _DissolveColor.rgb;
         }
 
         if(_DissolveCoordinates == 1)
         {
             half distToCenter = 1-length(i.objPos);
-            half dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
-            half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
             clip(dissolve);
-            col.rgb += (1-dissolveEdge) * _DissolveColor.rgb;
         }
 
         if(_DissolveCoordinates == 2)
         {
             half distToCenter = (1-i.objPos.y) * 0.5 + 0.5;
-            half dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
-            half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
             clip(dissolve);
-            col.rgb += (1-dissolveEdge) * _DissolveColor.rgb;
         }
+
+        #if !defined(UNITY_PASS_SHADOWCASTER)
+            float4 dissCol = _DissolveColor;
+            dissCol.rgb = rgb2hsv(dissCol.rgb);
+            dissCol.x += fmod(_Hue, 360);
+            dissCol.y = saturate(dissCol.y * _Saturation);
+            dissCol.z *= _Value;
+            dissCol.rgb = hsv2rgb(dissCol.rgb);
+
+            half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            col.rgb += (1-dissolveEdge) * dissCol.rgb;
+        #endif
     #endif
 }
 
@@ -286,6 +312,11 @@ void calcAlpha(inout XSLighting i)
 
     #ifdef _ALPHABLEND_ON
         i.alpha = i.albedo.a;
+
+        #ifdef UNITY_PASS_SHADOWCASTER
+            half dither = calcDither(i.screenUV.xy);
+            clip(i.alpha - dither);
+        #endif
     #endif
 
     #ifdef _ALPHATEST_ON

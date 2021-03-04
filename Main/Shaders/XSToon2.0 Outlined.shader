@@ -159,7 +159,7 @@
             ZWrite [_ZWrite]
             CGPROGRAM
             #define Geometry
-
+            #pragma target 4.0
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
@@ -194,7 +194,7 @@
             Fog { Color (0,0,0,0) }
             CGPROGRAM
             #define Geometry
-
+            #pragma target 4.0
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
@@ -223,8 +223,11 @@
             Tags{ "LightMode" = "ShadowCaster" }
             ZWrite On ZTest LEqual
             CGPROGRAM
-            #pragma vertex vertShadowCaster
-            #pragma fragment fragShadowCaster
+            #define Geometry
+            #pragma target 4.0
+            #pragma vertex vert
+            #pragma geometry geom
+            #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
             #pragma shader_feature _COLOROVERLAY_ON
@@ -234,7 +237,13 @@
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
-            #include "../CGIncludes/XSShadowCaster.cginc"
+            #include "../CGIncludes/XSDefines.cginc"
+            #include "../CGIncludes/XSHelperFunctions.cginc"
+            #include "../CGIncludes/XSLightingFunctions.cginc"
+            #include "../CGIncludes/XSLighting.cginc"
+            #include "../CGIncludes/XSVert.cginc"
+            #include "../CGIncludes/XSGeom.cginc"
+            #include "../CGIncludes/XSFrag.cginc"
             ENDCG
         }
     }

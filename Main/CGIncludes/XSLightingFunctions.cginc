@@ -50,24 +50,6 @@ half3 calcReflLight(half3 lightDir, half3 normal)
 {
     return reflect(lightDir, normal);
 }
-
-half3 rgb2hsv(half3 c)
-{
-    half4 K = half4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-    half4 p = lerp(half4(c.bg, K.wz), half4(c.gb, K.xy), step(c.b, c.g));
-    half4 q = lerp(half4(p.xyw, c.r), half4(c.r, p.yzx), step(p.x, c.r));
-
-    float d = q.x - min(q.w, q.y);
-    float e = 1.0e-10;
-    return half3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
-}
-
-half3 hsv2rgb(half3 c)
-{
-    half4 K = half4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    half3 p = abs(frac(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * lerp(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
 //
 
 //Returns the average direction of all lights and writes to a struct contraining individual directions
@@ -363,7 +345,11 @@ half4 calcDiffuse(XSLighting i, DotProducts d, half3 indirectDiffuse, half4 ligh
 {
     half4 diffuse;
     half4 indirect = indirectDiffuse.xyzz;
-    diffuse = ramp * i.attenuation * lightCol + indirect;
+
+    half grayIndirect = dot(indirectDiffuse, float3(1,1,1));
+    half attenFactor = lerp(i.attenuation, 1, smoothstep(0, 0.2, grayIndirect));
+
+    diffuse = ramp * attenFactor * lightCol + indirect;
     diffuse = i.albedo * diffuse;
     return diffuse;
 }
@@ -394,10 +380,17 @@ half4 calcSubsurfaceScattering(XSLighting i, DotProducts d, half3 lightDir, half
 half4 calcEmission(XSLighting i, half lightAvg)
 {
     #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
-        half4 emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse);
-        half4 scaledEmission = emission * saturate(smoothstep(1-_ScaleWithLightSensitivity, 1+_ScaleWithLightSensitivity, 1-lightAvg));
+        float4 emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse);
+        float4 scaledEmission = emission * saturate(smoothstep(1-_ScaleWithLightSensitivity, 1+_ScaleWithLightSensitivity, 1-lightAvg));
+        float4 em = lerp(scaledEmission, emission, _ScaleWithLight);
 
-        return lerp(scaledEmission, emission, _ScaleWithLight);
+        em.rgb = rgb2hsv(em.rgb);
+        em.x += fmod(_Hue, 360);
+        em.y = saturate(em.y * _Saturation);
+        em.z *= _Value;
+        em.rgb = hsv2rgb(em.rgb);
+
+        return em;
     #else
         return 0;
     #endif

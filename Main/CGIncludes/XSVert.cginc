@@ -22,7 +22,11 @@ VertexOutput vert (VertexInput v)
     o.screenPos = ComputeScreenPos(o.pos);
     o.objPos = normalize(v.vertex);
 
-    UNITY_TRANSFER_SHADOW(o, o.uv);
-    UNITY_TRANSFER_FOG(o, o.pos);
+    #if !defined(UNITY_PASS_SHADOWCASTER)
+        UNITY_TRANSFER_SHADOW(o, o.uv);
+        UNITY_TRANSFER_FOG(o, o.pos);
+    #else
+        TRANSFER_SHADOW_CASTER_NOPOS(o, o.pos);
+    #endif
     return o;
 }

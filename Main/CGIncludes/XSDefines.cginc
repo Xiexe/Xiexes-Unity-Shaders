@@ -32,8 +32,10 @@ struct VertexOutput
     float3 objPos : TEXCOORD11;
     float2 uv2 : TEXCOORD12;
 
-    SHADOW_COORDS(7)
-    UNITY_FOG_COORDS(10)
+    #if !defined(UNITY_PASS_SHADOWCASTER)
+        SHADOW_COORDS(7)
+        UNITY_FOG_COORDS(10)
+    #endif
 };
 
 #if defined(Geometry)
@@ -51,8 +53,10 @@ struct VertexOutput
         float3 objPos : TEXCOORD11;
         float2 uv2 : TEXCOORD12;
 
-        SHADOW_COORDS(7)
-        UNITY_FOG_COORDS(10)
+        #if !defined(UNITY_PASS_SHADOWCASTER)
+            SHADOW_COORDS(7)
+            UNITY_FOG_COORDS(10)
+        #endif
     };
 
     struct g2f
@@ -66,8 +70,10 @@ struct VertexOutput
         float4 screenPos : TEXCOORD8;
         float3 objPos : TEXCOORD10;
 
-        SHADOW_COORDS(7)
-        UNITY_FOG_COORDS(9)
+        #if !defined(UNITY_PASS_SHADOWCASTER)
+            SHADOW_COORDS(7)
+            UNITY_FOG_COORDS(9)
+        #endif
     };
 #endif
 
@@ -140,6 +146,8 @@ struct VertexLightInformation {
 };
 
 UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_DissolveTexture); half4 _DissolveTexture_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_BumpMap); half4 _BumpMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_DetailNormalMap); half4 _DetailNormalMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_DetailMask); half4 _DetailMask_ST;
@@ -149,10 +157,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_ReflectivityMask); half4 _ReflectivityMask_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ThicknessMap); half4 _ThicknessMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
-UNITY_DECLARE_TEX2D_NOSAMPLER(_CutoutMask); half4 _CutoutMask_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
-UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
-UNITY_DECLARE_TEX2D_NOSAMPLER(_DissolveTexture); half4 _DissolveTexture_ST;
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _Matcap;
@@ -161,13 +166,24 @@ samplerCUBE _BakedCubemap;
 sampler2D _GrabTexture;
 float4 _GrabTexture_TexelSize;
 
-half4 _Color, _ShadowRim,
+#if defined(UNITY_PASS_SHADOWCASTER)
+    sampler3D _DitherMaskLOD;
+#endif
+
+half4 _Color;
+half4 _ClipAgainstVertexColorGreaterZeroFive, _ClipAgainstVertexColorLessZeroFive;
+half _Cutoff;
+half _DissolveProgress, _DissolveStrength;
+int _DissolveCoordinates;
+int _UseClipsForDissolve;
+
+half4 _ShadowRim,
       _OutlineColor, _SSColor,
       _EmissionColor, _MatcapTint,
       _RimColor, _DissolveColor;
 
 half _MatcapTintToDiffuse;
-half _Cutoff;
+
 half _FadeDitherDistance;
 half _EmissionToDiffuse, _ScaleWithLightSensitivity;
 half _Hue, _Saturation, _Value;
@@ -175,13 +191,9 @@ half _Metallic, _Glossiness, _OcclusionIntensity, _Reflectivity, _ClearcoatStren
 half _BumpScale, _DetailNormalMapScale;
 half _SpecularIntensity, _SpecularSharpness, _SpecularArea, _AnisotropicSpecular, _AnisotropicReflection, _SpecularAlbedoTint;
 half _IOR;
-half _DissolveProgress, _DissolveStrength;
-
+half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount, _HalftoneLineIntensity;
 half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _RimCubemapTint, _RimAttenEffect;
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
-
-half4 _ClipAgainstVertexColorGreaterZeroFive, _ClipAgainstVertexColorLessZeroFive;
-
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;
 
@@ -198,10 +210,6 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
     _UVSetEmission, _UVSetClipMap, _UVSetDissolve;
 int _NormalMapMode, _OutlineUVSelect;
-int _DissolveCoordinates;
-int _UseClipsForDissolve;
-
-half _HalftoneDotSize, _HalftoneDotAmount, _HalftoneLineAmount, _HalftoneLineIntensity;
 
 //Defines for helper functions
 #define grayscaleVec float3(0.2125, 0.7154, 0.0721)
