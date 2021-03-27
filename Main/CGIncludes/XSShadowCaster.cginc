@@ -34,6 +34,7 @@ struct VertexInput
     float3 normal   : NORMAL;
     float2 uv0      : TEXCOORD0;
     float4 color    : COLOR;
+    UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 
@@ -50,6 +51,13 @@ struct VertexOutputShadowCaster
     float4 worldPos : TEXCOORD2;
     float4 screenPos : TEXCOORD3;
     float4 color : COLOR;
+};
+#endif
+
+#ifdef UNITY_STEREO_INSTANCING_ENABLED
+struct VertexOutputStereoShadowCaster
+{
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 #endif
 
@@ -95,8 +103,16 @@ void vertShadowCaster(VertexInput v,
     #if !defined(V2F_SHADOW_CASTER_NOPOS_IS_EMPTY) || defined(UNITY_STANDARD_USE_SHADOW_UVS)
         out VertexOutputShadowCaster o,
     #endif
+    #ifdef UNITY_STEREO_INSTANCING_ENABLED
+        out VertexOutputStereoShadowCaster os,
+    #endif
     out float4 opos : SV_POSITION)
 {
+    UNITY_SETUP_INSTANCE_ID(v);
+#ifdef UNITY_STEREO_INSTANCING_ENABLED
+    UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(os);
+#endif
+
     TRANSFER_SHADOW_CASTER_NOPOS(o, opos)
     #if defined(UNITY_STANDARD_USE_SHADOW_UVS)
         o.tex = TRANSFORM_TEX(v.uv0, _MainTex);

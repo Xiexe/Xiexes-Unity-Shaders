@@ -7,6 +7,7 @@ float4 frag (
     , uint facing : SV_IsFrontFace
     ) : SV_Target
 {
+    UNITY_SETUP_INSTANCE_ID(i);
     TextureUV t = (TextureUV)0; // Populate UVs
     if(_TilingMode != 1) { InitializeTextureUVs(i, t); } else { InitializeTextureUVsMerged(i, t); };
 

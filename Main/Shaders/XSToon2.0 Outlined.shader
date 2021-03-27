@@ -169,6 +169,7 @@
             #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase
+            #pragma multi_compile_instancing
 
             #ifndef UNITY_PASS_FORWARDBASE
                 #define UNITY_PASS_FORWARDBASE
@@ -232,6 +233,7 @@
             #pragma shader_feature _ALPHATEST_ON
             #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_shadowcaster
+            #pragma multi_compile_instancing
             #ifndef UNITY_PASS_SHADOWCASTER
                 #define UNITY_PASS_SHADOWCASTER
             #endif
