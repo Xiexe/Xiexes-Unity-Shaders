@@ -126,6 +126,8 @@ namespace XSToon
         private MaterialProperty _DissolveColor = null;
         private MaterialProperty _DissolveProgress = null;
         private MaterialProperty _UseClipsForDissolve = null;
+        private MaterialProperty _WireColor = null;
+        private MaterialProperty _WireWidth = null;
 
         //Material Properties for Patreon Plugins
         private MaterialProperty _LeftRightPan = null;
@@ -601,6 +603,8 @@ namespace XSToon
                         _ClipAgainstVertexColorLessZeroFive.vectorValue = ClampVec4(_ClipAgainstVertexColorLessZeroFive.vectorValue);
                     }
 
+                    materialEditor.ShaderProperty(_WireColor, new GUIContent("Wire Color On UV2", "This will only work with a specific second uv channel setup."));
+                    materialEditor.ShaderProperty(_WireWidth, new GUIContent("Wire Width", "Controls the above wire width."));
                     materialEditor.ShaderProperty(_Stencil, _Stencil.displayName);
                     materialEditor.ShaderProperty(_StencilComp, _StencilComp.displayName);
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);

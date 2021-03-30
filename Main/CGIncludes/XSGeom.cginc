@@ -8,6 +8,11 @@
     {
         g2f o = (g2f)0;
 
+        UNITY_SETUP_INSTANCE_ID(IN[0]);
+        UNITY_INITIALIZE_OUTPUT(g2f, o);
+        UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+        UNITY_TRANSFER_INSTANCE_ID(IN[0], o);
+
         //Main Mesh loop
         for (int i = 0; i < 3; i++)
         {

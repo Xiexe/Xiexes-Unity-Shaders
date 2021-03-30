@@ -62,6 +62,8 @@ struct VertexOutput
             SHADOW_COORDS(7)
             UNITY_FOG_COORDS(10)
         #endif
+
+        UNITY_VERTEX_INPUT_INSTANCE_ID
     };
 
     struct g2f
@@ -79,6 +81,9 @@ struct VertexOutput
             SHADOW_COORDS(7)
             UNITY_FOG_COORDS(9)
         #endif
+
+        UNITY_VERTEX_INPUT_INSTANCE_ID
+        UNITY_VERTEX_OUTPUT_STEREO
     };
 #endif
 

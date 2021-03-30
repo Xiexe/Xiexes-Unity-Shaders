@@ -7,7 +7,7 @@ namespace XSToon
     [InitializeOnLoad]
     public class XSStyles : MonoBehaviour
     {
-        public static string ver = "2.2.4";
+        public static string ver = "2.5";
 
         //Help URLs
         public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";
@@ -27,7 +27,7 @@ namespace XSToon
         {
             public static GUIContent version = new GUIContent("XSToon v" + ver, "The currently installed version of XSToon.");
         }
-                
+
         // Labels
         public static void DoHeader(GUIContent HeaderText)
         {
@@ -68,7 +68,7 @@ namespace XSToon
                 fontSize = 10
             });
         }
-        // ---- 
+        // ----
 
         static public GUIStyle _LineStyle;
         static public GUIStyle LineStyle
@@ -115,7 +115,7 @@ namespace XSToon
             GUILayout.EndHorizontal();
         }
 
-        
+
         static public void ResetAdvAll(Material material)
         {
             GUILayout.BeginHorizontal();
