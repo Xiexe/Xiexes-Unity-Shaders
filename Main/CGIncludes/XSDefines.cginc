@@ -11,6 +11,8 @@ struct VertexInput
     float3 normal : NORMAL;
     float4 tangent : TANGENT;
     float4 color : COLOR;
+
+    UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct VertexOutput
@@ -36,6 +38,9 @@ struct VertexOutput
         SHADOW_COORDS(7)
         UNITY_FOG_COORDS(10)
     #endif
+
+    UNITY_VERTEX_INPUT_INSTANCE_ID
+    UNITY_VERTEX_OUTPUT_STEREO
 };
 
 #if defined(Geometry)
