@@ -4,9 +4,10 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_Name: XSToon 2.0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: XSToon 2.0 _ StippledHalftone
   m_Shader: {fileID: 4800000, guid: 85c615217d617204cb497ae6838b8bae, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 6
@@ -94,11 +95,19 @@ Material:
     - _HalftoneDotAmount: 50
     - _HalftoneDotSize: 1.7
     - _HalftoneLineAmount: 150
+    - _HalftoneLineIntensity: 1
+    - _HalftoneType: 3
+    - _MatcapTintToDiffuse: 0
     - _Metallic: 0
+    - _OutlineAlbedoTint: 0
+    - _OutlineLighting: 0
     - _OutlineWidth: 1
     - _ReflectionBlendMode: 0
     - _ReflectionMode: 3
     - _Reflectivity: 1
+    - _RimAlbedoTint: 0
+    - _RimAttenEffect: 1
+    - _RimCubemapTint: 0
     - _RimIntensity: 0
     - _RimRange: 0.7
     - _RimSharpness: 0.1
@@ -111,6 +120,7 @@ Material:
     - _Saturation: 1
     - _ScaleWithLight: 1
     - _ScaleWithLightSensitivity: 1
+    - _ShadowRimAlbedoTint: 0
     - _ShadowRimRange: 0.7
     - _ShadowRimSharpness: 0.3
     - _ShadowRimThreshold: 0.1
@@ -134,6 +144,7 @@ Material:
     - _UVSetReflectivity: 0
     - _UVSetSpecular: 0
     - _UVSetThickness: 0
+    - _VertexColorAlbedo: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}

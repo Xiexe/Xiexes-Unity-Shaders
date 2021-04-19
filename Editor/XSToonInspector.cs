@@ -156,6 +156,8 @@ namespace XSToon
         private static bool showRefractionSettings = false;
         private static bool showDissolveSettings = false;
 
+        private static int BlendMode;
+
         private bool isPatreonShader = false;
         private bool isEyeTracking = false;
         private bool isOutlined = false;
@@ -218,50 +220,68 @@ namespace XSToon
 
         private void DoBlendModeSettings(Material material)
         {
-            int mode = material.GetInt("_BlendMode");
-            switch (mode)
+            int currentBlendMode = material.GetInt("_BlendMode");
+            if (BlendMode != currentBlendMode)
             {
-                case 0: //Opaque
-                    SetBlend(material, (int)UnityEngine.Rendering.BlendMode.One, (int)UnityEngine.Rendering.BlendMode.Zero, (int)UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    break;
+                BlendMode = currentBlendMode;
+                switch (BlendMode)
+                {
+                    case 0: //Opaque
+                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                            (int) UnityEngine.Rendering.BlendMode.Zero,
+                            (int) UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        break;
 
-                case 1: //Cutout
-                    SetBlend(material, (int)UnityEngine.Rendering.BlendMode.One, (int)UnityEngine.Rendering.BlendMode.Zero, (int)UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.EnableKeyword("_ALPHATEST_ON");
-                    break;
+                    case 1: //Cutout
+                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                            (int) UnityEngine.Rendering.BlendMode.Zero,
+                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.EnableKeyword("_ALPHATEST_ON");
+                        break;
 
-                case 2: //Dithered
-                    SetBlend(material, (int)UnityEngine.Rendering.BlendMode.One, (int)UnityEngine.Rendering.BlendMode.Zero, (int)UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.EnableKeyword("_ALPHATEST_ON");
-                    break;
+                    case 2: //Dithered
+                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                            (int) UnityEngine.Rendering.BlendMode.Zero,
+                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.EnableKeyword("_ALPHATEST_ON");
+                        break;
 
-                case 3: //Alpha To Coverage
-                    SetBlend(material, (int)UnityEngine.Rendering.BlendMode.One, (int)UnityEngine.Rendering.BlendMode.Zero, (int)UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.EnableKeyword("_ALPHATEST_ON");
-                    break;
+                    case 3: //Alpha To Coverage
+                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                            (int) UnityEngine.Rendering.BlendMode.Zero,
+                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.EnableKeyword("_ALPHATEST_ON");
+                        break;
 
-                case 4: //Transparent
-                    SetBlend(material, (int)UnityEngine.Rendering.BlendMode.One, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha, (int)UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                    material.EnableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    break;
+                    case 4: //Transparent
+                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                            (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
+                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                        material.EnableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        break;
 
-                case 5: //Fade
-                    SetBlend(material, (int)UnityEngine.Rendering.BlendMode.SrcAlpha, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha, (int)UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                    material.EnableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    break;
+                    case 5: //Fade
+                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.SrcAlpha,
+                            (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
+                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                        material.EnableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        break;
 
-                case 6: //Additive
-                    SetBlend(material, (int)UnityEngine.Rendering.BlendMode.One, (int)UnityEngine.Rendering.BlendMode.One, (int)UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                    material.DisableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    break;
+                    case 6: //Additive
+                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                            (int) UnityEngine.Rendering.BlendMode.One,
+                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.DisableKeyword("_ALPHATEST_ON");
+                        break;
+                }
             }
         }
 

@@ -124,6 +124,8 @@
         [Enum(UV1,0,UV2,1)] _UVSetDissolve("Dissolve Map UVs", Int) = 0
 
         _ClipMap("Clip Map", 2D) = "black" {}
+        _WireColor("Wire Color", Color) = (0,0,0,0)
+        _WireWidth("Wire Width", Float) = 0
         [HideInInspector][Enum(Basic, 0, Advanced, 1)]_AdvMode("Shader Mode", Int) = 0
         [IntRange] _Stencil ("Stencil ID [0;255]", Range(0,255)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
