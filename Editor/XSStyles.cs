@@ -7,7 +7,7 @@ namespace XSToon
     [InitializeOnLoad]
     public class XSStyles : MonoBehaviour
     {
-        public static string ver = "2.5";
+        public static string ver = "2.6";
 
         //Help URLs
         public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";
@@ -111,7 +111,7 @@ namespace XSToon
                 Renderer rend = Selection.activeGameObject.GetComponent<Renderer>();
                 if (rend != null)
                     XSClipMapEditor.Rend = rend;
-                
+
                 XSClipMapEditor.Init();
             }
             GUILayout.FlexibleSpace();

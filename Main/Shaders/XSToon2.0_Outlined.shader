@@ -183,6 +183,7 @@
             ZWrite [_ZWrite]
             CGPROGRAM
             #define Geometry
+            //#!RDPSTypeDefine
             #pragma target 4.0
             #pragma vertex vert
             #pragma geometry geom
@@ -219,6 +220,7 @@
             Fog { Color (0,0,0,0) }
             CGPROGRAM
             #define Geometry
+            //#!RDPSTypeDefine
             #pragma target 4.0
             #pragma vertex vert
             #pragma geometry geom
@@ -249,6 +251,7 @@
             ZWrite On ZTest LEqual
             CGPROGRAM
             #define Geometry
+            //#!RDPSTypeDefine
             #pragma target 4.0
             #pragma vertex vert
             #pragma geometry geom

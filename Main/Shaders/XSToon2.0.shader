@@ -182,6 +182,7 @@
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
             CGPROGRAM
+            //#!RDPSTypeDefine
             #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
@@ -215,6 +216,7 @@
             ZTest LEqual
             Fog { Color (0,0,0,0) }
             CGPROGRAM
+            //#!RDPSTypeDefine
             #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
@@ -242,6 +244,7 @@
             Tags{ "LightMode" = "ShadowCaster" }
             ZWrite On ZTest LEqual
             CGPROGRAM
+            //#!RDPSTypeDefine
             #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
