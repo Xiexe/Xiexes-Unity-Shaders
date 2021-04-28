@@ -11,6 +11,7 @@ struct VertexInput
     float3 normal : NORMAL;
     float4 tangent : TANGENT;
     float4 color : COLOR;
+    uint vertexId : SV_VertexID;
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
