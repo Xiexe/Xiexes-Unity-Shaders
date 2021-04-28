@@ -129,6 +129,26 @@ namespace XSToon
         private MaterialProperty _WireColor = null;
         private MaterialProperty _WireWidth = null;
 
+        //Experimenting
+        private MaterialProperty _ClipMaskArray = null;
+        private MaterialProperty _ClipIndex = null;
+        private MaterialProperty _ClipSlider00 = null;
+        private MaterialProperty _ClipSlider01 = null;
+        private MaterialProperty _ClipSlider02 = null;
+        private MaterialProperty _ClipSlider03 = null;
+        private MaterialProperty _ClipSlider04 = null;
+        private MaterialProperty _ClipSlider05 = null;
+        private MaterialProperty _ClipSlider06 = null;
+        private MaterialProperty _ClipSlider07 = null;
+        private MaterialProperty _ClipSlider08 = null;
+        private MaterialProperty _ClipSlider09 = null;
+        private MaterialProperty _ClipSlider10 = null;
+        private MaterialProperty _ClipSlider11 = null;
+        private MaterialProperty _ClipSlider12 = null;
+        private MaterialProperty _ClipSlider13 = null;
+        private MaterialProperty _ClipSlider14 = null;
+        private MaterialProperty _ClipSlider15 = null;
+
         //Material Properties for Patreon Plugins
         private MaterialProperty _LeftRightPan = null;
         private MaterialProperty _UpDownPan = null;
@@ -190,32 +210,31 @@ namespace XSToon
             }
 
             EditorGUI.BeginChangeCheck();
-            {
-                XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
-                material.SetShaderPassEnabled("Always", isRefractive);
-                materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
-                materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
-                materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
-                materialEditor.ShaderProperty(_BlendMode, new GUIContent("Blend Mode", "Blend mode of the material. (Opaque, transparent, cutout, etc.)"));
-                materialEditor.ShaderProperty(_UseRefraction, new GUIContent("Refraction", "Should this material be refractive? (Warning, this can be expensive!)"));
+            XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
+            material.SetShaderPassEnabled("Always", isRefractive);
+            materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
+            materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
+            materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
+            materialEditor.ShaderProperty(_BlendMode, new GUIContent("Blend Mode", "Blend mode of the material. (Opaque, transparent, cutout, etc.)"));
+            materialEditor.ShaderProperty(_UseRefraction, new GUIContent("Refraction", "Should this material be refractive? (Warning, this can be expensive!)"));
 
-                DoBlendModeSettings(material);
-                DrawMainSettings(materialEditor);
-                DrawDissolveSettings(materialEditor);
-                DrawShadowSettings(materialEditor, material);
-                DrawOutlineSettings(materialEditor);
-                DrawNormalSettings(materialEditor);
-                DrawSpecularSettings(materialEditor);
-                DrawReflectionsSettings(materialEditor, material);
-                DrawRefractionSettings(materialEditor);
-                DrawEmissionSettings(materialEditor);
-                DrawRimlightSettings(materialEditor);
-                DrawHalfToneSettings(materialEditor);
-                DrawTransmissionSettings(materialEditor);
-                DrawAdvancedSettings(materialEditor);
-                DrawPatreonSettings(materialEditor);
-                XSStyles.DoFooter();
-            }
+            DoBlendModeSettings(material);
+            DrawMainSettings(materialEditor);
+            DrawDissolveSettings(materialEditor);
+            DrawShadowSettings(materialEditor, material);
+            DrawOutlineSettings(materialEditor);
+            DrawNormalSettings(materialEditor);
+            DrawSpecularSettings(materialEditor);
+            DrawReflectionsSettings(materialEditor, material);
+            DrawRefractionSettings(materialEditor);
+            DrawEmissionSettings(materialEditor);
+            DrawRimlightSettings(materialEditor);
+            DrawHalfToneSettings(materialEditor);
+            DrawTransmissionSettings(materialEditor);
+            DrawAdvancedSettings(materialEditor, material);
+            DrawPatreonSettings(materialEditor);
+            XSStyles.DoFooter();
+
         }
 
         private void DoBlendModeSettings(Material material)
@@ -363,6 +382,7 @@ namespace XSToon
                     }
                 }
 
+                XSStyles.CallGradientEditor(material);
                 materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), _Ramp);
                 materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
 
@@ -379,7 +399,7 @@ namespace XSToon
                 materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
                 materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
                 materialEditor.ShaderProperty(_ShadowRimSharpness, new GUIContent("Sharpness", "Sharpness of the Shadow Rim"), 2);
-                XSStyles.callGradientEditor(material);
+
             }
         }
 
@@ -436,8 +456,6 @@ namespace XSToon
             showSpecular = XSStyles.ShurikenFoldout("Specular", showSpecular);
             if (showSpecular)
             {
-                XSStyles.SeparatorThin();
-
                 materialEditor.TexturePropertySingleLine(new GUIContent("Specular Map(R,G,B)", "Specular Map. Red channel controls Intensity, Green controls how much specular is tinted by Albedo, and Blue controls Smoothness (Only for Blinn-Phong, and GGX)."), _SpecularMap);
                 materialEditor.TextureScaleOffsetProperty(_SpecularMap);
                 materialEditor.ShaderProperty(_UVSetSpecular, new GUIContent("UV Set", "The UV set to use for the Specular Map"), 2);
@@ -603,32 +621,54 @@ namespace XSToon
             }
         }
 
-        private void DrawAdvancedSettings(MaterialEditor materialEditor)
+        private void DrawAdvancedSettings(MaterialEditor materialEditor, Material material)
         {
             if (_AdvMode.floatValue == 1)
             {
                 showAdvanced = XSStyles.ShurikenFoldout("Advanced Settings", showAdvanced);
                 if (showAdvanced)
                 {
-                    materialEditor.ShaderProperty(_VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
                     if (isDithered || isCutout)
                     {
-                        materialEditor.ShaderProperty(_UseClipsForDissolve, new GUIContent("Control Dissolve With Clip"));
-                        materialEditor.TexturePropertySingleLine(new GUIContent("Clip Map (RGBA)", "Used to control clipping in an advanced manner, read tooltip for Clip Mask Vectors below."), _ClipMap);
-                        materialEditor.TextureScaleOffsetProperty(_ClipMap);
+                        XSStyles.CallTexArrayManager();
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Clip Map (RGBA | Tex2DArray)", "Texture Array used to control clipping based on the Clip Index parameter."), _ClipMaskArray);
+                        materialEditor.ShaderProperty(_UseClipsForDissolve, new GUIContent("Use For Dissolve"), 2);
+                        materialEditor.ShaderProperty(_ClipIndex, new GUIContent("Clip Index", "The index to use for referencing the clipping mask in the array. Can be 0 - 15, for a total of 16 unique masks."), 2);
                         materialEditor.ShaderProperty(_UVSetClipMap, new GUIContent("UV Set", "The UV set to use for the Clip Map"), 2);
-                        materialEditor.ShaderProperty(_ClipAgainstVertexColorGreaterZeroFive, new GUIContent("Clip Mask > 0.5 Opacity", "Uses the Clip Map RGBA channels as a multiplier for clipping."));
-                        _ClipAgainstVertexColorGreaterZeroFive.vectorValue = ClampVec4(_ClipAgainstVertexColorGreaterZeroFive.vectorValue);
-                        materialEditor.ShaderProperty(_ClipAgainstVertexColorLessZeroFive, new GUIContent("Clip Mask Color < 0.5 Opacity", "Uses the Clip Map RGBA channels as a multiplier for clipping."));
-                        _ClipAgainstVertexColorLessZeroFive.vectorValue = ClampVec4(_ClipAgainstVertexColorLessZeroFive.vectorValue);
+
+                        int materialClipIndex = material.GetInt("_ClipIndex");
+                        switch (materialClipIndex)
+                        {
+                            case 0 : DrawVectorSliders(material, "_ClipSlider00", _ClipSlider00); break;
+                            case 1 : DrawVectorSliders(material, "_ClipSlider01", _ClipSlider01); break;
+                            case 2 : DrawVectorSliders(material, "_ClipSlider02", _ClipSlider02); break;
+                            case 3 : DrawVectorSliders(material, "_ClipSlider03", _ClipSlider03); break;
+                            case 4 : DrawVectorSliders(material, "_ClipSlider04", _ClipSlider04); break;
+                            case 5 : DrawVectorSliders(material, "_ClipSlider05", _ClipSlider05); break;
+                            case 6 : DrawVectorSliders(material, "_ClipSlider06", _ClipSlider06); break;
+                            case 7 : DrawVectorSliders(material, "_ClipSlider07", _ClipSlider07); break;
+                            case 8 : DrawVectorSliders(material, "_ClipSlider08", _ClipSlider08); break;
+                            case 9 : DrawVectorSliders(material, "_ClipSlider09", _ClipSlider09); break;
+                            case 10: DrawVectorSliders(material, "_ClipSlider10", _ClipSlider10); break;
+                            case 11: DrawVectorSliders(material, "_ClipSlider11", _ClipSlider11); break;
+                            case 12: DrawVectorSliders(material, "_ClipSlider12", _ClipSlider12); break;
+                            case 13: DrawVectorSliders(material, "_ClipSlider13", _ClipSlider13); break;
+                            case 14: DrawVectorSliders(material, "_ClipSlider14", _ClipSlider14); break;
+                            case 15: DrawVectorSliders(material, "_ClipSlider15", _ClipSlider15); break;
+                        }
                     }
 
+                    XSStyles.SeparatorThin();
+                    materialEditor.ShaderProperty(_VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
                     materialEditor.ShaderProperty(_WireColor, new GUIContent("Wire Color On UV2", "This will only work with a specific second uv channel setup."));
                     materialEditor.ShaderProperty(_WireWidth, new GUIContent("Wire Width", "Controls the above wire width."));
+
+                    XSStyles.SeparatorThin();
                     materialEditor.ShaderProperty(_Stencil, _Stencil.displayName);
                     materialEditor.ShaderProperty(_StencilComp, _StencilComp.displayName);
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
 
+                    XSStyles.SeparatorThin();
                     materialEditor.RenderQueueField();
                 }
             }
@@ -661,6 +701,17 @@ namespace XSToon
                 }
             }
             //
+        }
+
+        private void DrawVectorSliders(Material material, string vectorPropName, MaterialProperty property)
+        {
+            EditorGUI.BeginChangeCheck();
+            Vector4 prop = property.vectorValue;
+            prop.x = EditorGUILayout.Slider(new GUIContent("Clip R", "Clip on mask channel R"), prop.x, 0, 1);
+            prop.y = EditorGUILayout.Slider(new GUIContent("Clip G", "Clip on mask channel G"), prop.y, 0, 1);
+            prop.z = EditorGUILayout.Slider(new GUIContent("Clip B", "Clip on mask channel B"), prop.z, 0, 1);
+            prop.w = EditorGUILayout.Slider(new GUIContent("Clip A", "Clip on mask channel A"), prop.w, 0, 1);
+            property.vectorValue = prop;
         }
 
         private Vector4 ClampVec4(Vector4 vec)

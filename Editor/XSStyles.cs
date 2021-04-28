@@ -87,7 +87,7 @@ namespace XSToon
         }
 
         //GUI Buttons
-        static public void callGradientEditor(Material focusedMat = null)
+        static public void CallGradientEditor(Material focusedMat = null)
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -96,6 +96,23 @@ namespace XSToon
             {
                 XSGradientEditor.focusedMat = focusedMat;
                 XSGradientEditor.Init();
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+
+        static public void CallTexArrayManager()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUI.skin = null;
+            if (GUILayout.Button("Clip Map Manager", GUILayout.Width(200), GUILayout.Height(20)))
+            {
+                Renderer rend = Selection.activeGameObject.GetComponent<Renderer>();
+                if (rend != null)
+                    XSClipMapEditor.Rend = rend;
+                
+                XSClipMapEditor.Init();
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();

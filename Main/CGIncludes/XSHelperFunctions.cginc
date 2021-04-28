@@ -266,11 +266,43 @@ float AlphaAdjust(float alphaToAdj, float3 vColor)
     return alphaToAdj;
 }
 
+float AdjustAlphaUsingTextureArray(XSLighting i, float alphaToAdj)
+{
+    half4 compVal = 0;
+    switch (_ClipIndex)
+    {
+        case 0 : compVal = _ClipSlider00; break;
+        case 1 : compVal = _ClipSlider01; break;
+        case 2 : compVal = _ClipSlider02; break;
+        case 3 : compVal = _ClipSlider03; break;
+        case 4 : compVal = _ClipSlider04; break;
+        case 5 : compVal = _ClipSlider05; break;
+        case 6 : compVal = _ClipSlider06; break;
+        case 7 : compVal = _ClipSlider07; break;
+        case 8 : compVal = _ClipSlider08; break;
+        case 9 : compVal = _ClipSlider09; break;
+        case 10: compVal = _ClipSlider10; break;
+        case 11: compVal = _ClipSlider11; break;
+        case 12: compVal = _ClipSlider12; break;
+        case 13: compVal = _ClipSlider13; break;
+        case 14: compVal = _ClipSlider14; break;
+        case 15: compVal = _ClipSlider15; break;
+    }
+
+    //I fuckin hate this lol
+    alphaToAdj *= lerp(0, 1, lerp(1, compVal.r, step(0.01, i.clipMap.r)));
+    alphaToAdj *= lerp(0, 1, lerp(1, compVal.g, step(0.01, i.clipMap.g)));
+    alphaToAdj *= lerp(0, 1, lerp(1, compVal.b, step(0.01, i.clipMap.b)));
+    alphaToAdj *= lerp(0, 1, lerp(1, compVal.a, step(0.01, i.clipMap.a)));
+
+    return alphaToAdj;
+}
+
 void calcDissolve(inout XSLighting i, inout float4 col)
 {
     #ifdef _ALPHATEST_ON
         half dissolveAmt = Remap_Float(i.dissolveMask.x, float2(0,1), float2(0.1, 0.9));
-        half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AlphaAdjust(1, i.clipMap.rgb), _UseClipsForDissolve));
+        half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AdjustAlphaUsingTextureArray(i, 1), _UseClipsForDissolve));
         half dissolve = 0;
         if (_DissolveCoordinates == 0)
         {
@@ -320,7 +352,7 @@ void calcAlpha(inout XSLighting i)
     #endif
 
     #ifdef _ALPHATEST_ON
-        float modifiedAlpha = lerp(AlphaAdjust(i.albedo.a, i.clipMap.rgb), i.albedo.a, _UseClipsForDissolve);
+        float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
         if(_BlendMode >= 3)
         {
             half dither = calcDither(i.screenUV.xy);

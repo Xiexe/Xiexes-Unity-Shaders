@@ -1,6 +1,7 @@
 #include "UnityPBSLighting.cginc"
 #include "AutoLight.cginc"
 #include "UnityCG.cginc"
+//!RDPSDefines
 
 struct VertexInput
 {
@@ -155,6 +156,7 @@ struct VertexLightInformation {
     float Attenuation[4];
 };
 
+UNITY_DECLARE_TEX2DARRAY(_ClipMaskArray);
 UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_DissolveTexture); half4 _DissolveTexture_ST;
@@ -206,7 +208,12 @@ half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _Ri
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;
+half4 _ClipSlider00,_ClipSlider01,_ClipSlider02,_ClipSlider03,
+     _ClipSlider04,_ClipSlider05,_ClipSlider06,_ClipSlider07,
+     _ClipSlider08,_ClipSlider09,_ClipSlider10,_ClipSlider11,
+     _ClipSlider12,_ClipSlider13,_ClipSlider14,_ClipSlider15;
 
+int _ClipIndex;
 int _HalftoneType;
 int _FadeDither;
 int _BlendMode;

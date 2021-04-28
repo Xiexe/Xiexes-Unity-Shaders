@@ -135,6 +135,28 @@
         [HideInInspector] _DstBlend ("__dst", int) = 0
         [HideInInspector] _ZWrite ("__zw", int) = 1
         [HideInInspector] _AlphaToMask("__am", int) = 0
+
+        //A bit of a hack, but, a pretty okay hack?
+        _ClipMaskArray("Clip Mask Array", 2DArray) = "black" {}
+        [IntRange]_ClipIndex("Clip Index", Range(0,15)) = 0
+        _ClipSlider00("", Vector) = (1,1,1,1)
+        _ClipSlider01("", Vector) = (1,1,1,1)
+        _ClipSlider02("", Vector) = (1,1,1,1)
+        _ClipSlider03("", Vector) = (1,1,1,1)
+        _ClipSlider04("", Vector) = (1,1,1,1)
+        _ClipSlider05("", Vector) = (1,1,1,1)
+        _ClipSlider06("", Vector) = (1,1,1,1)
+        _ClipSlider07("", Vector) = (1,1,1,1)
+        _ClipSlider08("", Vector) = (1,1,1,1)
+        _ClipSlider09("", Vector) = (1,1,1,1)
+        _ClipSlider10("", Vector) = (1,1,1,1)
+        _ClipSlider11("", Vector) = (1,1,1,1)
+        _ClipSlider12("", Vector) = (1,1,1,1)
+        _ClipSlider13("", Vector) = (1,1,1,1)
+        _ClipSlider14("", Vector) = (1,1,1,1)
+        _ClipSlider15("", Vector) = (1,1,1,1)
+
+        //!RDPSProps
     }
 
     SubShader

@@ -1,7 +1,8 @@
+//!RDPSFunctions
+
 VertexOutput vert (VertexInput v)
 {
     VertexOutput o = (VertexOutput)0;
-
     #if !defined(Geometry)
         UNITY_SETUP_INSTANCE_ID(v);
         UNITY_INITIALIZE_OUTPUT(VertexOutput, o);
@@ -11,6 +12,8 @@ VertexOutput vert (VertexInput v)
         UNITY_SETUP_INSTANCE_ID(v);
         UNITY_TRANSFER_INSTANCE_ID(v, o);
     #endif
+
+    //!RDPSVertInject
 
     float3 wnormal = UnityObjectToWorldNormal(v.normal);
     float3 tangent = UnityObjectToWorldDir(v.tangent.xyz);
