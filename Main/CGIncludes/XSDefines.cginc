@@ -1,7 +1,6 @@
 #include "UnityPBSLighting.cginc"
 #include "AutoLight.cginc"
 #include "UnityCG.cginc"
-//!RDPSDefines
 
 struct VertexInput
 {
@@ -227,6 +226,8 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
     _UVSetEmission, _UVSetClipMap, _UVSetDissolve;
 int _NormalMapMode, _OutlineUVSelect;
+
+//!RDPSDefines
 
 //Defines for helper functions
 #define grayscaleVec float3(0.2125, 0.7154, 0.0721)
