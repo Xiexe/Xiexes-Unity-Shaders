@@ -245,7 +245,7 @@ namespace XSToon
         private void DoBlendModeSettings(Material material)
         {
             //!RDPSBlendModeInjection
-
+            
             int currentBlendMode = material.GetInt("_BlendMode");
             if (BlendMode != currentBlendMode)
             {
