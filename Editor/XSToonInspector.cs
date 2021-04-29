@@ -161,6 +161,8 @@ namespace XSToon
         private MaterialProperty _EyeOffsetLimit = null;
         //--
 
+        //!RDPSPropsInjection
+
         private static bool showMainSettings = true;
         private static bool showNormalMapSettings = false;
         private static bool showShadows = true;
@@ -185,6 +187,7 @@ namespace XSToon
         private bool isCutoutMasked = false;
         private bool isDithered = false;
         private bool isRefractive = false;
+
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
         {
@@ -233,12 +236,16 @@ namespace XSToon
             DrawTransmissionSettings(materialEditor);
             DrawAdvancedSettings(materialEditor, material);
             DrawPatreonSettings(materialEditor);
-            XSStyles.DoFooter();
 
+            //!RDPSFunctionCallInject
+
+            XSStyles.DoFooter();
         }
 
         private void DoBlendModeSettings(Material material)
         {
+            //!RDPSBlendModeInjection
+
             int currentBlendMode = material.GetInt("_BlendMode");
             if (BlendMode != currentBlendMode)
             {
@@ -702,6 +709,8 @@ namespace XSToon
             }
             //
         }
+
+        //!RDPSFunctionInject
 
         private void DrawVectorSliders(Material material, string vectorPropName, MaterialProperty property)
         {
