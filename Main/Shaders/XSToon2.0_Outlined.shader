@@ -103,10 +103,10 @@
         [Enum(UV, 0, Root Distance (Spherical), 1, Height, 2)]_DissolveCoordinates("Dissolve Shape", Int) = 0
         _DissolveTexture("Dissolve Texture", 2D) = "black" {}
         _DissolveBlendPower("Layer Blend Power", Float) = 1
-        _DissolveLayer1Scale("Layer1 Scale", float) = 1
-        _DissolveLayer2Scale("Layer2 Scale", float) = 0.5
-        _DissolveLayer1Speed("Layer1 Speed", float) = 0
-        _DissolveLayer2Speed("Layer2 Speed", float) = 0
+        _DissolveLayer1Scale("Layer1 Scale", Float) = 1
+        _DissolveLayer2Scale("Layer2 Scale", Float) = 0.5
+        _DissolveLayer1Speed("Layer1 Speed", Float) = 0
+        _DissolveLayer2Speed("Layer2 Speed", Float) = 0
 
         _DissolveStrength("Dissolve Sharpness", Float) = 1
         [HDR]_DissolveColor("Dissolve Color", Color) = (1,1,1,1)
@@ -142,9 +142,8 @@
         [HideInInspector] _ZWrite ("__zw", int) = 1
         [HideInInspector] _AlphaToMask("__am", int) = 0
 
-        //A bit of a hack, but, a pretty okay hack?
-        _ClipMaskArray("Clip Mask Array", 2DArray) = "black" {}
-        [IntRange]_ClipIndex("Clip Index", Range(0,15)) = 0
+        _ClipMask("Clip Mask", 2D) = "black" {}
+        [IntRange]_ClipIndex("Clip Index", Range(0,8)) = 0
         _ClipSlider00("", Vector) = (1,1,1,1)
         _ClipSlider01("", Vector) = (1,1,1,1)
         _ClipSlider02("", Vector) = (1,1,1,1)

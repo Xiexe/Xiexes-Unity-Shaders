@@ -194,6 +194,7 @@ namespace XSToon
         private bool isCutout = false;
         private bool isCutoutMasked = false;
         private bool isDithered = false;
+        private bool isA2C = false;
         private bool isRefractive = false;
 
 
@@ -204,6 +205,7 @@ namespace XSToon
 
             isCutout = material.GetInt("_BlendMode") == 1;
             isDithered = material.GetInt("_BlendMode") == 2;
+            isA2C = material.GetInt("_BlendMode") == 3;
             isRefractive = material.GetInt("_UseRefraction") == 1;
             isOutlined = shader.name.Contains("Outline");
             isPatreonShader = shader.name.Contains("Patreon");
@@ -368,7 +370,7 @@ namespace XSToon
 
         private void DrawDissolveSettings(MaterialEditor materialEditor, Material material)
         {
-            if (isCutout || isDithered || material.GetInt("_AlphaToMask") > 0)
+            if (isCutout || isDithered || isA2C)
             {
                 Foldouts[material].ShowDissolve = XSStyles.ShurikenFoldout("Dissolve", Foldouts[material].ShowDissolve);
                 if (Foldouts[material].ShowDissolve)
@@ -661,7 +663,7 @@ namespace XSToon
                 Foldouts[material].ShowAdvanced = XSStyles.ShurikenFoldout("Advanced Settings", Foldouts[material].ShowAdvanced);
                 if (Foldouts[material].ShowAdvanced)
                 {
-                    if (isDithered || isCutout || material.GetInt("_AlphaToMask") > 0)
+                    if (isDithered || isCutout || isA2C)
                     {
                         //XSStyles.CallTexArrayManager();
                         materialEditor.TexturePropertySingleLine(new GUIContent("Clip Map (RGB)", "Texture used to control clipping based on the Clip Index parameter."), _ClipMask);
