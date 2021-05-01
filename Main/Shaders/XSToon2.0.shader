@@ -136,9 +136,8 @@
         [HideInInspector] _ZWrite ("__zw", int) = 1
         [HideInInspector] _AlphaToMask("__am", int) = 0
 
-        //A bit of a hack, but, a pretty okay hack?
-        _ClipMaskArray("Clip Mask Array", 2DArray) = "black" {}
-        [IntRange]_ClipIndex("Clip Index", Range(0,15)) = 0
+        _ClipMask("Clip Mask", 2D) = "black" {}
+        [IntRange]_ClipIndex("Clip Index", Range(0,8)) = 0
         _ClipSlider00("", Vector) = (1,1,1,1)
         _ClipSlider01("", Vector) = (1,1,1,1)
         _ClipSlider02("", Vector) = (1,1,1,1)

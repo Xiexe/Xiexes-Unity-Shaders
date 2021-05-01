@@ -359,7 +359,7 @@ void calcAlpha(inout XSLighting i)
 
     #ifdef _ALPHATEST_ON
         float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
-        if(_BlendMode >= 3)
+        if(_BlendMode == 3 || _AlphaToMask == 1)
         {
             half dither = calcDither(i.screenUV.xy);
             i.alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);

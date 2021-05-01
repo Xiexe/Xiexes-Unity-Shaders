@@ -156,7 +156,7 @@ struct VertexLightInformation {
     float Attenuation[4];
 };
 
-UNITY_DECLARE_TEX2DARRAY(_ClipMaskArray);
+
 UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_DissolveTexture); half4 _DissolveTexture_ST;
@@ -172,6 +172,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
+sampler2D _ClipMask;
 sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
@@ -227,6 +228,7 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
     _UVSetEmission, _UVSetClipMap, _UVSetDissolve;
 int _NormalMapMode, _OutlineUVSelect;
+int _AlphaToMask;
 
 //!RDPSDefines
 

@@ -149,7 +149,7 @@ namespace XSToon
         private MaterialProperty _WireWidth = null;
 
         //Experimenting
-        private MaterialProperty _ClipMaskArray = null;
+        private MaterialProperty _ClipMask = null;
         private MaterialProperty _ClipIndex = null;
         private MaterialProperty _ClipSlider00 = null;
         private MaterialProperty _ClipSlider01 = null;
@@ -329,7 +329,7 @@ namespace XSToon
             material.SetInt("_SrcBlend", src);
             material.SetInt("_DstBlend", dst);
             material.SetInt("_ZWrite", zwrite);
-            material.SetInt("_AlphaToCoverage", alphatocoverage);
+            material.SetInt("_AlphaToMask", alphatocoverage);
 
             material.renderQueue = isRefractive ? (int)UnityEngine.Rendering.RenderQueue.Overlay - 1 : renderQueue;
         }
@@ -650,13 +650,15 @@ namespace XSToon
                 {
                     if (isDithered || isCutout)
                     {
-                        XSStyles.CallTexArrayManager();
-                        materialEditor.TexturePropertySingleLine(new GUIContent("Clip Map (RGB | Tex2DArray)", "Texture Array used to control clipping based on the Clip Index parameter."), _ClipMaskArray);
+                        //XSStyles.CallTexArrayManager();
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Clip Map (RGB)", "Texture used to control clipping based on the Clip Index parameter."), _ClipMask);
                         materialEditor.ShaderProperty(_UseClipsForDissolve, new GUIContent("Use For Dissolve"), 2);
-                        materialEditor.ShaderProperty(_ClipIndex, new GUIContent("Clip Index", "The index to use for referencing the clipping mask in the array. Can be 0 - 15, for a total of 16 unique masks."), 2);
+
                         materialEditor.ShaderProperty(_UVSetClipMap, new GUIContent("UV Set", "The UV set to use for the Clip Map"), 2);
 
                         XSStyles.DoHeaderLeft("Clip Against");
+                        materialEditor.ShaderProperty(_ClipIndex, new GUIContent("Clip Index", "Should be unique per material, controls which set of slider values to use for clipping. Can be 0 - 8(materials), with 8 masks in each texture, for a total of 64 unique masks."), 1);
+                        XSStyles.SeparatorThin();
                         int materialClipIndex = material.GetInt("_ClipIndex");
                         switch (materialClipIndex)
                         {
@@ -671,17 +673,17 @@ namespace XSToon
                         }
                     }
 
-                    XSStyles.SeparatorThin();
+                    XSStyles.Separator();
                     materialEditor.ShaderProperty(_VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
                     materialEditor.ShaderProperty(_WireColor, new GUIContent("Wire Color On UV2", "This will only work with a specific second uv channel setup."));
                     materialEditor.ShaderProperty(_WireWidth, new GUIContent("Wire Width", "Controls the above wire width."));
 
-                    XSStyles.SeparatorThin();
+                    XSStyles.Separator();
                     materialEditor.ShaderProperty(_Stencil, _Stencil.displayName);
                     materialEditor.ShaderProperty(_StencilComp, _StencilComp.displayName);
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
 
-                    XSStyles.SeparatorThin();
+                    XSStyles.Separator();
                     materialEditor.RenderQueueField();
                 }
             }
