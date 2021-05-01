@@ -183,7 +183,7 @@
             ZWrite [_ZWrite]
             CGPROGRAM
             //#!RDPSTypeDefine
-            #pragma target 3.0
+            #pragma target 5.0
             #pragma vertex vert
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
@@ -217,7 +217,7 @@
             Fog { Color (0,0,0,0) }
             CGPROGRAM
             //#!RDPSTypeDefine
-            #pragma target 3.0
+            #pragma target 5.0
             #pragma vertex vert
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
@@ -245,7 +245,7 @@
             ZWrite On ZTest LEqual
             CGPROGRAM
             //#!RDPSTypeDefine
-            #pragma target 3.0
+            #pragma target 5.0
             #pragma vertex vert
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON

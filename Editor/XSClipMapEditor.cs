@@ -216,7 +216,12 @@ namespace XSToon
 
                 output.Apply(false);
 
-                string path = EditorUtility.SaveFilePanelInProject("Save Array", $"{Rend.name}_texarray.asset", "asset", "Please enter a file name to save the texture array to");
+                string path = "";
+                if(Rend != null)
+                    path = EditorUtility.SaveFilePanelInProject("Save Array", $"{Rend.name}_texarray.asset", "asset", "Please enter a file name to save the texture array to");
+                else
+                    path = EditorUtility.SaveFilePanelInProject("Save Array", "SwapMask_texarray.asset", "asset", "Please enter a file name to save the texture array to");
+
                 if (path.Length != 0)
                 {
                     AssetDatabase.CreateAsset(output, path);

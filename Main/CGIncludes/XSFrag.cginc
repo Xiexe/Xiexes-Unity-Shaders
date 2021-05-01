@@ -63,7 +63,7 @@ float4 frag (
         o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV) * _EmissionColor;
         o.rampMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RampSelectionMask, _MainTex, i.uv); // This texture doesn't need to ever be on a second uv channel, and doesn't need tiling, convince me otherwise.
         o.hsvMask = UNITY_SAMPLE_TEX2D_SAMPLER(_HSVMask, _MainTex, t.albedoUV);
-        o.clipMap = UNITY_SAMPLE_TEX2DARRAY(_ClipMaskArray, float3(t.clipMapUV, _ClipIndex));
+        o.clipMap = UNITY_SAMPLE_TEX2DARRAY_LOD(_ClipMaskArray, float3(t.clipMapUV, _ClipIndex), 0);
         o.dissolveMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV);
 
         o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
@@ -82,6 +82,8 @@ float4 frag (
         calcAlpha(o);
         calcDissolve(o, col);
         UNITY_APPLY_FOG(i.fogCoord, col);
+        // float clipR = IsColorMatch(o.clipMap.rgb, float3(1,0,0));
+        // return lerp(float4(col.rgb, 1), clipR, 0.9999);
         // return lerp(float4(col.rgb, 1), float4(o.clipMap.rgb, 1), 0.9999);
         return float4(col.rgb, o.alpha);
     #endif

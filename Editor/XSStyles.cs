@@ -39,6 +39,16 @@ namespace XSToon
             });
         }
 
+        public static void DoHeaderLeft(string text)
+        {
+            GUILayout.Label(text, new GUIStyle(EditorStyles.boldLabel)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                wordWrap = true,
+                fontSize = 12
+            });
+        }
+
         public static void doLabel(string text)
         {
             GUILayout.Label(text, new GUIStyle(EditorStyles.label)
