@@ -102,6 +102,12 @@
 
         [Enum(UV, 0, Root Distance (Spherical), 1, Height, 2)]_DissolveCoordinates("Dissolve Shape", Int) = 0
         _DissolveTexture("Dissolve Texture", 2D) = "black" {}
+        _DissolveBlendPower("Layer Blend Power", Float) = 1
+        _DissolveLayer1Scale("Layer1 Scale", Float) = 1
+        _DissolveLayer2Scale("Layer2 Scale", Float) = 0.5
+        _DissolveLayer1Speed("Layer1 Speed", Float) = 0
+        _DissolveLayer2Speed("Layer2 Speed", Float) = 0
+
         _DissolveStrength("Dissolve Sharpness", Float) = 1
         [HDR]_DissolveColor("Dissolve Color", Color) = (1,1,1,1)
         _DissolveProgress("Dissolve Amount", Range(0,1)) = 0

@@ -149,6 +149,11 @@ namespace XSToon
         private MaterialProperty _WireWidth = null;
 
         //Experimenting
+        private MaterialProperty _DissolveBlendPower = null;
+        private MaterialProperty _DissolveLayer1Scale = null;
+        private MaterialProperty _DissolveLayer2Scale = null;
+        private MaterialProperty _DissolveLayer1Speed = null;
+        private MaterialProperty _DissolveLayer2Speed = null;
         private MaterialProperty _ClipMask = null;
         private MaterialProperty _ClipIndex = null;
         private MaterialProperty _ClipSlider00 = null;
@@ -363,7 +368,7 @@ namespace XSToon
 
         private void DrawDissolveSettings(MaterialEditor materialEditor, Material material)
         {
-            if (isCutout || isDithered)
+            if (isCutout || isDithered || material.GetInt("_AlphaToMask") > 0)
             {
                 Foldouts[material].ShowDissolve = XSStyles.ShurikenFoldout("Dissolve", Foldouts[material].ShowDissolve);
                 if (Foldouts[material].ShowDissolve)
@@ -372,6 +377,14 @@ namespace XSToon
                     materialEditor.TexturePropertySingleLine(new GUIContent("Dissolve Texture", "Noise texture used to control up dissolve pattern"), _DissolveTexture, _DissolveColor);
                     materialEditor.TextureScaleOffsetProperty(_DissolveTexture);
                     materialEditor.ShaderProperty(_UVSetDissolve, new GUIContent("UV Set", "The UV set to use for the Dissolve Texture."), 2);
+
+
+                    materialEditor.ShaderProperty(_DissolveBlendPower, new GUIContent("Layer Blend", "How much to boost the blended layers"));
+                    materialEditor.ShaderProperty(_DissolveLayer1Scale, new GUIContent("Layer 1 Scale", "How much tiling to apply to the layer."));
+                    materialEditor.ShaderProperty(_DissolveLayer1Speed, new GUIContent("Layer 1 Speed", "Scroll Speed of the layer, can be negative."));
+
+                    materialEditor.ShaderProperty(_DissolveLayer2Scale, new GUIContent("Layer 2 Scale", "How much tiling to apply to the layer."));
+                    materialEditor.ShaderProperty(_DissolveLayer2Speed, new GUIContent("Layer 2 Speed", "Scroll Speed of the layer, can be negative."));
 
                     materialEditor.ShaderProperty(_DissolveStrength, new GUIContent("Dissolve Sharpness", "Sharpness of the dissolve texture."));
                     materialEditor.ShaderProperty(_DissolveProgress, new GUIContent("Dissolve Progress", "Progress of the dissolve effect."));
@@ -648,7 +661,7 @@ namespace XSToon
                 Foldouts[material].ShowAdvanced = XSStyles.ShurikenFoldout("Advanced Settings", Foldouts[material].ShowAdvanced);
                 if (Foldouts[material].ShowAdvanced)
                 {
-                    if (isDithered || isCutout)
+                    if (isDithered || isCutout || material.GetInt("_AlphaToMask") > 0)
                     {
                         //XSStyles.CallTexArrayManager();
                         materialEditor.TexturePropertySingleLine(new GUIContent("Clip Map (RGB)", "Texture used to control clipping based on the Clip Index parameter."), _ClipMask);

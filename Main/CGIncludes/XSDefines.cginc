@@ -104,6 +104,7 @@ struct XSLighting
     half4 hsvMask;
     half4 clipMap;
     half4 dissolveMask;
+    half4 dissolveMaskSecondLayer;
     half3 diffuseColor;
     half attenuation;
     half3 normal;
@@ -209,6 +210,8 @@ half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _Ri
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;
+half _DissolveBlendPower, _DissolveLayer1Scale, _DissolveLayer2Scale, _DissolveLayer1Speed, _DissolveLayer2Speed;
+
 half4 _ClipSlider00,_ClipSlider01,_ClipSlider02,_ClipSlider03,
      _ClipSlider04,_ClipSlider05,_ClipSlider06,_ClipSlider07,
      _ClipSlider08,_ClipSlider09,_ClipSlider10,_ClipSlider11,

@@ -307,7 +307,8 @@ float AdjustAlphaUsingTextureArray(XSLighting i, float alphaToAdj)
 void calcDissolve(inout XSLighting i, inout float4 col)
 {
     #ifdef _ALPHATEST_ON
-        half dissolveAmt = Remap_Float(i.dissolveMask.x, float2(0,1), float2(0.1, 0.9));
+        float4 mask = i.dissolveMask.x * i.dissolveMaskSecondLayer.x * _DissolveBlendPower;
+        half dissolveAmt = Remap_Float(mask, float2(0,1), float2(0.25, 0.75));
         half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AdjustAlphaUsingTextureArray(i, 1), _UseClipsForDissolve));
         half dissolve = 0;
         if (_DissolveCoordinates == 0)
