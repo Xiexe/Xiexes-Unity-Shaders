@@ -277,7 +277,7 @@ float AdjustAlphaUsingTextureArray(XSLighting i, float alphaToAdj)
 {
     half4 compValRGBW = 0; // Red Green Blue White
     half4 compValCYMB = 0; // Cyan Yellow Magenta Black
-    switch (_ClipIndex) // Each of these is a Vector / 4 masks, 2 per material, so 8 masks per material, 16 total.
+    switch (_ClipIndex) // Each of these is a Vector / 4 masks, 2 per material, so 8 masks per material, 8 materials max, 64 total masks
     {
         case 0 : compValRGBW = _ClipSlider00; compValCYMB = _ClipSlider01; break;
         case 1 : compValRGBW = _ClipSlider02; compValCYMB = _ClipSlider03; break;
