@@ -144,22 +144,22 @@
 
         _ClipMask("Clip Mask", 2D) = "black" {}
         [IntRange]_ClipIndex("Clip Index", Range(0,7)) = 0
-        _ClipSlider00("", Vector) = (1,1,1,1)
-        _ClipSlider01("", Vector) = (1,1,1,1)
-        _ClipSlider02("", Vector) = (1,1,1,1)
-        _ClipSlider03("", Vector) = (1,1,1,1)
-        _ClipSlider04("", Vector) = (1,1,1,1)
-        _ClipSlider05("", Vector) = (1,1,1,1)
-        _ClipSlider06("", Vector) = (1,1,1,1)
-        _ClipSlider07("", Vector) = (1,1,1,1)
-        _ClipSlider08("", Vector) = (1,1,1,1)
-        _ClipSlider09("", Vector) = (1,1,1,1)
-        _ClipSlider10("", Vector) = (1,1,1,1)
-        _ClipSlider11("", Vector) = (1,1,1,1)
-        _ClipSlider12("", Vector) = (1,1,1,1)
-        _ClipSlider13("", Vector) = (1,1,1,1)
-        _ClipSlider14("", Vector) = (1,1,1,1)
-        _ClipSlider15("", Vector) = (1,1,1,1)
+        _ClipSlider00("", Vector) = (0,0,0,0)
+        _ClipSlider01("", Vector) = (0,0,0,0)
+        _ClipSlider02("", Vector) = (0,0,0,0)
+        _ClipSlider03("", Vector) = (0,0,0,0)
+        _ClipSlider04("", Vector) = (0,0,0,0)
+        _ClipSlider05("", Vector) = (0,0,0,0)
+        _ClipSlider06("", Vector) = (0,0,0,0)
+        _ClipSlider07("", Vector) = (0,0,0,0)
+        _ClipSlider08("", Vector) = (0,0,0,0)
+        _ClipSlider09("", Vector) = (0,0,0,0)
+        _ClipSlider10("", Vector) = (0,0,0,0)
+        _ClipSlider11("", Vector) = (0,0,0,0)
+        _ClipSlider12("", Vector) = (0,0,0,0)
+        _ClipSlider13("", Vector) = (0,0,0,0)
+        _ClipSlider14("", Vector) = (0,0,0,0)
+        _ClipSlider15("", Vector) = (0,0,0,0)
 
         //!RDPSProps
     }

@@ -290,16 +290,16 @@ float AdjustAlphaUsingTextureArray(XSLighting i, float alphaToAdj)
     }
 
     //Compares to Red, Green, Blue, and White against the first slider set
-    alphaToAdj *= lerp(1, compValRGBW.r, IsColorMatch(i.clipMap.rgb, float3(1,0,0)));
-    alphaToAdj *= lerp(1, compValRGBW.g, IsColorMatch(i.clipMap.rgb, float3(0,1,0)));
-    alphaToAdj *= lerp(1, compValRGBW.b, IsColorMatch(i.clipMap.rgb, float3(0,0,1)));
-    alphaToAdj *= lerp(1, compValRGBW.w, IsColorMatch(i.clipMap.rgb, float3(1,1,1)));
+    alphaToAdj *= lerp(1, 1-compValRGBW.r, IsColorMatch(i.clipMap.rgb, float3(1,0,0)));
+    alphaToAdj *= lerp(1, 1-compValRGBW.g, IsColorMatch(i.clipMap.rgb, float3(0,1,0)));
+    alphaToAdj *= lerp(1, 1-compValRGBW.b, IsColorMatch(i.clipMap.rgb, float3(0,0,1)));
+    alphaToAdj *= lerp(1, 1-compValRGBW.w, IsColorMatch(i.clipMap.rgb, float3(1,1,1)));
 
     //Compares to Cyan, Yellow, Magenta, and Black against the second slider set
-    alphaToAdj *= lerp(1, compValCYMB.r, IsColorMatch(i.clipMap.rgb, float3(0,1,1)));
-    alphaToAdj *= lerp(1, compValCYMB.g, IsColorMatch(i.clipMap.rgb, float3(1,1,0)));
-    alphaToAdj *= lerp(1, compValCYMB.b, IsColorMatch(i.clipMap.rgb, float3(1,0,1)));
-    alphaToAdj *= lerp(1, compValCYMB.w, IsColorMatch(i.clipMap.rgb, float3(0,0,0)));
+    alphaToAdj *= lerp(1, 1-compValCYMB.r, IsColorMatch(i.clipMap.rgb, float3(0,1,1)));
+    alphaToAdj *= lerp(1, 1-compValCYMB.g, IsColorMatch(i.clipMap.rgb, float3(1,1,0)));
+    alphaToAdj *= lerp(1, 1-compValCYMB.b, IsColorMatch(i.clipMap.rgb, float3(1,0,1)));
+    alphaToAdj *= lerp(1, 1-compValCYMB.w, IsColorMatch(i.clipMap.rgb, float3(0,0,0)));
 
     return alphaToAdj;
 }
