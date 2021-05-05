@@ -27,7 +27,6 @@ float4 frag (
         calcAlpha(o, alpha);
         calcDissolve(o, o.albedo.rgb);
         return alpha;
-
     #else
         UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
 
@@ -82,7 +81,7 @@ float4 frag (
         o.objPos = i.objPos;
 
         float4 col = BRDF_XSLighting(o);
-        float alpha = 1;
+        float alpha = o.albedo.a;
         calcAlpha(o, alpha);
         calcDissolve(o, col.rgb);
         UNITY_APPLY_FOG(i.fogCoord, col);
