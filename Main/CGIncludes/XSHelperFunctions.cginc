@@ -304,7 +304,7 @@ float AdjustAlphaUsingTextureArray(XSLighting i, float alphaToAdj)
     return alphaToAdj;
 }
 
-void calcDissolve(inout XSLighting i, inout float4 col)
+void calcDissolve(inout XSLighting i, inout float3 col)
 {
     #ifdef _ALPHATEST_ON
         float4 mask = i.dissolveMask.x * i.dissolveMaskSecondLayer.x * _DissolveBlendPower;
@@ -340,32 +340,26 @@ void calcDissolve(inout XSLighting i, inout float4 col)
             dissCol.rgb = hsv2rgb(dissCol.rgb);
 
             half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            dissCol.rgb *= saturate(sin(dissolveProgress * 4) * 3);
             col.rgb += (1-dissolveEdge) * dissCol.rgb;
         #endif
     #endif
 }
 
-void calcAlpha(inout XSLighting i)
+//todo: What the fuck is going on here?
+void calcAlpha(inout XSLighting i, inout float alpha)
 {
-    i.alpha = 1;
-
-    #ifdef _ALPHABLEND_ON
-        i.alpha = i.albedo.a;
+    #if defined(_ALPHABLEND_ON) && !defined(_ALPHATEST_ON) // Traditional Alphablended / Fade blending
+        alpha = i.albedo.a;
 
         #ifdef UNITY_PASS_SHADOWCASTER
             half dither = calcDither(i.screenUV.xy);
-            clip(i.alpha - dither);
+            clip(alpha - dither);
         #endif
     #endif
 
-    #ifdef _ALPHATEST_ON
+    #if !defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Dithered / Cutout transparency
         float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
-        if(_BlendMode == 3 || _AlphaToMask == 1)
-        {
-            half dither = calcDither(i.screenUV.xy);
-            i.alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
-        }
-
         if(_BlendMode == 2)
         {
             half dither = calcDither(i.screenUV.xy);
@@ -381,6 +375,16 @@ void calcAlpha(inout XSLighting i)
         {
             clip(modifiedAlpha - _Cutoff);
         }
+    #endif
+
+    #if defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Alpha to Coverage
+        float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
+        half dither = calcDither(i.screenUV.xy);
+        alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
+
+        #if defined(UNITY_PASS_SHADOWCASTER)
+            clip(modifiedAlpha - dither);
+        #endif
     #endif
 }
 

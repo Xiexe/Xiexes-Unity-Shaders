@@ -13,19 +13,21 @@ float4 frag (
 
     #ifdef UNITY_PASS_SHADOWCASTER
         XSLighting o = (XSLighting)0; //Populate Lighting Struct, but only with important shadowcaster stuff!
-        o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color * lerp(1, float4(i.color.rgb, 1), _VertexColorAlbedo);
+        o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color;
         o.clipMap = tex2Dlod(_ClipMask, float4(t.clipMapUV, 0, 0));
-        o.dissolveMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV);
+        o.dissolveMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV * _DissolveLayer1Scale + (_Time.y * _DissolveLayer1Speed));
+        o.dissolveMaskSecondLayer = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV * _DissolveLayer2Scale + (_Time.y * _DissolveLayer2Speed));
 
         o.worldPos = i.worldPos;
         o.screenUV = calcScreenUVs(i.screenPos);
         o.screenPos = i.screenPos;
         o.objPos = i.objPos;
 
-        float4 outCol = 0;
-        calcAlpha(o);
-        calcDissolve(o, outCol);
-        SHADOW_CASTER_FRAGMENT(i);
+        float alpha = o.albedo.a;
+        calcAlpha(o, alpha);
+        calcDissolve(o, o.albedo.rgb);
+        return alpha;
+
     #else
         UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos.xyz);
 
@@ -80,12 +82,10 @@ float4 frag (
         o.objPos = i.objPos;
 
         float4 col = BRDF_XSLighting(o);
-        calcAlpha(o);
-        calcDissolve(o, col);
+        float alpha = 1;
+        calcAlpha(o, alpha);
+        calcDissolve(o, col.rgb);
         UNITY_APPLY_FOG(i.fogCoord, col);
-        // float clipR = IsColorMatch(o.clipMap.rgb, float3(1,0,0));
-        // return lerp(float4(col.rgb, 1), clipR, 0.9999);
-        // return lerp(float4(col.rgb, 1), float4(o.clipMap.rgb, 1), 0.9999);
-        return float4(col.rgb, o.alpha);
+        return float4(col.rgb, alpha);
     #endif
 }

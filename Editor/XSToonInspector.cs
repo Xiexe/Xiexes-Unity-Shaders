@@ -300,7 +300,7 @@ namespace XSToon
                         SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                             (int) UnityEngine.Rendering.BlendMode.Zero,
                             (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
-                        material.DisableKeyword("_ALPHABLEND_ON");
+                        material.EnableKeyword("_ALPHABLEND_ON");
                         material.EnableKeyword("_ALPHATEST_ON");
                         break;
 
