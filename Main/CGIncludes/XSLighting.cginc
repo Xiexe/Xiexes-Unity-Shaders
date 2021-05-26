@@ -1,4 +1,4 @@
-half4 BRDF_XSLighting(XSLighting i, TextureUV t)
+half4 BRDF_XSLighting(FragmentData i, TextureUV t)
 {
     float3 untouchedNormal = i.normal;
     i.tangent = normalize(i.tangent);

@@ -12,7 +12,7 @@ float4 frag (
     if(_TilingMode != 1) { InitializeTextureUVs(i, t); } else { InitializeTextureUVsMerged(i, t); };
 
     #ifdef UNITY_PASS_SHADOWCASTER
-        XSLighting o = (XSLighting)0; //Populate Lighting Struct, but only with important shadowcaster stuff!
+        FragmentData o = (FragmentData)0; //Populate Lighting Struct, but only with important shadowcaster stuff!
         o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color;
         o.clipMap = tex2Dlod(_ClipMask, float4(t.clipMapUV, 0, 0));
         o.dissolveMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV * _DissolveLayer1Scale + (_Time.y * _DissolveLayer1Speed));
@@ -51,7 +51,7 @@ float4 frag (
             i.ntb[2] = -i.ntb[2];
         }
 
-        XSLighting o = (XSLighting)0; //Populate Lighting Struct
+        FragmentData o = (FragmentData)0; //Populate Surface Fragment Struct
         o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color * lerp(1, float4(i.color.rgb, 1), _VertexColorAlbedo);
         o.specularMap = UNITY_SAMPLE_TEX2D_SAMPLER(_SpecularMap, _MainTex, t.specularMapUV);
         o.metallicGlossMap = UNITY_SAMPLE_TEX2D_SAMPLER(_MetallicGlossMap, _MainTex, t.metallicGlossMapUV);

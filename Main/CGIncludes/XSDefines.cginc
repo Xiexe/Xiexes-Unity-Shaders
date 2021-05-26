@@ -88,7 +88,7 @@ struct VertexOutput
     };
 #endif
 
-struct XSLighting
+struct FragmentData
 {
     half4 albedo;
     half4 normalMap;
@@ -135,7 +135,6 @@ struct TextureUV
     half2 outlineMaskUV;
     half2 clipMapUV;
     half2 dissolveUV;
-    half2 audioLinkUV;
 };
 
 struct DotProducts
@@ -156,7 +155,6 @@ struct VertexLightInformation {
     float3 ColorFalloff[4];
     float Attenuation[4];
 };
-
 
 UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
