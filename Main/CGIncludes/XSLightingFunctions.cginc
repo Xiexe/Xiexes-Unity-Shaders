@@ -387,7 +387,7 @@ half4 calcEmission(XSLighting i, DotProducts d, half lightAvg)
         }
         else
         {
-            if(AudioLinkIsAvailableNonSurface())
+            if(AudioLinkIsAvailable())
             {
                 if(_EmissionAudioLinkChannel != 5)
                 {

@@ -61,7 +61,7 @@ float4 AudioLinkLerp(float2 xy) { return lerp( AudioLinkData(xy), AudioLinkData(
 float4 AudioLinkLerpMultiline(float2 xy) { return lerp( AudioLinkDataMultiline(xy), AudioLinkDataMultiline(xy+float2(1,0)), frac( xy.x ) ); }
 
 //Tests to see if Audio Link texture is available, I think this only works on VertFrag shaders. Will need another method for Surface Shaders?
-bool AudioLinkIsAvailableNonSurface()
+bool AudioLinkIsAvailable()
 {
     int width, height;
     _AudioTexture.GetDimensions(width, height);
@@ -326,4 +326,3 @@ float PrintNumberOnLine( float number, uint fixeddiv, uint digit, float2 mxy, in
 
     return PrintChar( selnum, mxy, softness );
 }
-
