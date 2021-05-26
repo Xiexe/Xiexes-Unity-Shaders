@@ -1,21 +1,21 @@
 // Map of where features in AudioLink are.
-#define ALPASS_DFT              int2(0,4)
-#define ALPASS_WAVEFORM         int2(0,6)
-#define ALPASS_AUDIOLINK        int2(0,0)
-#define ALPASS_AUDIOLINKHISTORY int2(1,0)
-#define ALPASS_GENERALVU        int2(0,22)
-#define ALPASS_AUDIOLINK_BASS   int2(0,0)
-#define ALPASS_AUDIOLINK_LOWMID int2(32,0)
-#define ALPASS_AUDIOLINK_HIMID  int2(64,0)
-#define ALPASS_AUDIOLINK_TREBLE int2(96,0)
+#define ALPASS_DFT                       int2(0,4)
+#define ALPASS_WAVEFORM                  int2(0,6)
+#define ALPASS_AUDIOLINK                 int2(0,0)
+#define ALPASS_AUDIOBASS                 int2(0,0)
+#define ALPASS_AUDIOLOWMIDS              int2(0,1)
+#define ALPASS_AUDIOHIGHMIDS             int2(0,2)
+#define ALPASS_AUDIOTREBLE               int2(0,3)
+#define ALPASS_AUDIOLINKHISTORY          int2(1,0)
+#define ALPASS_GENERALVU                 int2(0,22)
 
 #define ALPASS_GENERALVU_INSTANCE_TIME   int2(2,22)
 #define ALPASS_GENERALVU_LOCAL_TIME      int2(3,22)
 
-#define ALPASS_CCINTERNAL       int2(12,22)
-#define ALPASS_CCSTRIP          int2(0,24)
-#define ALPASS_CCLIGHTS         int2(0,25)
-#define ALPASS_AUTOCORRELATOR   int2(0,27)
+#define ALPASS_CCINTERNAL                int2(12,22)
+#define ALPASS_CCSTRIP                   int2(0,24)
+#define ALPASS_CCLIGHTS                  int2(0,25)
+#define ALPASS_AUTOCORRELATOR            int2(0,27)
 
 // Some basic constants to use (Note, these should be compatible with
 // future version of AudioLink, but may change.
@@ -60,23 +60,31 @@ float4 AudioLinkLerp(float2 xy) { return lerp( AudioLinkData(xy), AudioLinkData(
 // Same as AudioLinkLerp but properly handles multiline reading.
 float4 AudioLinkLerpMultiline(float2 xy) { return lerp( AudioLinkDataMultiline(xy), AudioLinkDataMultiline(xy+float2(1,0)), frac( xy.x ) ); }
 
+//Tests to see if Audio Link texture is available, I think this only works on VertFrag shaders. Will need another method for Surface Shaders?
+bool AudioLinkIsAvailableNonSurface()
+{
+    int width, height;
+    _AudioTexture.GetDimensions(width, height);
+    return width > 16;
+}
+
 // Decompress a RGBA FP16 into a really big number, this is used in some sections of the info block.
 #define DecodeLongFloat( vALValue )  (vALValue.r + vALValue.g*1024 + vALValue.b * 1048576 + vALValue.a * 1073741824 )
 
 
 // Extra utility functions for time.
-uint ALDecodeDataAsUInt( uint2 sample )
+uint ALDecodeDataAsUInt( uint2 indexloc )
 {
-    half4 rpx = AudioLinkData( sample );
+    half4 rpx = AudioLinkData( indexloc );
     return DecodeLongFloat( rpx );
 }
 
 
 //Note: This will truncate time to every 134,217.728 seconds (~1.5 days of an instance being up) to prevent floating point aliasing.
 // if your code will alias sooner, you will need to use a different function.
-float ALDecodeDataAsFloat( uint2 sample )
+float ALDecodeDataAsFloat( uint2 indexloc )
 {
-    return (ALDecodeDataAsUInt( sample ) & 0x7ffffff) / 1000.;
+    return (ALDecodeDataAsUInt( indexloc ) & 0x7ffffff) / 1000.;
 }
 
 
@@ -156,7 +164,7 @@ float3 CCtoRGB( float bin, float intensity, int RootNote )
 // A basic versino of the debug screen without text was only 134
 // instructions.
 
-float PrintChar( uint selchar, float2 mxy )
+float PrintChar( uint selchar, float2 mxy, float2 softness )
 {
     const static uint BitmapNumberFont[40] = {
         15379168,  // '0' 1110 1010 1010 1010 1110 0000
@@ -173,32 +181,32 @@ float PrintChar( uint selchar, float2 mxy )
         57344,     // '-' 0000 0000 1110 0000 0000 0000
         0,         // ' '
         15395488,  // 'A' 1110 1010 1110 1010 1010 0000
-        15395552,  // 'B' 1110 1010 1110 1010 1110 0000
+        15387360,  // 'B' 1110 1010 1100 1010 1110 0000
         15239392,  // 'C' 1110 1000 1000 1000 1110 0000
         15379168,  // 'D' 1110 1010 1010 1010 1110 0000
         15255776,  // 'E' 1110 1000 1100 1000 1110 0000
         15255680,  // 'F' 1110 1000 1100 1000 1000 0000
-        15264480,  // 'G' 1110 1000 1110 1010 1110 0000
+        15248096,  // 'G' 1110 1000 1010 1010 1110 0000
         11201184,  // 'H' 1010 1010 1110 1010 1010 0000
         14959840,  // 'I' 1110 0100 0100 0100 1110 0000
-        14823136,  // 'J' 1110 0010 0010 1110 1110 0000
+        14822112,  // 'J' 1110 0010 0010 1010 1110 0000
         11201184,  // 'K' 1010 1010 1110 1010 1010 0000
         8947936 ,  // 'L' 1000 1000 1000 1000 1110 0000
         11446944,  // 'M' 1010 1110 1010 1010 1010 0000
-        9349792 ,  // 'N' 1000 1110 1010 1010 1010 0000
+        13281952,  // 'N' 1110 1010 1010 1010 1010 0000
         15379168,  // 'O' 1110 1010 1010 1010 1110 0000
         15394944,  // 'P' 1110 1010 1110 1000 1000 0000
-        15380192,  // 'Q' 1110 1010 1010 1110 1110 0000
+        15380064,  // 'Q' 1110 1010 1010 1110 0110 0000
         15395488,  // 'R' 1110 1010 1110 1010 1010 0000
         15262432,  // 'S' 1110 1000 1110 0010 1110 0000
         14959680,  // 'T' 1110 0100 0100 0100 0100 0000
         11184864,  // 'U' 1010 1010 1010 1010 1110 0000
-        11184704,  // 'V' 1010 1010 1010 1010 0100 0000
-        11464256,  // 'W' 1010 1010 1110 1110 0100 0000
+        11185728,  // 'V' 1010 1010 1010 1110 0100 0000
+        11185824,  // 'W' 1010 1010 1010 1110 1010 0000
         11160224,  // 'X' 1010 1010 0100 1010 1010 0000
         11199552,  // 'Y' 1010 1010 1110 0100 0100 0000
         14829792,  // 'Z' 1110 0010 0100 1000 1110 0000
-        658144,  // ':)'0000 1010 0000 1010 1110 0000
+        658144     // ':)'0000 1010 0000 1010 1110 0000
     };
     const static uint BitmapNumberFontPartial[40] = {
         15379168,  // '0' 1110 1010 1010 1010 1110 0000
@@ -223,24 +231,24 @@ float PrintChar( uint selchar, float2 mxy )
         15248096,  // 'G' 1110 1000 1010 1010 1110 0000
         11201184,  // 'H' 1010 1010 1110 1010 1010 0000
         14959840,  // 'I' 1110 0100 0100 0100 0100 0000
-        14822080,  // 'J' 1110 0010 0010 1010 1100 0000
+        14821952,  // 'J' 1110 0010 0010 1010 0100 0000
         11192992,  // 'K' 1010 1010 1100 1010 1010 0000
         8947936 ,  // 'L' 1000 1000 1000 1000 1110 0000
         11446944,  // 'M' 1010 1110 1010 1010 1010 0000
-        9218720 ,  // 'N' 1000 1100 1010 1010 1010 0000
+        15379104,  // 'N' 1100 1010 1010 1010 1010 0000
         15379168,  // 'O' 1110 1010 1010 1010 1110 0000
         15394944,  // 'P' 1110 1010 1110 1000 1000 0000
-        15379040,  // 'Q' 1110 1010 1010 1010 0110 0000
+        15380064,  // 'Q' 1110 1010 1010 1110 0110 0000
         15387296,  // 'R' 1110 1010 1100 1010 1010 0000
-        15262432,  // 'S' 1110 1000 1110 0010 1110 0000
+        6832832,  // 'S' 0110 1000 0100 0010 1100 0000
         14959680,  // 'T' 1110 0100 0100 0100 0100 0000
         11184864,  // 'U' 1010 1010 1010 1010 1110 0000
         11185728,  // 'V' 1010 1010 1010 1110 0100 0000
-        11464256,  // 'W' 1010 1010 1110 1110 0100 0000
+        11185824,  // 'W' 1010 1010 1010 1110 1010 0000
         11160224,  // 'X' 1010 1010 0100 1010 1010 0000
         11199552,  // 'Y' 1010 1010 1110 0100 0100 0000
         14829792,  // 'Z' 1110 0010 0100 1000 1110 0000
-        657984,  // ':)'0000 1010 0000 1010 0100 0000
+        657984     // ':)'0000 1010 0000 1010 0100 0000
     };
 
     uint bitmap = BitmapNumberFont[selchar];
@@ -272,13 +280,13 @@ float PrintChar( uint selchar, float2 mxy )
         float ov = lerp(
             lerp( tolerp.x, tolerp.y, shift.x ),
             lerp( tolerp.z, tolerp.w, shift.x ), shift.y ) / 2.;
-        return saturate( ov * 20 - 10 );
+        return saturate( ov * softness - softness/2 );
     }
 }
 
 
 // Used for debugging
-float PrintNumberOnLine( float number, uint fixeddiv, uint digit, float2 mxy, int offset, bool leadzero )
+float PrintNumberOnLine( float number, uint fixeddiv, uint digit, float2 mxy, int offset, bool leadzero, float2 softness )
 {
     uint selnum;
     if( number < 0 && digit == 0 )
@@ -316,6 +324,6 @@ float PrintNumberOnLine( float number, uint fixeddiv, uint digit, float2 mxy, in
         }
     }
 
-    return PrintChar( selnum, mxy );
+    return PrintChar( selnum, mxy, softness );
 }
 

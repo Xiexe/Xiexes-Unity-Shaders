@@ -387,10 +387,7 @@ half4 calcEmission(XSLighting i, DotProducts d, half lightAvg)
         }
         else
         {
-            int width, height;
-            _AudioTexture.GetDimensions(width, height);
-            bool hasAudioLink = width > 16;
-            if(hasAudioLink)
+            if(AudioLinkIsAvailableNonSurface())
             {
                 if(_EmissionAudioLinkChannel != 5)
                 {
