@@ -402,8 +402,8 @@ half4 calcEmission(XSLighting i, DotProducts d, half lightAvg)
                 {
 
                     float audioDataBass = AudioLinkData(int2(0,0)).x;
-                    float audioDataMids = (AudioLinkData(int2(0,1)).x + AudioLinkData(int2(0,2)).x) / 2;
-                    float audioDataHighs = AudioLinkData(int2(0,3)).x;
+                    float audioDataMids = AudioLinkData(int2(0,1)).x;
+                    float audioDataHighs = (AudioLinkData(int2(0,2)).x + AudioLinkData(int2(0,3)).x) * 0.5;
 
                     float4 emissionChannelRed = i.emissionMap.r * _EmissionColor * audioDataBass;
                     float4 emissionChannelGreen = i.emissionMap.g * _EmissionColor0 * audioDataMids;
