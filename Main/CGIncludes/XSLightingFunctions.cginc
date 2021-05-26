@@ -377,10 +377,42 @@ half4 calcSubsurfaceScattering(XSLighting i, DotProducts d, half3 lightDir, half
     }
 }
 
-half4 calcEmission(XSLighting i, half lightAvg)
+half4 calcEmission(XSLighting i, DotProducts d, half lightAvg)
 {
     #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
-        float4 emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse);
+        float4 emission = 0;
+        if(_EmissionAudioLinkChannel == 0)
+        {
+            emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse) * _EmissionColor;
+        }
+        else
+        {
+            int width, height;
+            _AudioTexture.GetDimensions(width, height);
+            bool hasAudioLink = width > 16;
+            if(hasAudioLink)
+            {
+                if(_EmissionAudioLinkChannel != 5)
+                {
+                    int2 aluv = int2(0, (_EmissionAudioLinkChannel-1));
+                    float alink = lerp(1, AudioLinkData(aluv).x , saturate(_EmissionAudioLinkChannel));
+                    emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse) * _EmissionColor * alink;
+                }
+                else
+                {
+
+                    float audioDataBass = AudioLinkData(int2(0,0)).x;
+                    float audioDataMids = (AudioLinkData(int2(0,1)).x + AudioLinkData(int2(0,2)).x) / 2;
+                    float audioDataHighs = AudioLinkData(int2(0,3)).x;
+
+                    float4 emissionChannelRed = i.emissionMap.r * _EmissionColor * audioDataBass;
+                    float4 emissionChannelGreen = i.emissionMap.g * _EmissionColor0 * audioDataMids;
+                    float4 emissionChannelBlue = i.emissionMap.b * _EmissionColor1 * audioDataHighs;
+                    emission = (emissionChannelRed + emissionChannelGreen + emissionChannelBlue) * lerp(1, i.diffuseColor.rgbb, _EmissionToDiffuse);
+                }
+            }
+        }
+
         float4 scaledEmission = emission * saturate(smoothstep(1-_ScaleWithLightSensitivity, 1+_ScaleWithLightSensitivity, 1-lightAvg));
         float4 em = lerp(scaledEmission, emission, _ScaleWithLight);
 

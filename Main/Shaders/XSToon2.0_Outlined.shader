@@ -6,8 +6,7 @@
         [Enum(Separated, 0, Merged, 1)] _TilingMode ("Tiling Mode", Int) = 0
         [Enum(Off,0,Front,1,Back,2)] _Culling ("Culling Mode", Int) = 2
         [Enum(Opaque, 0, Cutout, 1, Dithered, 2, Alpha To Coverage, 3, Transparent, 4, Fade, 5, Additive, 6)]_BlendMode("Blend Mode", Int) = 0
-        [Enum(None, 0, Plane, 1, Sphere, 2)]_RefractionModel("Refraction Model", Int) = 0
-        [Toggle(_COLOROVERLAY_ON)]_UseRefraction("Refraction", Int) = 0
+
         _MainTex("Texture", 2D) = "white" {}
         _HSVMask("HSV Mask", 2D) = "white" {}
         _Hue("Hue", Range(0,1)) = 0
@@ -129,6 +128,11 @@
         [Enum(UV1,0,UV2,1)] _UVSetClipMap("Clip Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetDissolve("Dissolve Map UVs", Int) = 0
 
+        [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
+        [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
+        [HDR]_EmissionColor0("Emission Packed Color 1", Color) = (0,0,0,0)
+        [HDR]_EmissionColor1("Emission Packed Color 2", Color) = (0,0,0,0)
+
         _ClipMap("Clip Map", 2D) = "black" {}
         _WireColor("Wire Color", Color) = (0,0,0,0)
         _WireWidth("Wire Width", Float) = 0
@@ -175,11 +179,11 @@
             Comp [_StencilComp]
             Pass [_StencilOp]
         }
-        Grabpass // Gets disabled via the editor script when not in use through the Lightmode Tag.
-        {
-            Tags{"LightMode" = "Always"}
-            "_GrabTexture"
-        }
+//        Grabpass // Gets disabled via the editor script when not in use through the Lightmode Tag.
+//        {
+//            Tags{"LightMode" = "Always"}
+//            "_AudioTexture"
+//        }
         Pass
         {
             Name "FORWARD"
@@ -196,7 +200,6 @@
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
             #pragma multi_compile _ VERTEXLIGHT_ON
-            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase
             #pragma multi_compile_instancing
@@ -205,6 +208,7 @@
                 #define UNITY_PASS_FORWARDBASE
             #endif
 
+            #include "../CGIncludes/AudioLink.cginc"
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
@@ -232,13 +236,13 @@
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
-            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
 
+            #include "../CGIncludes/AudioLink.cginc"
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
@@ -263,7 +267,6 @@
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
-            #pragma shader_feature _COLOROVERLAY_ON
             #pragma multi_compile_shadowcaster
             #pragma multi_compile_instancing
             #ifndef UNITY_PASS_SHADOWCASTER
@@ -271,6 +274,7 @@
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
+            #include "../CGIncludes/AudioLink.cginc"
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"

@@ -22,7 +22,7 @@ namespace XSToon
         public bool ShowEmission = false;
         public bool ShowAdvanced = false;
         public bool ShowEyeTracking = false;
-        public bool ShowRefraction = false;
+        public bool ShowAudioLink = false;
         public bool ShowDissolve = false;
     }
 
@@ -72,6 +72,8 @@ namespace XSToon
         private MaterialProperty _ScaleWithLight = null;
         private MaterialProperty _ScaleWithLightSensitivity = null;
         private MaterialProperty _EmissionColor = null;
+        private MaterialProperty _EmissionColor0 = null;
+        private MaterialProperty _EmissionColor1 = null;
         private MaterialProperty _EmissionToDiffuse = null;
         private MaterialProperty _RimColor = null;
         private MaterialProperty _RimIntensity = null;
@@ -136,8 +138,6 @@ namespace XSToon
         private MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null;
         private MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
         private MaterialProperty _IOR = null;
-        private MaterialProperty _UseRefraction = null;
-        private MaterialProperty _RefractionModel = null;
         private MaterialProperty _NormalMapMode = null;
         private MaterialProperty _DissolveCoordinates = null;
         private MaterialProperty _DissolveTexture = null;
@@ -147,6 +147,8 @@ namespace XSToon
         private MaterialProperty _UseClipsForDissolve = null;
         private MaterialProperty _WireColor = null;
         private MaterialProperty _WireWidth = null;
+
+        private MaterialProperty _EmissionAudioLinkChannel = null;
 
         //Experimenting
         private MaterialProperty _DissolveBlendPower = null;
@@ -195,8 +197,6 @@ namespace XSToon
         private bool isCutoutMasked = false;
         private bool isDithered = false;
         private bool isA2C = false;
-        private bool isRefractive = false;
-
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
         {
@@ -206,7 +206,6 @@ namespace XSToon
             isCutout = material.GetInt("_BlendMode") == 1;
             isDithered = material.GetInt("_BlendMode") == 2;
             isA2C = material.GetInt("_BlendMode") == 3;
-            isRefractive = material.GetInt("_UseRefraction") == 1;
             isOutlined = shader.name.Contains("Outline");
             isPatreonShader = shader.name.Contains("Patreon");
             isEyeTracking = shader.name.Contains("EyeTracking");
@@ -225,12 +224,10 @@ namespace XSToon
 
             EditorGUI.BeginChangeCheck();
             XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
-            material.SetShaderPassEnabled("Always", isRefractive);
             materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
             materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
             materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
             materialEditor.ShaderProperty(_BlendMode, new GUIContent("Blend Mode", "Blend mode of the material. (Opaque, transparent, cutout, etc.)"));
-            materialEditor.ShaderProperty(_UseRefraction, new GUIContent("Refraction", "Should this material be refractive? (Warning, this can be expensive!)"));
 
             DoBlendModeSettings(material);
             DrawMainSettings(materialEditor, material);
@@ -240,7 +237,7 @@ namespace XSToon
             DrawNormalSettings(materialEditor, material);
             DrawSpecularSettings(materialEditor, material);
             DrawReflectionsSettings(materialEditor, material);
-            DrawRefractionSettings(materialEditor, material);
+            // DrawAudioLinkSettings(materialEditor, material);
             DrawEmissionSettings(materialEditor, material);
             DrawRimlightSettings(materialEditor, material);
             DrawHalfToneSettings(materialEditor, material);
@@ -337,8 +334,6 @@ namespace XSToon
             material.SetInt("_DstBlend", dst);
             material.SetInt("_ZWrite", zwrite);
             material.SetInt("_AlphaToMask", alphatocoverage);
-
-            material.renderQueue = isRefractive ? (int)UnityEngine.Rendering.RenderQueue.Overlay - 1 : renderQueue;
         }
 
         private void DrawMainSettings(MaterialEditor materialEditor, Material material)
@@ -579,10 +574,28 @@ namespace XSToon
             Foldouts[material].ShowEmission = XSStyles.ShurikenFoldout("Emission", Foldouts[material].ShowEmission);
             if (Foldouts[material].ShowEmission)
             {
-                materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map", "Emissive map. White to black, unless you want multiple colors."), _EmissionMap, _EmissionColor);
-                materialEditor.TextureScaleOffsetProperty(_EmissionMap);
-                materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
-                materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
+                bool isAudioLink = material.GetInt("_EmissionAudioLinkChannel") > 0;
+                bool isPackedMapLink = material.GetInt("_EmissionAudioLinkChannel") == 5;
+                materialEditor.ShaderProperty(_EmissionAudioLinkChannel, new GUIContent("Emission Audio Link", "Use Audio Link for Emission Brightness"));
+
+                if (!isPackedMapLink)
+                {
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map", "Emissive map. White to black, unless you want multiple colors."), _EmissionMap, _EmissionColor);
+                    materialEditor.TextureScaleOffsetProperty(_EmissionMap);
+                    materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
+                    materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
+                }
+                else
+                {
+                    materialEditor.ColorProperty(_EmissionColor, "Red Ch. Color (Bass)");
+                    materialEditor.ColorProperty(_EmissionColor0, "Green Ch. Color (Mids)");
+                    materialEditor.ColorProperty(_EmissionColor1, "Blue Ch. Color (Highs)");
+
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map", "Emissive map. White to black, unless you want multiple colors. Setting to Packed Map for Audio Link will change the color per channel."), _EmissionMap);
+                    materialEditor.TextureScaleOffsetProperty(_EmissionMap);
+                    materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
+                    materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
+                }
 
                 XSStyles.SeparatorThin();
                 materialEditor.ShaderProperty(_ScaleWithLight, new GUIContent("Scale w/ Light", "Scales the emission intensity based on how dark or bright the environment is."));
@@ -643,18 +656,15 @@ namespace XSToon
             }
         }
 
-        private void DrawRefractionSettings(MaterialEditor materialEditor, Material material)
-        {
-            if (isRefractive)
-            {
-                Foldouts[material].ShowRefraction = XSStyles.ShurikenFoldout("Refraction", Foldouts[material].ShowRefraction);
-                if (Foldouts[material].ShowRefraction)
-                {
-                    materialEditor.ShaderProperty(_RefractionModel, new GUIContent("Refraction Model", "Refraction technique"));
-                    materialEditor.ShaderProperty(_IOR, new GUIContent("Index of Refraction", "The index of refraction of the material. Glass: 1.5, Crystal: 2.0, Ice: 1.309, Water: 1.325"));
-                }
-            }
-        }
+        // private void DrawAudioLinkSettings(MaterialEditor materialEditor, Material material)
+        // {
+        //     Foldouts[material].ShowAudioLink = XSStyles.ShurikenFoldout("Audio Link", Foldouts[material].ShowAudioLink);
+        //     if (Foldouts[material].ShowAudioLink)
+        //     {
+        //         materialEditor.ShaderProperty(_EmissionAudioLinkChannel, new GUIContent("Emission Audio Link", "Use Audio Link for Emission Brightness"));
+        //         // materialEditor.ShaderProperty(_IOR, new GUIContent("Index of Refraction", "The index of refraction of the material. Glass: 1.5, Crystal: 2.0, Ice: 1.309, Water: 1.325"));
+        //     }
+        // }
 
         private void DrawAdvancedSettings(MaterialEditor materialEditor, Material material)
         {
@@ -677,14 +687,14 @@ namespace XSToon
                         int materialClipIndex = material.GetInt("_ClipIndex");
                         switch (materialClipIndex)
                         {
-                            case 0: DrawVectorSliders(material, _ClipSlider00, "Red", "Green", "Blue", "White"); DrawVectorSliders(material, _ClipSlider01, "Cyan", "Yellow", "Magenta", "Black"); break;
-                            case 1: DrawVectorSliders(material, _ClipSlider02, "Red", "Green", "Blue", "White"); DrawVectorSliders(material, _ClipSlider03, "Cyan", "Yellow", "Magenta", "Black"); break;
-                            case 2: DrawVectorSliders(material, _ClipSlider04, "Red", "Green", "Blue", "White"); DrawVectorSliders(material, _ClipSlider05, "Cyan", "Yellow", "Magenta", "Black"); break;
-                            case 3: DrawVectorSliders(material, _ClipSlider06, "Red", "Green", "Blue", "White"); DrawVectorSliders(material, _ClipSlider07, "Cyan", "Yellow", "Magenta", "Black"); break;
-                            case 4: DrawVectorSliders(material, _ClipSlider08, "Red", "Green", "Blue", "White"); DrawVectorSliders(material, _ClipSlider09, "Cyan", "Yellow", "Magenta", "Black"); break;
-                            case 5: DrawVectorSliders(material, _ClipSlider10, "Red", "Green", "Blue", "White"); DrawVectorSliders(material, _ClipSlider11, "Cyan", "Yellow", "Magenta", "Black"); break;
-                            case 6: DrawVectorSliders(material, _ClipSlider12, "Red", "Green", "Blue", "White"); DrawVectorSliders(material, _ClipSlider13, "Cyan", "Yellow", "Magenta", "Black"); break;
-                            case 7: DrawVectorSliders(material, _ClipSlider14, "Red", "Green", "Blue", "White"); DrawVectorSliders(material, _ClipSlider15, "Cyan", "Yellow", "Magenta", "Black"); break;
+                            case 0: DrawVectorSliders(materialEditor, material, _ClipSlider00, "Red", "Green", "Blue", "White"); DrawVectorSliders(materialEditor, material, _ClipSlider01, "Cyan", "Yellow", "Magenta", "Black"); break;
+                            case 1: DrawVectorSliders(materialEditor, material, _ClipSlider02, "Red", "Green", "Blue", "White"); DrawVectorSliders(materialEditor, material, _ClipSlider03, "Cyan", "Yellow", "Magenta", "Black"); break;
+                            case 2: DrawVectorSliders(materialEditor, material, _ClipSlider04, "Red", "Green", "Blue", "White"); DrawVectorSliders(materialEditor, material, _ClipSlider05, "Cyan", "Yellow", "Magenta", "Black"); break;
+                            case 3: DrawVectorSliders(materialEditor, material, _ClipSlider06, "Red", "Green", "Blue", "White"); DrawVectorSliders(materialEditor, material, _ClipSlider07, "Cyan", "Yellow", "Magenta", "Black"); break;
+                            case 4: DrawVectorSliders(materialEditor, material, _ClipSlider08, "Red", "Green", "Blue", "White"); DrawVectorSliders(materialEditor, material, _ClipSlider09, "Cyan", "Yellow", "Magenta", "Black"); break;
+                            case 5: DrawVectorSliders(materialEditor, material, _ClipSlider10, "Red", "Green", "Blue", "White"); DrawVectorSliders(materialEditor, material, _ClipSlider11, "Cyan", "Yellow", "Magenta", "Black"); break;
+                            case 6: DrawVectorSliders(materialEditor, material, _ClipSlider12, "Red", "Green", "Blue", "White"); DrawVectorSliders(materialEditor, material, _ClipSlider13, "Cyan", "Yellow", "Magenta", "Black"); break;
+                            case 7: DrawVectorSliders(materialEditor, material, _ClipSlider14, "Red", "Green", "Blue", "White"); DrawVectorSliders(materialEditor, material, _ClipSlider15, "Cyan", "Yellow", "Magenta", "Black"); break;
                         }
                     }
 
@@ -735,11 +745,12 @@ namespace XSToon
 
         //!RDPSFunctionInject
 
-        private void DrawVectorSliders(Material material, MaterialProperty property, string nameR, string nameG, string nameB, string nameA)
+        private void DrawVectorSliders(MaterialEditor materialEditor, Material material, MaterialProperty property, string nameR, string nameG, string nameB, string nameA)
         {
             EditorGUI.BeginChangeCheck();
             Vector4 prop = property.vectorValue;
             EditorGUI.indentLevel += 1;
+            // materialEditor.ShaderProperty(property, new GUIContent($"{nameR}|{nameG}|{nameB}|{nameA}", ""));
             prop.x = EditorGUILayout.Slider(new GUIContent(nameR, "Clip on mask channel R"), prop.x, 0, 1);
             prop.y = EditorGUILayout.Slider(new GUIContent(nameG, "Clip on mask channel G"), prop.y, 0, 1);
             prop.z = EditorGUILayout.Slider(new GUIContent(nameB, "Clip on mask channel B"), prop.z, 0, 1);

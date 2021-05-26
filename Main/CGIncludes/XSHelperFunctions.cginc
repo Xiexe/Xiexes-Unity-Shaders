@@ -381,7 +381,6 @@ void calcAlpha(inout XSLighting i, inout float alpha)
         float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
         half dither = calcDither(i.screenUV.xy);
         alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
-
         #if defined(UNITY_PASS_SHADOWCASTER)
             clip(modifiedAlpha - dither);
         #endif

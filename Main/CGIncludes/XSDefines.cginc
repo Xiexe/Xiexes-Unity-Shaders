@@ -112,7 +112,6 @@ struct XSLighting
     half3 bitangent;
     half4 worldPos;
     half3 color;
-    half alpha;
     float isOutline;
     float4 screenPos;
     float2 screenUV;
@@ -136,6 +135,7 @@ struct TextureUV
     half2 outlineMaskUV;
     half2 clipMapUV;
     half2 dissolveUV;
+    half2 audioLinkUV;
 };
 
 struct DotProducts
@@ -177,8 +177,6 @@ sampler2D _ClipMask;
 sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
-sampler2D _GrabTexture;
-float4 _GrabTexture_TexelSize;
 
 #if defined(UNITY_PASS_SHADOWCASTER)
     sampler3D _DitherMaskLOD;
@@ -191,10 +189,9 @@ half _DissolveProgress, _DissolveStrength;
 int _DissolveCoordinates;
 int _UseClipsForDissolve;
 
-half4 _ShadowRim,
-      _OutlineColor, _SSColor,
-      _EmissionColor, _MatcapTint,
-      _RimColor, _DissolveColor;
+half4 _ShadowRim, _OutlineColor, _SSColor,
+      _EmissionColor, _EmissionColor0, _EmissionColor1,
+      _MatcapTint, _RimColor, _DissolveColor;
 
 half _MatcapTintToDiffuse;
 
@@ -213,16 +210,16 @@ half _OutlineWidth;
 half _DissolveBlendPower, _DissolveLayer1Scale, _DissolveLayer2Scale, _DissolveLayer1Speed, _DissolveLayer2Speed;
 
 half4 _ClipSlider00,_ClipSlider01,_ClipSlider02,_ClipSlider03,
-     _ClipSlider04,_ClipSlider05,_ClipSlider06,_ClipSlider07,
-     _ClipSlider08,_ClipSlider09,_ClipSlider10,_ClipSlider11,
-     _ClipSlider12,_ClipSlider13,_ClipSlider14,_ClipSlider15;
+      _ClipSlider04,_ClipSlider05,_ClipSlider06,_ClipSlider07,
+      _ClipSlider08,_ClipSlider09,_ClipSlider10,_ClipSlider11,
+      _ClipSlider12,_ClipSlider13,_ClipSlider14,_ClipSlider15;
 
 int _ClipIndex;
 int _HalftoneType;
 int _FadeDither;
 int _BlendMode;
 int _OcclusionMode;
-int _UseRefraction;
+int _EmissionAudioLink, _EmissionAudioLinkChannel;
 int _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 int _TilingMode, _VertexColorAlbedo, _ScaleWithLight;
 int _OutlineAlbedoTint, _OutlineLighting, _OutlineNormalMode;
