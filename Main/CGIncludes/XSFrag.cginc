@@ -84,13 +84,14 @@ float4 frag (
         o.screenPos = i.screenPos;
         o.objPos = i.objPos;
 
+        float alpha = o.albedo.a;
         #if defined(Fur)
             o.layer = i.layer;
             AdjustAlbedo(o, t);
+            DoFurAlpha(o,t,alpha);
         #endif
 
         float4 col = BRDF_XSLighting(o,t);
-        float alpha = o.albedo.a;
         calcAlpha(o, t, alpha);
         calcDissolve(o, col.rgb);
         UNITY_APPLY_FOG(i.fogCoord, col);
