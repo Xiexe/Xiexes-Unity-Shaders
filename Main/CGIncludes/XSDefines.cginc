@@ -78,6 +78,10 @@ struct VertexOutput
         float4 screenPos : TEXCOORD8;
         float3 objPos : TEXCOORD10;
 
+        #if defined(Fur)
+        float layer : TEXCOORD11;
+        #endif
+
         #if !defined(UNITY_PASS_SHADOWCASTER)
             SHADOW_COORDS(7)
             UNITY_FOG_COORDS(9)
@@ -116,6 +120,10 @@ struct FragmentData
     float4 screenPos;
     float2 screenUV;
     float3 objPos;
+
+    #if defined(Fur)
+        float layer;
+    #endif
 };
 
 struct TextureUV

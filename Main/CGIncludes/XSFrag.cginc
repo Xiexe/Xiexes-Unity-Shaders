@@ -23,8 +23,12 @@ float4 frag (
         o.screenPos = i.screenPos;
         o.objPos = i.objPos;
 
+        #if defined(Fur)
+            o.layer = i.layer;
+        #endif
+
         float alpha = o.albedo.a;
-        calcAlpha(o, alpha);
+        calcAlpha(o, t, alpha);
         calcDissolve(o, o.albedo.rgb);
         return alpha;
     #else
@@ -80,9 +84,14 @@ float4 frag (
         o.screenPos = i.screenPos;
         o.objPos = i.objPos;
 
+        #if defined(Fur)
+            o.layer = i.layer;
+            AdjustAlbedo(o, t);
+        #endif
+
         float4 col = BRDF_XSLighting(o,t);
         float alpha = o.albedo.a;
-        calcAlpha(o, alpha);
+        calcAlpha(o, t, alpha);
         calcDissolve(o, col.rgb);
         UNITY_APPLY_FOG(i.fogCoord, col);
         return float4(col.rgb, alpha);

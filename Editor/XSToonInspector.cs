@@ -24,6 +24,7 @@ namespace XSToon
         public bool ShowEyeTracking = false;
         public bool ShowAudioLink = false;
         public bool ShowDissolve = false;
+        public bool ShowFur = false;
     }
 
     public class XSToonInspector : ShaderGUI
@@ -187,11 +188,32 @@ namespace XSToon
         private MaterialProperty _EyeOffsetLimit = null;
         //--
 
+        //Properties for Fur plugin
+        private MaterialProperty _FurTexture = null;
+        private MaterialProperty _FurLengthMask = null;
+        private MaterialProperty _NoiseTexture = null;
+        private MaterialProperty _LayerCount = null;
+        private MaterialProperty _FurLength = null;
+        private MaterialProperty _FurWidth = null;
+        private MaterialProperty _Gravity = null;
+        private MaterialProperty _CombX = null;
+        private MaterialProperty _CombY = null;
+        private MaterialProperty _FurOcclusion = null;
+        private MaterialProperty _OcclusionFalloffMin = null;
+        private MaterialProperty _OcclusionFalloffMax = null;
+        private MaterialProperty _ColorFalloffMin = null;
+        private MaterialProperty _ColorFalloffMax = null;
+        private MaterialProperty _BottomColor = null;
+        private MaterialProperty _TopColor = null;
+        private MaterialProperty _StrandAmount = null;
+        //
+
         //!RDPSPropsInjection
 
         private static int BlendMode;
         private bool isPatreonShader = false;
         private bool isEyeTracking = false;
+        private bool isFurShader = false;
         private bool isOutlined = false;
         private bool isCutout = false;
         private bool isCutoutMasked = false;
@@ -209,6 +231,7 @@ namespace XSToon
             isOutlined = shader.name.Contains("Outline");
             isPatreonShader = shader.name.Contains("Patreon");
             isEyeTracking = shader.name.Contains("EyeTracking");
+            isFurShader = shader.name.Contains("Fur");
 
             SetupFoldoutDictionary(material);
 
@@ -229,7 +252,19 @@ namespace XSToon
             materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
             materialEditor.ShaderProperty(_BlendMode, new GUIContent("Blend Mode", "Blend mode of the material. (Opaque, transparent, cutout, etc.)"));
 
-            DoBlendModeSettings(material);
+            if (!isFurShader)
+            {
+                DoBlendModeSettings(material);
+            }
+            else
+            {
+                SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                    (int) UnityEngine.Rendering.BlendMode.Zero,
+                    (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
+                material.EnableKeyword("_ALPHABLEND_ON");
+                material.EnableKeyword("_ALPHATEST_ON");
+            }
+
             DrawMainSettings(materialEditor, material);
             DrawDissolveSettings(materialEditor, material);
             DrawShadowSettings(materialEditor, material);
@@ -244,6 +279,7 @@ namespace XSToon
             DrawTransmissionSettings(materialEditor, material);
             DrawAdvancedSettings(materialEditor, material);
             DrawPatreonSettings(materialEditor, material);
+            DrawFurSettings(materialEditor, material);
 
             //!RDPSFunctionCallInject
 
@@ -741,6 +777,44 @@ namespace XSToon
                 }
             }
             //
+        }
+
+        private void DrawFurSettings(MaterialEditor materialEditor, Material material)
+        {
+            if (isFurShader)
+            {
+                Foldouts[material].ShowFur = XSStyles.ShurikenFoldout("Fur Settings", Foldouts[material].ShowFur);
+                if (Foldouts[material].ShowFur)
+                {
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Noise Texture", "Used to control the pattern of the fur strands."), _NoiseTexture);
+                    XSStyles.SeparatorThin();
+
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Fur Albedo", "Albedo Texture for the fur coat"), _FurTexture);
+                    materialEditor.TextureScaleOffsetProperty(_FurTexture);
+                    XSStyles.SeparatorThin();
+
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Length Mask", "Used to control length of the fur."), _FurLengthMask);
+                    materialEditor.TextureScaleOffsetProperty(_FurLengthMask);
+                    XSStyles.SeparatorThin();
+
+                    materialEditor.ShaderProperty(_TopColor, new GUIContent("Top Color", ""));
+                    materialEditor.ShaderProperty(_BottomColor, new GUIContent("Bottom Color", ""));
+                    materialEditor.ShaderProperty(_ColorFalloffMin, new GUIContent("Blend Min", ""));
+                    materialEditor.ShaderProperty(_ColorFalloffMax, new GUIContent("Blend Max", ""));
+                    XSStyles.SeparatorThin();
+
+                    materialEditor.ShaderProperty(_LayerCount, new GUIContent("Layer Count", ""));
+                    materialEditor.ShaderProperty(_StrandAmount, new GUIContent("Strand Count", ""));
+                    materialEditor.ShaderProperty(_FurLength, new GUIContent("Length", ""));
+                    materialEditor.ShaderProperty(_FurWidth, new GUIContent("Strand Width", ""));
+                    XSStyles.SeparatorThin();
+
+                    materialEditor.ShaderProperty(_Gravity, new GUIContent("Gravity Strength", ""));
+                    materialEditor.ShaderProperty(_CombX, new GUIContent("Comb X", ""));
+                    materialEditor.ShaderProperty(_CombY, new GUIContent("Comb Y", ""));
+                    XSStyles.SeparatorThin();
+                }
+            }
         }
 
         //!RDPSFunctionInject

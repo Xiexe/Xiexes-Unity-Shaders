@@ -56,6 +56,9 @@ void InitializeTextureUVs(
         i.uv1 = eyeUvOffset;
     #endif
 
+    t.uv0 = i.uv;
+    t.uv1 = i.uv1;
+
     half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
 
@@ -347,42 +350,70 @@ void calcDissolve(inout FragmentData i, inout float3 col)
 }
 
 //todo: What the fuck is going on here?
-void calcAlpha(inout FragmentData i, inout float alpha)
+void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
 {
-    #if defined(_ALPHABLEND_ON) && !defined(_ALPHATEST_ON) // Traditional Alphablended / Fade blending
-        alpha = i.albedo.a;
+    #if defined(Fur)
+        float lengthMask = tex2D(_FurLengthMask, t.uv0 * _FurLengthMask_ST.xy + _FurLengthMask_ST.zw).x;
 
-        #ifdef UNITY_PASS_SHADOWCASTER
+        float layer = i.layer;
+        float layerScalar = (layer / _LayerCount);
+
+        float2 furUV = t.uv0 * _StrandAmount;
+        furUV.x += _CombX * layer * 0.01;
+        furUV.y += _CombY * layer * 0.01;
+
+        float4 noise = tex2D(_NoiseTexture, furUV);
+
+        if(layer != 0)
+        {
+            float clipMap = (layerScalar * (1-_FurWidth)) + (1-lengthMask);
+            clip(noise.r - clipMap);
+        }
+        else
+        {
+            float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
             half dither = calcDither(i.screenUV.xy);
-            clip(alpha - dither);
+            alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
+            #if defined(UNITY_PASS_SHADOWCASTER)
+                clip(modifiedAlpha - dither);
+            #endif
+        }
+    #else
+        #if defined(_ALPHABLEND_ON) && !defined(_ALPHATEST_ON) // Traditional Alphablended / Fade blending
+            alpha = i.albedo.a;
+
+            #ifdef UNITY_PASS_SHADOWCASTER
+                half dither = calcDither(i.screenUV.xy);
+                clip(alpha - dither);
+            #endif
         #endif
-    #endif
 
-    #if !defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Dithered / Cutout transparency
-        float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
-        if(_BlendMode == 2)
-        {
+        #if !defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Dithered / Cutout transparency
+            float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
+            if(_BlendMode == 2)
+            {
+                half dither = calcDither(i.screenUV.xy);
+                float fadeDist = abs(_FadeDitherDistance);
+                float d = distance(_WorldSpaceCameraPos, i.worldPos);
+                d = smoothstep(fadeDist, fadeDist + 0.05, d);
+                d = lerp(d, 1-d, saturate(step(0, _FadeDitherDistance)));
+                dither += lerp(0, d, saturate(_FadeDither));
+                clip(modifiedAlpha - dither);
+            }
+
+            if(_BlendMode == 1)
+            {
+                clip(modifiedAlpha - _Cutoff);
+            }
+        #endif
+
+        #if defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Alpha to Coverage
+            float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
             half dither = calcDither(i.screenUV.xy);
-            float fadeDist = abs(_FadeDitherDistance);
-            float d = distance(_WorldSpaceCameraPos, i.worldPos);
-            d = smoothstep(fadeDist, fadeDist + 0.05, d);
-            d = lerp(d, 1-d, saturate(step(0, _FadeDitherDistance)));
-            dither += lerp(0, d, saturate(_FadeDither));
-            clip(modifiedAlpha - dither);
-        }
-
-        if(_BlendMode == 1)
-        {
-            clip(modifiedAlpha - _Cutoff);
-        }
-    #endif
-
-    #if defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Alpha to Coverage
-        float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
-        half dither = calcDither(i.screenUV.xy);
-        alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
-        #if defined(UNITY_PASS_SHADOWCASTER)
-            clip(modifiedAlpha - dither);
+            alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
+            #if defined(UNITY_PASS_SHADOWCASTER)
+                clip(modifiedAlpha - dither);
+            #endif
         #endif
     #endif
 }
