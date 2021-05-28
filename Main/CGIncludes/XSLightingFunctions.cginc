@@ -391,7 +391,14 @@ half4 calcEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
             {
                 if(_EmissionAudioLinkChannel != 5)
                 {
-                    int2 aluv = int2(0, (_EmissionAudioLinkChannel-1));
+                    int2 aluv;
+                    if (_EmissionAudioLinkChannel == 6)
+                    {
+                        aluv = int2(t.emissionMapUV.x * _ALUVWidth, t.emissionMapUV.y);
+                    } else
+                    {
+                        aluv = int2(0, (_EmissionAudioLinkChannel-1));
+                    }
                     float alink = lerp(1, AudioLinkData(aluv).x , saturate(_EmissionAudioLinkChannel));
                     emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse) * _EmissionColor * alink;
                 }
