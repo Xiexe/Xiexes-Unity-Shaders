@@ -401,9 +401,9 @@ half4 calcEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
                     float audioDataMids = AudioLinkData(ALPASS_AUDIOLOWMIDS).x;
                     float audioDataHighs = (AudioLinkData(ALPASS_AUDIOHIGHMIDS).x + AudioLinkData(ALPASS_AUDIOTREBLE).x) * 0.5;
 
-                    float tLow = smoothstep((1-audioDataBass), (1-audioDataBass) + 0.05, i.emissionMap.r) * i.emissionMap.a;
-                    float tMid = smoothstep((1-audioDataMids), (1-audioDataMids) + 0.05, i.emissionMap.g) * i.emissionMap.a;
-                    float tHigh = smoothstep((1-audioDataHighs), (1-audioDataHighs) + 0.05, i.emissionMap.b) * i.emissionMap.a;
+                    float tLow = smoothstep((1-audioDataBass), (1-audioDataBass) + 0.01, i.emissionMap.r) * i.emissionMap.a;
+                    float tMid = smoothstep((1-audioDataMids), (1-audioDataMids) + 0.01, i.emissionMap.g) * i.emissionMap.a;
+                    float tHigh = smoothstep((1-audioDataHighs), (1-audioDataHighs) + 0.01, i.emissionMap.b) * i.emissionMap.a;
 
                     float4 emissionChannelRed = lerp(i.emissionMap.r, tLow, _ALGradientOnRed) * _EmissionColor * audioDataBass;
                     float4 emissionChannelGreen = lerp(i.emissionMap.g, tMid, _ALGradientOnGreen) * _EmissionColor0 * audioDataMids;
