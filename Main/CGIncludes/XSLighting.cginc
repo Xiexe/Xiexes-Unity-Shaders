@@ -91,13 +91,17 @@ half4 BRDF_XSLighting(FragmentData i, TextureUV t)
         indirectSpecular *= lerp(0.5, 1, stipplingIndirect); // Don't want these to go completely black, looks weird
     }
 
+    #if defined(Fur)
+        AdjustFurSpecular(i, directSpecular.rgb, indirectSpecular.rgb);
+    #endif
+
     half4 col = diffuse * shadowRim;
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
     col += max(directSpecular.xyzz, rimLight);
     col.rgb += max(vertexLightSpec.rgb, rimLight);
     col += subsurface;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
-    col += calcEmission(i, d, lightAvg);
+    col += calcEmission(i, t, d, lightAvg);
     float4 finalColor = lerp(col, outlineColor, i.isOutline) * lerp(1, lineHalftone, _HalftoneLineIntensity * usingLineHalftone);
 
     return finalColor;

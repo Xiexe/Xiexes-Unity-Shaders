@@ -23,11 +23,12 @@ float4 frag (
         o.screenPos = i.screenPos;
         o.objPos = i.objPos;
 
+        float alpha = o.albedo.a;
         #if defined(Fur)
             o.layer = i.layer;
+            DoFurAlpha(o,t,alpha);
         #endif
 
-        float alpha = o.albedo.a;
         calcAlpha(o, t, alpha);
         calcDissolve(o, o.albedo.rgb);
         return alpha;

@@ -392,6 +392,11 @@ void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
     #endif
 }
 
+float lerpstep(float a, float b, float t)
+{
+    return saturate( ( t - a ) / ( b - a ) );
+}
+
 // //Halftone functions, finish implementing later.. Not correct right now.
 float2 SphereUV( float3 coords /*viewDir?*/)
 {
