@@ -7,16 +7,15 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Test
+  m_Name: XSToon 3.0 _ StippledHalftone
   m_Shader: {fileID: 4800000, guid: 85c615217d617204cb497ae6838b8bae, type: 3}
-  m_ShaderKeywords: _ALPHABLEND_ON
-  m_LightmapFlags: 4
+  m_ShaderKeywords: 
+  m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
-  disabledShaderPasses:
-  - ALWAYS
+  disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -99,9 +98,11 @@ Material:
     m_Floats:
     - _AdvMode: 0
     - _AlphaToMask: 0
+    - _AnisotropicAX: 0.25
+    - _AnisotropicAY: 0.75
     - _AnisotropicReflection: 0
     - _AnisotropicSpecular: 0
-    - _BlendMode: 4
+    - _BlendMode: 0
     - _BumpScale: 1
     - _ClearCoat: 0
     - _ClearcoatSmoothness: 0.8
@@ -118,14 +119,15 @@ Material:
     - _DissolveLayer2Speed: 0
     - _DissolveProgress: 0
     - _DissolveStrength: 1
-    - _DstBlend: 10
+    - _DstBlend: 0
+    - _EmissionAudioLinkChannel: 0
     - _EmissionToDiffuse: 0
     - _FadeDither: 0
     - _FadeDitherDistance: 0
     - _Glossiness: 0
-    - _HalftoneDotAmount: 5
-    - _HalftoneDotSize: 0.5
-    - _HalftoneLineAmount: 2000
+    - _HalftoneDotAmount: 50
+    - _HalftoneDotSize: 1.7
+    - _HalftoneLineAmount: 150
     - _HalftoneLineIntensity: 1
     - _HalftoneType: 3
     - _Hue: 0
@@ -142,8 +144,7 @@ Material:
     - _OutlineWidth: 1
     - _ReflectionBlendMode: 0
     - _ReflectionMode: 3
-    - _Reflectivity: 0.5
-    - _RefractionModel: 0
+    - _Reflectivity: 1
     - _RimAlbedoTint: 0
     - _RimAttenEffect: 1
     - _RimCubemapTint: 0
@@ -153,6 +154,8 @@ Material:
     - _RimThreshold: 0.1
     - _SSDistortion: 1
     - _SSPower: 1
+    - _SSSRange: 1
+    - _SSSSharpness: 0.2
     - _SSScale: 1
     - _Saturation: 1
     - _ScaleWithLight: 1
@@ -162,10 +165,12 @@ Material:
     - _ShadowRimSharpness: 0.3
     - _ShadowRimThreshold: 0.1
     - _ShadowSharpness: 0.5
+    - _SpecMode: 0
     - _SpecularAlbedoTint: 1
     - _SpecularArea: 0.5
     - _SpecularIntensity: 0
     - _SpecularSharpness: 0
+    - _SpecularStyle: 0
     - _SrcBlend: 1
     - _Stencil: 0
     - _StencilComp: 0
@@ -184,11 +189,10 @@ Material:
     - _UVSetSpecular: 0
     - _UVSetThickness: 0
     - _UseClipsForDissolve: 0
-    - _UseRefraction: 0
     - _Value: 1
     - _VertexColorAlbedo: 0
     - _WireWidth: 0
-    - _ZWrite: 0
+    - _ZWrite: 1
     m_Colors:
     - _ClipAgainstVertexColorGreaterZeroFive: {r: 1, g: 1, b: 1, a: 1}
     - _ClipAgainstVertexColorLessZeroFive: {r: 1, g: 1, b: 1, a: 1}
@@ -208,10 +212,13 @@ Material:
     - _ClipSlider13: {r: 0, g: 0, b: 0, a: 0}
     - _ClipSlider14: {r: 0, g: 0, b: 0, a: 0}
     - _ClipSlider15: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0, g: 0, b: 0, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DissolveColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissionColor0: {r: 0, g: 0, b: 0, a: 0}
+    - _EmissionColor1: {r: 0, g: 0, b: 0, a: 0}
     - _MatcapTint: {r: 1, g: 1, b: 1, a: 1}
+    - _OcclusionColor: {r: 0, g: 0, b: 0, a: 0}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _SSColor: {r: 0, g: 0, b: 0, a: 0}

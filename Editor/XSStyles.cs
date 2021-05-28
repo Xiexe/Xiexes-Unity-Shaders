@@ -2,12 +2,12 @@
 using UnityEditor;
 using UnityEngine;
 using System.IO;
-namespace XSToon
+namespace XSToon3
 {
     [InitializeOnLoad]
     public class XSStyles : MonoBehaviour
     {
-        public static string ver = "2.6";
+        public static string ver = "3.0";
 
         //Help URLs
         public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";

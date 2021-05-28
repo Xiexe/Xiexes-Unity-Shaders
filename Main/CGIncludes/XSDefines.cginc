@@ -235,6 +235,7 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetEmission, _UVSetClipMap, _UVSetDissolve;
 int _NormalMapMode, _OutlineUVSelect;
 int _AlphaToMask;
+int _ALGradientOnRed, _ALGradientOnGreen, _ALGradientOnBlue;
 
 //!RDPSDefines
 

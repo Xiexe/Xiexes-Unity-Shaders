@@ -6,7 +6,7 @@ using System.Reflection;
 using System;
 using UnityEditorInternal;
 
-namespace XSToon
+namespace XSToon3
 {
     public class XSClipMapEditor : EditorWindow
     {
@@ -24,8 +24,8 @@ namespace XSToon
         public static Renderer Rend;
 
 
-        public XSToon.TextureList TexList;
-        private XSToon.TextureList oldTexList;
+        public XSToon3.TextureList TexList;
+        private XSToon3.TextureList oldTexList;
         public string[] filters = new string[] {"Point (No Filtering)", "Bilinear", "Trilinear"};
         public FilterMode filterMode = FilterMode.Bilinear;
 

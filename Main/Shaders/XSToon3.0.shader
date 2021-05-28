@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon2.0/XSToon2.0_Outlined"
+﻿Shader "Xiexe/Toon3/XSToon3"
 {
     Properties
     {
@@ -45,7 +45,6 @@
 
         [Enum(Yes,0, No,1)] _ScaleWithLight("Emission Scale w/ Light", Int) = 1
         _EmissionMap("Emission Map", 2D) = "white" {}
-        [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         _EmissionToDiffuse("Emission Tint To Diffuse", Range(0,1)) = 0
         _ScaleWithLightSensitivity("Scaling Sensitivity", Range(0,1)) = 1
 
@@ -129,6 +128,9 @@
         [Enum(UV1,0,UV2,1)] _UVSetDissolve("Dissolve Map UVs", Int) = 0
 
         [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
+        [ToggleUI]_ALGradientOnRed("Gradient Red", Int) = 0
+        [ToggleUI]_ALGradientOnGreen("Gradient Green", Int) = 0
+        [ToggleUI]_ALGradientOnBlue("Gradient Blue", Int) = 0
         [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         [HDR]_EmissionColor0("Emission Packed Color 1", Color) = (0,0,0,0)
         [HDR]_EmissionColor1("Emission Packed Color 2", Color) = (0,0,0,0)
@@ -191,11 +193,9 @@
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
             CGPROGRAM
-            #define Geometry
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
-            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -214,7 +214,6 @@
             #include "../CGIncludes/XSLightingFunctions.cginc"
             #include "../CGIncludes/XSLighting.cginc"
             #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
             #include "../CGIncludes/XSFrag.cginc"
             ENDCG
         }
@@ -228,11 +227,9 @@
             ZTest LEqual
             Fog { Color (0,0,0,0) }
             CGPROGRAM
-            #define Geometry
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
-            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -248,7 +245,6 @@
             #include "../CGIncludes/XSLightingFunctions.cginc"
             #include "../CGIncludes/XSLighting.cginc"
             #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
             #include "../CGIncludes/XSFrag.cginc"
             ENDCG
         }
@@ -259,11 +255,9 @@
             Tags{ "LightMode" = "ShadowCaster" }
             ZWrite On ZTest LEqual
             CGPROGRAM
-            #define Geometry
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
-            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -280,11 +274,10 @@
             #include "../CGIncludes/XSLightingFunctions.cginc"
             #include "../CGIncludes/XSLighting.cginc"
             #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
             #include "../CGIncludes/XSFrag.cginc"
             ENDCG
         }
     }
     Fallback "Diffuse"
-    CustomEditor "XSToon.XSToonInspector"
+    CustomEditor "XSToon3.XSToonInspector"
 }

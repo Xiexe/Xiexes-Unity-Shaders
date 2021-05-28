@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace  XSToon
+namespace  XSToon3
 {
     public class TextureList : ScriptableObject
     {

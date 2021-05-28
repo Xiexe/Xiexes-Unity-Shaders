@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-namespace XSToon
+namespace XSToon3
 {
 	public class XSMultiGradient : ScriptableObject {
 		public string uniqueName = "New Gradient";
