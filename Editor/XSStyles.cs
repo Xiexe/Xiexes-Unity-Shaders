@@ -2,12 +2,12 @@
 using UnityEditor;
 using UnityEngine;
 using System.IO;
-namespace XSToon
+namespace XSToon3
 {
     [InitializeOnLoad]
     public class XSStyles : MonoBehaviour
     {
-        public static string ver = "2.5";
+        public static string ver = "3.0";
 
         //Help URLs
         public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";
@@ -34,6 +34,16 @@ namespace XSToon
             GUILayout.Label(HeaderText, new GUIStyle(EditorStyles.boldLabel)
             {
                 alignment = TextAnchor.MiddleCenter,
+                wordWrap = true,
+                fontSize = 12
+            });
+        }
+
+        public static void DoHeaderLeft(string text)
+        {
+            GUILayout.Label(text, new GUIStyle(EditorStyles.boldLabel)
+            {
+                alignment = TextAnchor.MiddleLeft,
                 wordWrap = true,
                 fontSize = 12
             });
@@ -87,7 +97,7 @@ namespace XSToon
         }
 
         //GUI Buttons
-        static public void callGradientEditor(Material focusedMat = null)
+        static public void CallGradientEditor(Material focusedMat = null)
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -96,6 +106,23 @@ namespace XSToon
             {
                 XSGradientEditor.focusedMat = focusedMat;
                 XSGradientEditor.Init();
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+
+        static public void CallTexArrayManager()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            GUI.skin = null;
+            if (GUILayout.Button("Clip Map Manager", GUILayout.Width(200), GUILayout.Height(20)))
+            {
+                Renderer rend = Selection.activeGameObject.GetComponent<Renderer>();
+                if (rend != null)
+                    XSClipMapEditor.Rend = rend;
+
+                XSClipMapEditor.Init();
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
@@ -162,18 +189,18 @@ namespace XSToon
         //GUI Lines
         static public void Separator()
         {
-            GUILayout.Space(4);
-            GUILine(new Color(.3f, .3f, .3f), 1);
-            GUILine(new Color(.9f, .9f, .9f), 1);
-            GUILayout.Space(4);
+            GUILayout.Space(10);
+            GUILine(new Color(.1f, .1f, .1f), 1f);
+            GUILine(new Color(.3f, .3f, .3f), 2f);
+            GUILayout.Space(10);
         }
 
         static public void SeparatorThin()
         {
-            GUILayout.Space(2);
+            GUILayout.Space(6);
             GUILine(new Color(.1f, .1f, .1f), 1f);
             GUILine(new Color(.3f, .3f, .3f), 1f);
-            GUILayout.Space(2);
+            GUILayout.Space(6);
         }
 
         static public void SeparatorBig()

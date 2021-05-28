@@ -6,7 +6,7 @@ using System.Reflection;
 using System;
 using UnityEditorInternal;
 
-namespace XSToon
+namespace XSToon3
 {
     public class XSGradientEditor : EditorWindow
     {
@@ -266,7 +266,7 @@ namespace XSToon
                 }
             }
             drawHelpText();
-        }   
+        }
 
         Gradient reflessGradient(Gradient old_grad)
         {

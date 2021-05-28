@@ -11,6 +11,7 @@ struct VertexInput
     float3 normal : NORMAL;
     float4 tangent : TANGENT;
     float4 color : COLOR;
+    uint vertexId : SV_VertexID;
 
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -77,6 +78,10 @@ struct VertexOutput
         float4 screenPos : TEXCOORD8;
         float3 objPos : TEXCOORD10;
 
+        #if defined(Fur)
+        float layer : TEXCOORD11;
+        #endif
+
         #if !defined(UNITY_PASS_SHADOWCASTER)
             SHADOW_COORDS(7)
             UNITY_FOG_COORDS(9)
@@ -87,7 +92,7 @@ struct VertexOutput
     };
 #endif
 
-struct XSLighting
+struct FragmentData
 {
     half4 albedo;
     half4 normalMap;
@@ -103,6 +108,7 @@ struct XSLighting
     half4 hsvMask;
     half4 clipMap;
     half4 dissolveMask;
+    half4 dissolveMaskSecondLayer;
     half3 diffuseColor;
     half attenuation;
     half3 normal;
@@ -110,11 +116,14 @@ struct XSLighting
     half3 bitangent;
     half4 worldPos;
     half3 color;
-    half alpha;
     float isOutline;
     float4 screenPos;
     float2 screenUV;
     float3 objPos;
+
+    #if defined(Fur)
+        float layer;
+    #endif
 };
 
 struct TextureUV
@@ -170,11 +179,10 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
+sampler2D _ClipMask;
 sampler2D _Matcap;
 sampler2D _Ramp;
 samplerCUBE _BakedCubemap;
-sampler2D _GrabTexture;
-float4 _GrabTexture_TexelSize;
 
 #if defined(UNITY_PASS_SHADOWCASTER)
     sampler3D _DitherMaskLOD;
@@ -187,10 +195,9 @@ half _DissolveProgress, _DissolveStrength;
 int _DissolveCoordinates;
 int _UseClipsForDissolve;
 
-half4 _ShadowRim,
-      _OutlineColor, _SSColor,
-      _EmissionColor, _MatcapTint,
-      _RimColor, _DissolveColor;
+half4 _ShadowRim, _OutlineColor, _SSColor,
+      _EmissionColor, _EmissionColor0, _EmissionColor1,
+      _MatcapTint, _RimColor, _DissolveColor;
 
 half _MatcapTintToDiffuse;
 
@@ -206,12 +213,19 @@ half _RimRange, _RimThreshold, _RimIntensity, _RimSharpness, _RimAlbedoTint, _Ri
 half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness, _ShadowRimAlbedoTint;
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;
+half _DissolveBlendPower, _DissolveLayer1Scale, _DissolveLayer2Scale, _DissolveLayer1Speed, _DissolveLayer2Speed;
 
+half4 _ClipSlider00,_ClipSlider01,_ClipSlider02,_ClipSlider03,
+      _ClipSlider04,_ClipSlider05,_ClipSlider06,_ClipSlider07,
+      _ClipSlider08,_ClipSlider09,_ClipSlider10,_ClipSlider11,
+      _ClipSlider12,_ClipSlider13,_ClipSlider14,_ClipSlider15;
+
+int _ClipIndex;
 int _HalftoneType;
 int _FadeDither;
 int _BlendMode;
 int _OcclusionMode;
-int _UseRefraction;
+int _EmissionAudioLink, _EmissionAudioLinkChannel;
 int _ReflectionMode, _ReflectionBlendMode, _ClearCoat;
 int _TilingMode, _VertexColorAlbedo, _ScaleWithLight;
 int _OutlineAlbedoTint, _OutlineLighting, _OutlineNormalMode;
@@ -220,6 +234,10 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
     _UVSetEmission, _UVSetClipMap, _UVSetDissolve;
 int _NormalMapMode, _OutlineUVSelect;
+int _AlphaToMask;
+int _ALGradientOnRed, _ALGradientOnGreen, _ALGradientOnBlue;
+
+//!RDPSDefines
 
 //Defines for helper functions
 #define grayscaleVec float3(0.2125, 0.7154, 0.0721)

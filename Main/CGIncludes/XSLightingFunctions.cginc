@@ -81,7 +81,7 @@ float3 getVertexLightsDir(inout VertexLightInformation vLights, float3 worldPos,
 }
 
 // Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
-half3 calcLightDir(XSLighting i)
+half3 calcLightDir(FragmentData i)
 {
     half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
     half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
@@ -150,7 +150,7 @@ float3 get4VertexLightsColFalloff(inout VertexLightInformation vLight, float3 wo
     return lightColor;
 }
 
-half4 calcRamp(XSLighting i, DotProducts d)
+half4 calcRamp(FragmentData i, DotProducts d)
 {
     half remapRamp;
     remapRamp = (d.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode) ;
@@ -161,7 +161,7 @@ half4 calcRamp(XSLighting i, DotProducts d)
     return ramp;
 }
 
-half4 calcRampShadowOverride(XSLighting i, float ndl)
+half4 calcRampShadowOverride(FragmentData i, float ndl)
 {
     half remapRamp;
     remapRamp = (ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode);
@@ -169,7 +169,7 @@ half4 calcRampShadowOverride(XSLighting i, float ndl)
     return ramp;
 }
 
-float3 getVertexLightsDiffuse(XSLighting i, VertexLightInformation vLight)
+float3 getVertexLightsDiffuse(FragmentData i, VertexLightInformation vLight)
 {
     float3 vertexLightsDiffuse = 0;
     #if defined(VERTEXLIGHT_ON)
@@ -182,7 +182,7 @@ float3 getVertexLightsDiffuse(XSLighting i, VertexLightInformation vLight)
     return vertexLightsDiffuse;
 }
 
-half4 calcMetallicSmoothness(XSLighting i)
+half4 calcMetallicSmoothness(FragmentData i)
 {
     half roughness = 1-(_Glossiness * i.metallicGlossMap.a);
     roughness *= 1.7 - 0.7 * roughness;
@@ -190,7 +190,7 @@ half4 calcMetallicSmoothness(XSLighting i)
     return half4(metallic, 0, 0, roughness);
 }
 
-half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half3 envMap)
+half4 calcRimLight(FragmentData i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half3 envMap)
 {
     half rimIntensity = saturate((1-d.svdn)) * pow(d.ndl, _RimThreshold);
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
@@ -199,7 +199,7 @@ half4 calcRimLight(XSLighting i, DotProducts d, half4 lightCol, half3 indirectDi
     return rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
 }
 
-half4 calcShadowRim(XSLighting i, DotProducts d, half3 indirectDiffuse)
+half4 calcShadowRim(FragmentData i, DotProducts d, half3 indirectDiffuse)
 {
     half rimIntensity = saturate((1-d.svdn)) * pow(1-d.ndl, _ShadowRimThreshold * 2);
     rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
@@ -219,7 +219,7 @@ float3 getAnisotropicReflectionVector(float3 viewDir, float3 bitangent, float3 t
     return reflect(-viewDir, bentNormal);
 }
 
-half3 calcDirectSpecular(XSLighting i, float ndl, float ndh, float vdn, float ldh, half4 lightCol, half3 halfVector, half anisotropy)
+half3 calcDirectSpecular(FragmentData i, float ndl, float ndh, float vdn, float ldh, half4 lightCol, half3 halfVector, half anisotropy)
 {
     half specularIntensity = _SpecularIntensity * i.specularMap.r;
     half3 specular = half3(0,0,0);
@@ -244,7 +244,7 @@ half3 calcDirectSpecular(XSLighting i, float ndl, float ndh, float vdn, float ld
     return specular;
 }
 
-float3 getVertexLightSpecular(XSLighting i, DotProducts d, VertexLightInformation vLight, float3 normal, float3 viewDir, float anisotropy)
+float3 getVertexLightSpecular(FragmentData i, DotProducts d, VertexLightInformation vLight, float3 normal, float3 viewDir, float anisotropy)
 {
     float3 vertexLightSpec = 0;
     #if defined(VERTEXLIGHT_ON)
@@ -261,7 +261,7 @@ float3 getVertexLightSpecular(XSLighting i, DotProducts d, VertexLightInformatio
     return vertexLightSpec;
 }
 
-half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness, half3 reflDir, half3 indirectLight, half3 viewDir, float3 fresnel, half4 ramp)
+half3 calcIndirectSpecular(FragmentData i, DotProducts d, half4 metallicSmoothness, half3 reflDir, half3 indirectLight, half3 viewDir, float3 fresnel, half4 ramp)
 {//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
     half3 spec = half3(0,0,0);
 
@@ -323,7 +323,7 @@ half3 calcIndirectSpecular(XSLighting i, DotProducts d, half4 metallicSmoothness
     return spec;
 }
 
-half4 calcOutlineColor(XSLighting i, DotProducts d, half3 indirectDiffuse, half4 lightCol)
+half4 calcOutlineColor(FragmentData i, DotProducts d, half3 indirectDiffuse, half4 lightCol)
 {
     half3 outlineColor = half3(0,0,0);
     #if defined(Geometry)
@@ -335,13 +335,13 @@ half4 calcOutlineColor(XSLighting i, DotProducts d, half3 indirectDiffuse, half4
     return half4(outlineColor,1);
 }
 
-half3 calcIndirectDiffuse(XSLighting i)
+half3 calcIndirectDiffuse(FragmentData i)
 {// We don't care about anything other than the color from probes for toon lighting.
     half3 indirectDiffuse = ShadeSH9(float4(0,0.5,0,1));//half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
     return indirectDiffuse;
 }
 
-half4 calcDiffuse(XSLighting i, DotProducts d, half3 indirectDiffuse, half4 lightCol, half4 ramp)
+half4 calcDiffuse(FragmentData i, DotProducts d, half3 indirectDiffuse, half4 lightCol, half4 ramp)
 {
     half4 diffuse;
     half4 indirect = indirectDiffuse.xyzz;
@@ -356,7 +356,7 @@ half4 calcDiffuse(XSLighting i, DotProducts d, half3 indirectDiffuse, half4 ligh
 
 //Subsurface Scattering - Based on a 2011 GDC Conference from by Colin Barre-Bresebois & Marc Bouchard
 //Modified by Xiexe
-half4 calcSubsurfaceScattering(XSLighting i, DotProducts d, half3 lightDir, half3 viewDir, half3 normal, half4 lightCol, half3 indirectDiffuse)
+half4 calcSubsurfaceScattering(FragmentData i, DotProducts d, half3 lightDir, half3 viewDir, half3 normal, half4 lightCol, half3 indirectDiffuse)
 {
     UNITY_BRANCH
     if(any(_SSColor.rgb)) // Skip all the SSS stuff if the color is 0.
@@ -377,10 +377,42 @@ half4 calcSubsurfaceScattering(XSLighting i, DotProducts d, half3 lightDir, half
     }
 }
 
-half4 calcEmission(XSLighting i, half lightAvg)
+half4 calcEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
 {
     #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
-        float4 emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse);
+        float4 emission = 0;
+        if(_EmissionAudioLinkChannel == 0)
+        {
+            emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse) * _EmissionColor;
+        }
+        else
+        {
+            if(AudioLinkIsAvailable())
+            {
+                if(_EmissionAudioLinkChannel != 5)
+                {
+                    int2 aluv = int2(0, (_EmissionAudioLinkChannel-1));
+                    float alink = lerp(1, AudioLinkData(aluv).x , saturate(_EmissionAudioLinkChannel));
+                    emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse) * _EmissionColor * alink;
+                }
+                else
+                {
+                    float audioDataBass = AudioLinkData(ALPASS_AUDIOBASS).x;
+                    float audioDataMids = AudioLinkData(ALPASS_AUDIOLOWMIDS).x;
+                    float audioDataHighs = (AudioLinkData(ALPASS_AUDIOHIGHMIDS).x + AudioLinkData(ALPASS_AUDIOTREBLE).x) * 0.5;
+
+                    float tLow = smoothstep((1-audioDataBass), (1-audioDataBass) + 0.01, i.emissionMap.r) * i.emissionMap.a;
+                    float tMid = smoothstep((1-audioDataMids), (1-audioDataMids) + 0.01, i.emissionMap.g) * i.emissionMap.a;
+                    float tHigh = smoothstep((1-audioDataHighs), (1-audioDataHighs) + 0.01, i.emissionMap.b) * i.emissionMap.a;
+
+                    float4 emissionChannelRed = lerp(i.emissionMap.r, tLow, _ALGradientOnRed) * _EmissionColor * audioDataBass;
+                    float4 emissionChannelGreen = lerp(i.emissionMap.g, tMid, _ALGradientOnGreen) * _EmissionColor0 * audioDataMids;
+                    float4 emissionChannelBlue = lerp(i.emissionMap.b, tHigh, _ALGradientOnBlue) * _EmissionColor1 * audioDataHighs;
+                    emission = (emissionChannelRed + emissionChannelGreen + emissionChannelBlue) * lerp(1, i.diffuseColor.rgbb, _EmissionToDiffuse);
+                }
+            }
+        }
+
         float4 scaledEmission = emission * saturate(smoothstep(1-_ScaleWithLightSensitivity, 1+_ScaleWithLightSensitivity, 1-lightAvg));
         float4 em = lerp(scaledEmission, emission, _ScaleWithLight);
 
@@ -396,7 +428,7 @@ half4 calcEmission(XSLighting i, half lightAvg)
     #endif
 }
 
-void calcReflectionBlending(XSLighting i, inout half4 col, half3 indirectSpecular)
+void calcReflectionBlending(FragmentData i, inout half4 col, half3 indirectSpecular)
 {
     if(_ReflectionBlendMode == 0) // Additive
         col += indirectSpecular.xyzz * i.reflectivityMask.r;
@@ -406,7 +438,7 @@ void calcReflectionBlending(XSLighting i, inout half4 col, half3 indirectSpecula
         col -= indirectSpecular.xyzz * i.reflectivityMask.r;
 }
 
-void calcClearcoat(inout half4 col, XSLighting i, DotProducts d, half3 untouchedNormal, half3 indirectDiffuse, half3 lightCol, half3 viewDir, half3 lightDir, half4 ramp)
+void calcClearcoat(inout half4 col, FragmentData i, DotProducts d, half3 untouchedNormal, half3 indirectDiffuse, half3 lightCol, half3 viewDir, half3 lightDir, half4 ramp)
 {
     UNITY_BRANCH
     if(_ClearCoat != 0)

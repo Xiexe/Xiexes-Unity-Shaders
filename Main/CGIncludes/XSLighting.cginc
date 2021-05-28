@@ -1,4 +1,4 @@
-half4 BRDF_XSLighting(XSLighting i)
+half4 BRDF_XSLighting(FragmentData i, TextureUV t)
 {
     float3 untouchedNormal = i.normal;
     i.tangent = normalize(i.tangent);
@@ -91,28 +91,18 @@ half4 BRDF_XSLighting(XSLighting i)
         indirectSpecular *= lerp(0.5, 1, stipplingIndirect); // Don't want these to go completely black, looks weird
     }
 
-    #if defined(_COLOROVERLAY_ON)
-        float refractFresnel = 1-d.vdn;
-        float distanceToPixel = distance(_WorldSpaceCameraPos, i.worldPos);
-        float distanceScalar = saturate(1 / distanceToPixel) * saturate(distanceToPixel);
-        float3 refractDir = refract(viewDir, i.normal, max(0, _IOR - 1) * 0.03 * distanceScalar * refractFresnel);
-        float3x3 worldToTangentMatrix = float3x3(i.tangent, i.bitangent, i.normal);
-        refractDir = mul(worldToTangentMatrix, refractDir);
-        float4 backgroundColor = tex2Dproj(_GrabTexture, float4(i.screenPos.xyz + refractDir, i.screenPos.w));
+    #if defined(Fur)
+        AdjustFurSpecular(i, directSpecular.rgb, indirectSpecular.rgb);
     #endif
 
-    half4 col;
-    #if !defined(_COLOROVERLAY_ON)
-        col = diffuse * shadowRim;
-    #else
-        col = backgroundColor * diffuse * shadowRim;
-    #endif
+    half4 col = diffuse * shadowRim;
     calcReflectionBlending(i, col, indirectSpecular.xyzz);
     col += max(directSpecular.xyzz, rimLight);
     col.rgb += max(vertexLightSpec.rgb, rimLight);
     col += subsurface;
     calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
-    col += calcEmission(i, lightAvg);
+    col += calcEmission(i, t, d, lightAvg);
     float4 finalColor = lerp(col, outlineColor, i.isOutline) * lerp(1, lineHalftone, _HalftoneLineIntensity * usingLineHalftone);
+
     return finalColor;
 }

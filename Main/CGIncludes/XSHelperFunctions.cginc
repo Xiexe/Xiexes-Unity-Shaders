@@ -1,4 +1,4 @@
-void calcNormal(inout XSLighting i)
+void calcNormal(inout FragmentData i)
 {
     if(_NormalMapMode == 0)
     {
@@ -55,6 +55,9 @@ void InitializeTextureUVs(
         i.uv = eyeUvOffset;
         i.uv1 = eyeUvOffset;
     #endif
+
+    t.uv0 = i.uv;
+    t.uv1 = i.uv1;
 
     half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
@@ -219,7 +222,7 @@ half3 getReflectionUV(half3 direction, half3 position, half4 cubemapPosition, ha
     return direction;
 }
 
-half3 getEnvMap(XSLighting i, DotProducts d, float blur, half3 reflDir, half3 indirectLight, half3 wnormal)
+half3 getEnvMap(FragmentData i, DotProducts d, float blur, half3 reflDir, half3 indirectLight, half3 wnormal)
 {//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
     half3 envMap = half3(0,0,0);
 
@@ -266,11 +269,50 @@ float AlphaAdjust(float alphaToAdj, float3 vColor)
     return alphaToAdj;
 }
 
-void calcDissolve(inout XSLighting i, inout float4 col)
+bool IsColorMatch(float3 color1, float3 color2)
+{
+    float epsilon = 0.1;
+    float3 delta = abs(color1.rgb - color2.rgb);
+    return step((delta.r + delta.g + delta.b), epsilon);
+}
+
+float AdjustAlphaUsingTextureArray(FragmentData i, float alphaToAdj)
+{
+    half4 compValRGBW = 0; // Red Green Blue White
+    half4 compValCYMB = 0; // Cyan Yellow Magenta Black
+    switch (_ClipIndex) // Each of these is a Vector / 4 masks, 2 per material, so 8 masks per material, 8 materials max, 64 total masks
+    {
+        case 0 : compValRGBW = _ClipSlider00; compValCYMB = _ClipSlider01; break;
+        case 1 : compValRGBW = _ClipSlider02; compValCYMB = _ClipSlider03; break;
+        case 2 : compValRGBW = _ClipSlider04; compValCYMB = _ClipSlider05; break;
+        case 3 : compValRGBW = _ClipSlider06; compValCYMB = _ClipSlider07; break;
+        case 4 : compValRGBW = _ClipSlider08; compValCYMB = _ClipSlider09; break;
+        case 5 : compValRGBW = _ClipSlider10; compValCYMB = _ClipSlider11; break;
+        case 6 : compValRGBW = _ClipSlider12; compValCYMB = _ClipSlider13; break;
+        case 7 : compValRGBW = _ClipSlider14; compValCYMB = _ClipSlider15; break;
+    }
+
+    //Compares to Red, Green, Blue, and White against the first slider set
+    alphaToAdj *= lerp(1, 1-compValRGBW.r, IsColorMatch(i.clipMap.rgb, float3(1,0,0)));
+    alphaToAdj *= lerp(1, 1-compValRGBW.g, IsColorMatch(i.clipMap.rgb, float3(0,1,0)));
+    alphaToAdj *= lerp(1, 1-compValRGBW.b, IsColorMatch(i.clipMap.rgb, float3(0,0,1)));
+    alphaToAdj *= lerp(1, 1-compValRGBW.w, IsColorMatch(i.clipMap.rgb, float3(1,1,1)));
+
+    //Compares to Cyan, Yellow, Magenta, and Black against the second slider set
+    alphaToAdj *= lerp(1, 1-compValCYMB.r, IsColorMatch(i.clipMap.rgb, float3(0,1,1)));
+    alphaToAdj *= lerp(1, 1-compValCYMB.g, IsColorMatch(i.clipMap.rgb, float3(1,1,0)));
+    alphaToAdj *= lerp(1, 1-compValCYMB.b, IsColorMatch(i.clipMap.rgb, float3(1,0,1)));
+    alphaToAdj *= lerp(1, 1-compValCYMB.w, IsColorMatch(i.clipMap.rgb, float3(0,0,0)));
+
+    return alphaToAdj;
+}
+
+void calcDissolve(inout FragmentData i, inout float3 col)
 {
     #ifdef _ALPHATEST_ON
-        half dissolveAmt = Remap_Float(i.dissolveMask.x, float2(0,1), float2(0.1, 0.9));
-        half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AlphaAdjust(1, i.clipMap.rgb), _UseClipsForDissolve));
+        float4 mask = i.dissolveMask.x * i.dissolveMaskSecondLayer.x * _DissolveBlendPower;
+        half dissolveAmt = Remap_Float(mask, float2(0,1), float2(0.25, 0.75));
+        half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AdjustAlphaUsingTextureArray(i, 1), _UseClipsForDissolve));
         half dissolve = 0;
         if (_DissolveCoordinates == 0)
         {
@@ -301,48 +343,58 @@ void calcDissolve(inout XSLighting i, inout float4 col)
             dissCol.rgb = hsv2rgb(dissCol.rgb);
 
             half dissolveEdge = smoothstep(dissolve, dissolve - (_DissolveStrength * 0.01), dissolve * dissolveAmt);
+            dissCol.rgb *= saturate(sin(dissolveProgress * 4) * 3);
             col.rgb += (1-dissolveEdge) * dissCol.rgb;
         #endif
     #endif
 }
 
-void calcAlpha(inout XSLighting i)
+//todo: What the fuck is going on here?
+void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
 {
-    i.alpha = 1;
+    #if !defined(Fur)
+        #if defined(_ALPHABLEND_ON) && !defined(_ALPHATEST_ON) // Traditional Alphablended / Fade blending
+            alpha = i.albedo.a;
 
-    #ifdef _ALPHABLEND_ON
-        i.alpha = i.albedo.a;
+            #ifdef UNITY_PASS_SHADOWCASTER
+                half dither = calcDither(i.screenUV.xy);
+                clip(alpha - dither);
+            #endif
+        #endif
 
-        #ifdef UNITY_PASS_SHADOWCASTER
+        #if !defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Dithered / Cutout transparency
+            float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
+            if(_BlendMode == 2)
+            {
+                half dither = calcDither(i.screenUV.xy);
+                float fadeDist = abs(_FadeDitherDistance);
+                float d = distance(_WorldSpaceCameraPos, i.worldPos);
+                d = smoothstep(fadeDist, fadeDist + 0.05, d);
+                d = lerp(d, 1-d, saturate(step(0, _FadeDitherDistance)));
+                dither += lerp(0, d, saturate(_FadeDither));
+                clip(modifiedAlpha - dither);
+            }
+
+            if(_BlendMode == 1)
+            {
+                clip(modifiedAlpha - _Cutoff);
+            }
+        #endif
+
+        #if defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Alpha to Coverage
+            float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
             half dither = calcDither(i.screenUV.xy);
-            clip(i.alpha - dither);
+            alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
+            #if defined(UNITY_PASS_SHADOWCASTER)
+                clip(modifiedAlpha - dither);
+            #endif
         #endif
     #endif
+}
 
-    #ifdef _ALPHATEST_ON
-        float modifiedAlpha = lerp(AlphaAdjust(i.albedo.a, i.clipMap.rgb), i.albedo.a, _UseClipsForDissolve);
-        if(_BlendMode >= 3)
-        {
-            half dither = calcDither(i.screenUV.xy);
-            i.alpha = modifiedAlpha - (dither * (1-i.albedo.a) * 0.15);
-        }
-
-        if(_BlendMode == 2)
-        {
-            half dither = calcDither(i.screenUV.xy);
-            float fadeDist = abs(_FadeDitherDistance);
-            float d = distance(_WorldSpaceCameraPos, i.worldPos);
-            d = smoothstep(fadeDist, fadeDist + 0.05, d);
-            d = lerp(d, 1-d, saturate(step(0, _FadeDitherDistance)));
-            dither += lerp(0, d, saturate(_FadeDither));
-            clip(modifiedAlpha - dither);
-        }
-
-        if(_BlendMode == 1)
-        {
-            clip(modifiedAlpha - _Cutoff);
-        }
-    #endif
+float lerpstep(float a, float b, float t)
+{
+    return saturate( ( t - a ) / ( b - a ) );
 }
 
 // //Halftone functions, finish implementing later.. Not correct right now.
@@ -364,7 +416,7 @@ half2 rotateUV(half2 uv, half rotation)
     );
 }
 
-half DotHalftone(XSLighting i, half scalar) //Scalar can be anything from attenuation to a dot product
+half DotHalftone(FragmentData i, half scalar) //Scalar can be anything from attenuation to a dot product
 {
 	bool inMirror = IsInMirror();
 	half2 uv = SphereUV(calcViewDir(i.worldPos));
@@ -377,7 +429,7 @@ half DotHalftone(XSLighting i, half scalar) //Scalar can be anything from attenu
 	return lerp(1, 1-dotMask, smoothstep(0, 0.4, 1/distance(i.worldPos, _WorldSpaceCameraPos)));;
 }
 
-half LineHalftone(XSLighting i, half scalar)
+half LineHalftone(FragmentData i, half scalar)
 {
 	// #if defined(DIRECTIONAL)
 	// 	scalar = saturate(scalar + ((1-i.attenuation) * 0.2));
@@ -392,4 +444,6 @@ half LineHalftone(XSLighting i, half scalar)
 
 	return saturate(lineMask);
 }
+
+float flength(float i) { return length(float2(ddx(i), ddy(i))); }
 //
