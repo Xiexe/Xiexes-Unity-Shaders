@@ -148,6 +148,10 @@ namespace XSToon3
         private MaterialProperty _UseClipsForDissolve = null;
         private MaterialProperty _WireColor = null;
         private MaterialProperty _WireWidth = null;
+        private MaterialProperty _SrcBlend = null;
+        private MaterialProperty _DstBlend = null;
+        private MaterialProperty _ZWrite = null;
+
 
         private MaterialProperty _EmissionAudioLinkChannel = null;
         private MaterialProperty _ALGradientOnRed = null;
@@ -759,7 +763,12 @@ namespace XSToon3
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
 
                     XSStyles.Separator();
+                    materialEditor.ShaderProperty(_SrcBlend, new GUIContent("SrcBlend", ""));
+                    materialEditor.ShaderProperty(_DstBlend, new GUIContent("DstBlend", ""));
+                    materialEditor.ShaderProperty(_ZWrite, new GUIContent("ZWrite", ""));
+                    XSStyles.Separator();
                     materialEditor.RenderQueueField();
+                    XSStyles.Separator();
                 }
             }
         }
