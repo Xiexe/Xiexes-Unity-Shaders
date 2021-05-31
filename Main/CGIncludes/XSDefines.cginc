@@ -5,8 +5,8 @@
 struct VertexInput
 {
     float4 vertex : POSITION;
-    float2 uv : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
+    centroid float2 uv : TEXCOORD0;
+    centroid float2 uv1 : TEXCOORD1;
     float2 uv2 : TEXCOORD2;
     float3 normal : NORMAL;
     float4 tangent : TANGENT;
@@ -25,15 +25,15 @@ struct VertexOutput
         float4 pos : SV_POSITION;
     #endif
 
-    float2 uv : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
+    centroid float2 uv : TEXCOORD0;
+    centroid float2 uv1 : TEXCOORD1;
     float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
     float4 worldPos : TEXCOORD5;
     float4 color : TEXCOORD6;
     float3 normal : TEXCOORD8;
     float4 screenPos : TEXCOORD9;
     float3 objPos : TEXCOORD11;
-    float2 uv2 : TEXCOORD12;
+    centroid float2 uv2 : TEXCOORD12;
 
     #if !defined(UNITY_PASS_SHADOWCASTER)
         SHADOW_COORDS(7)
