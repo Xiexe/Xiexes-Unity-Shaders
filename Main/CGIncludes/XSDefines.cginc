@@ -5,8 +5,8 @@
 struct VertexInput
 {
     float4 vertex : POSITION;
-    float2 uv : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
+    centroid float2 uv : TEXCOORD0;
+    centroid float2 uv1 : TEXCOORD1;
     float2 uv2 : TEXCOORD2;
     float3 normal : NORMAL;
     float4 tangent : TANGENT;
@@ -25,15 +25,15 @@ struct VertexOutput
         float4 pos : SV_POSITION;
     #endif
 
-    float2 uv : TEXCOORD0;
-    float2 uv1 : TEXCOORD1;
+    centroid float2 uv : TEXCOORD0;
+    centroid float2 uv1 : TEXCOORD1;
     float3 ntb[3] : TEXCOORD2; //texcoord 3, 4 || Holds World Normal, Tangent, and Bitangent
     float4 worldPos : TEXCOORD5;
     float4 color : TEXCOORD6;
     float3 normal : TEXCOORD8;
     float4 screenPos : TEXCOORD9;
     float3 objPos : TEXCOORD11;
-    float2 uv2 : TEXCOORD12;
+    centroid float2 uv2 : TEXCOORD12;
 
     #if !defined(UNITY_PASS_SHADOWCASTER)
         SHADOW_COORDS(7)
@@ -77,9 +77,10 @@ struct VertexOutput
         float4 color : TEXCOORD6;
         float4 screenPos : TEXCOORD8;
         float3 objPos : TEXCOORD10;
+        float2 uv2 : TEXCOORD11;
 
         #if defined(Fur)
-        float layer : TEXCOORD11;
+        float layer : TEXCOORD12;
         #endif
 
         #if !defined(UNITY_PASS_SHADOWCASTER)
@@ -130,6 +131,7 @@ struct TextureUV
 {
     half2 uv0;
     half2 uv1;
+    half2 uv2;
     half2 albedoUV;
     half2 specularMapUV;
     half2 metallicGlossMapUV;
@@ -236,6 +238,7 @@ int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
 int _NormalMapMode, _OutlineUVSelect;
 int _AlphaToMask;
 int _ALGradientOnRed, _ALGradientOnGreen, _ALGradientOnBlue;
+int _ALUVWidth;
 
 //!RDPSDefines
 

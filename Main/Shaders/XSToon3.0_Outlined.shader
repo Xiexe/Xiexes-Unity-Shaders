@@ -128,13 +128,14 @@
         [Enum(UV1,0,UV2,1)] _UVSetClipMap("Clip Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetDissolve("Dissolve Map UVs", Int) = 0
 
-        [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
+        [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5,UV Based,6)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
         [ToggleUI]_ALGradientOnRed("Gradient Red", Int) = 0
         [ToggleUI]_ALGradientOnGreen("Gradient Green", Int) = 0
         [ToggleUI]_ALGradientOnBlue("Gradient Blue", Int) = 0
         [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         [HDR]_EmissionColor0("Emission Packed Color 1", Color) = (0,0,0,0)
         [HDR]_EmissionColor1("Emission Packed Color 2", Color) = (0,0,0,0)
+        [IntRange]_ALUVWidth("History Sample Amount", Range(0,128)) = 128
 
         _ClipMap("Clip Map", 2D) = "black" {}
         _WireColor("Wire Color", Color) = (0,0,0,0)
@@ -144,9 +145,9 @@
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
 
-        [HideInInspector] _SrcBlend ("__src", int) = 1
-        [HideInInspector] _DstBlend ("__dst", int) = 0
-        [HideInInspector] _ZWrite ("__zw", int) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)]_SrcBlend ("__src", int) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)]_DstBlend ("__dst", int) = 0
+        [Enum(Off,0,On,1)]_ZWrite ("__zw", int) = 1
         [HideInInspector] _AlphaToMask("__am", int) = 0
 
         _ClipMask("Clip Mask", 2D) = "black" {}

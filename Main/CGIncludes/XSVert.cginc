@@ -31,6 +31,7 @@ VertexOutput vert (VertexInput v)
     o.ntb[2] = bitangent;
     o.uv = v.uv;
     o.uv1 = v.uv1;
+    o.uv2 = v.uv2;
     o.color = float4(v.color.rgb, 0); // store if outline in alpha channel of vertex colors | 0 = not an outline
     o.normal = v.normal;
     o.screenPos = ComputeScreenPos(o.pos);

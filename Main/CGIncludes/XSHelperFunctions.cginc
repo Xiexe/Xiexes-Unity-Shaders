@@ -58,6 +58,7 @@ void InitializeTextureUVs(
 
     t.uv0 = i.uv;
     t.uv1 = i.uv1;
+    t.uv2 = i.uv2;
 
     half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
@@ -129,6 +130,10 @@ void InitializeTextureUVsMerged(
     #endif
         inout TextureUV t)
 {
+    t.uv0 = i.uv;
+    t.uv1 = i.uv1;
+    t.uv2 = i.uv2;
+
     half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
     t.normalMapUV = t.albedoUV;

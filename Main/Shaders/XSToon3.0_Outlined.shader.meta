@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 956a7ff9ce5a1cf4c8735b173dfac4bc
+guid: fd568e6ed04d8e241b02aed90d55738d
 ShaderImporter:
   externalObjects: {}
   defaultTextures:
@@ -18,6 +18,7 @@ ShaderImporter:
   - _OcclusionMap: {instanceID: 0}
   - _OutlineMask: {instanceID: 0}
   - _ThicknessMap: {instanceID: 0}
+  nonModifiableTextures: []
   userData: 
   assetBundleName: 
   assetBundleVariant: 

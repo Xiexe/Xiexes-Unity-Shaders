@@ -337,8 +337,12 @@ half4 calcOutlineColor(FragmentData i, DotProducts d, half3 indirectDiffuse, hal
 
 half3 calcIndirectDiffuse(FragmentData i)
 {// We don't care about anything other than the color from probes for toon lighting.
-    half3 indirectDiffuse = ShadeSH9(float4(0,0.5,0,1));//half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
-    return indirectDiffuse;
+    #if !defined(LIGHTMAP_ON)
+        half3 indirectDiffuse = ShadeSH9(float4(0,0.5,0,1));//half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
+        return indirectDiffuse;
+    #else
+        return 0;
+    #endif
 }
 
 half4 calcDiffuse(FragmentData i, DotProducts d, half3 indirectDiffuse, half4 lightCol, half4 ramp)
@@ -352,6 +356,33 @@ half4 calcDiffuse(FragmentData i, DotProducts d, half3 indirectDiffuse, half4 li
     diffuse = ramp * attenFactor * lightCol + indirect;
     diffuse = i.albedo * diffuse;
     return diffuse;
+}
+
+float4 getRealtimeLightmap(float2 uv, float3 worldNormal)
+{
+    float2 realtimeUV = uv * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+    float4 bakedCol = UNITY_SAMPLE_TEX2D(unity_DynamicLightmap, realtimeUV);
+    float3 realtimeLightmap = DecodeRealtimeLightmap(bakedCol);
+
+    #ifdef DIRLIGHTMAP_COMBINED
+        float4 realtimeDirTex = UNITY_SAMPLE_TEX2D_SAMPLER(unity_DynamicDirectionality, unity_DynamicLightmap, realtimeUV);
+        realtimeLightmap += DecodeDirectionalLightmap (realtimeLightmap, realtimeDirTex, worldNormal);
+    #endif
+
+    return float4(realtimeLightmap.rgb, 1);
+}
+
+float4 getLightmap(float2 uv, float3 worldNormal, float3 worldPos)
+{
+    float2 lightmapUV = uv * unity_LightmapST.xy + unity_LightmapST.zw;
+    float4 bakedColorTex = UNITY_SAMPLE_TEX2D(unity_Lightmap, lightmapUV);
+    float3 lightMap = DecodeLightmap(bakedColorTex);
+
+    #ifdef DIRLIGHTMAP_COMBINED
+        fixed4 bakedDirTex = UNITY_SAMPLE_TEX2D_SAMPLER (unity_LightmapInd, unity_Lightmap, lightmapUV);
+        lightMap = DecodeDirectionalLightmap(lightMap, bakedDirTex, worldNormal);
+    #endif
+    return float4(lightMap.rgb, 1);
 }
 
 //Subsurface Scattering - Based on a 2011 GDC Conference from by Colin Barre-Bresebois & Marc Bouchard
@@ -391,7 +422,14 @@ half4 calcEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
             {
                 if(_EmissionAudioLinkChannel != 5)
                 {
-                    int2 aluv = int2(0, (_EmissionAudioLinkChannel-1));
+                    int2 aluv;
+                    if (_EmissionAudioLinkChannel == 6)
+                    {
+                        aluv = int2(t.emissionMapUV.x * _ALUVWidth, t.emissionMapUV.y);
+                    } else
+                    {
+                        aluv = int2(0, (_EmissionAudioLinkChannel-1));
+                    }
                     float alink = lerp(1, AudioLinkData(aluv).x , saturate(_EmissionAudioLinkChannel));
                     emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse) * _EmissionColor * alink;
                 }
