@@ -43,7 +43,7 @@ half4 BRDF_XSLighting(FragmentData i, TextureUV t)
 
     float3 vertexLightDiffuse = 0;
     float3 vertexLightSpec = 0;
-    #if defined(VERTEXLIGHT_ON)
+    #if defined(VERTEXLIGHT_ON) && !defined(LIGHTMAP_ON)
         VertexLightInformation vLight = (VertexLightInformation)0;
         float4 vertexLightAtten = float4(0,0,0,0);
         float3 vertexLightColor = get4VertexLightsColFalloff(vLight, i.worldPos, i.normal, vertexLightAtten);
@@ -57,8 +57,18 @@ half4 BRDF_XSLighting(FragmentData i, TextureUV t)
     half lightAvg = (dot(indirectDiffuse.rgb, grayscaleVec) + dot(lightCol.rgb, grayscaleVec)) / 2;
     half3 envMapBlurred = getEnvMap(i, d, 5, reflView, indirectDiffuse, i.normal);
 
-    half4 ramp = calcRamp(i,d);
-    half4 diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
+    half4 ramp = 1;
+    half4 diffuse = 1;
+    #if defined(LIGHTMAP_ON)
+        diffuse = i.albedo * getLightmap(t.uv1, i.normal, i.worldPos);
+        #if defined(DYNAMICLIGHTMAP_ON)
+            diffuse += getRealtimeLightmap(t.uv2, i.normal);
+        #endif
+    #else
+        ramp = calcRamp(i,d);
+        diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
+    #endif
+
     half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse, envMapBlurred);
     half4 shadowRim = calcShadowRim(i, d, indirectDiffuse);
 

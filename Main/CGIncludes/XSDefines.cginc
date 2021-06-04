@@ -77,9 +77,10 @@ struct VertexOutput
         float4 color : TEXCOORD6;
         float4 screenPos : TEXCOORD8;
         float3 objPos : TEXCOORD10;
+        float2 uv2 : TEXCOORD11;
 
         #if defined(Fur)
-        float layer : TEXCOORD11;
+        float layer : TEXCOORD12;
         #endif
 
         #if !defined(UNITY_PASS_SHADOWCASTER)
@@ -130,6 +131,7 @@ struct TextureUV
 {
     half2 uv0;
     half2 uv1;
+    half2 uv2;
     half2 albedoUV;
     half2 specularMapUV;
     half2 metallicGlossMapUV;
