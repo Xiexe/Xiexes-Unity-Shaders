@@ -496,3 +496,30 @@ void calcClearcoat(inout half4 col, FragmentData i, DotProducts d, half3 untouch
         col += clearcoat.xyzz;
     }
 }
+
+Directions GetDirections(FragmentData i)
+{
+    Directions dirs = (Directions) 0;
+    dirs.lightDir = calcLightDir(i);
+    dirs.viewDir = calcViewDir(i.worldPos);
+    dirs.stereoViewDir = calcStereoViewDir(i.worldPos);
+    dirs.halfVector = normalize(dirs.lightDir + dirs.viewDir);
+    dirs.reflView = calcReflView(dirs.viewDir, i.normal);
+    dirs.reflLight = calcReflLight(dirs.lightDir, i.normal);
+    return dirs;
+}
+
+DotProducts GetDots(Directions dirs, FragmentData i)
+{
+    DotProducts d = (DotProducts)0;
+    d.ndl = dot(i.normal, dirs.lightDir);
+    d.vdn = abs(dot(dirs.viewDir, i.normal));
+    d.vdh = DotClamped(dirs.viewDir, dirs.halfVector);
+    d.tdh = dot(i.tangent, dirs.halfVector);
+    d.bdh = dot(i.bitangent, dirs.halfVector);
+    d.ndh = DotClamped(i.normal, dirs.halfVector);
+    d.rdv = saturate(dot(dirs.reflLight, float4(-dirs.viewDir, 0)));
+    d.ldh = DotClamped(dirs.lightDir, dirs.halfVector);
+    d.svdn = abs(dot(dirs.stereoViewDir, i.normal));
+    return d;
+}

@@ -160,6 +160,25 @@ struct DotProducts
     half svdn;
 };
 
+struct Directions
+{
+    half3 lightDir;
+    half3 viewDir;
+    half3 stereoViewDir;
+    half3 halfVector;
+    half3 reflView;
+    half3 reflLight;
+    half3 reflViewAniso;
+};
+
+struct HookData
+{
+    FragmentData i;
+    TextureUV t;
+    Directions dirs;
+    DotProducts d;
+};
+
 struct VertexLightInformation {
     float3 Direction[4];
     float3 ColorFalloff[4];

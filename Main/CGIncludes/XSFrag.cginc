@@ -92,9 +92,20 @@ float4 frag (
             DoFurAlpha(o,t,alpha);
         #endif
 
-        float4 col = BRDF_XSLighting(o,t);
-        calcAlpha(o, t, alpha);
-        calcDissolve(o, col.rgb);
+        Directions dirs = GetDirections(o);
+        DotProducts d = GetDots(dirs, o);
+        HookData data = (HookData) 0;
+        data.i = o;
+        data.t = t;
+        data.dirs = dirs;
+        data.d = d;
+        data = PreLightingHook(data);
+    
+        float4 col = BRDF_XSLighting(data);
+        calcAlpha(data.i, data.t, alpha);
+        calcDissolve(data.i, col.rgb);
+    
+        PostLightingHook(col, data);
         UNITY_APPLY_FOG(i.fogCoord, col);
         return float4(col.rgb, alpha);
     #endif
