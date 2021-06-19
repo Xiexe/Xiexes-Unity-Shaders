@@ -1,14 +1,10 @@
 half4 BRDF_XSLighting(HookData data)
 {
     FragmentData i = data.i;
+    float3 untouchedNormal = data.untouchedNormal;
     TextureUV t = data.t;
     Directions dirs = data.dirs;
     DotProducts d = data.d;
-    
-    float3 untouchedNormal = i.normal;
-    i.tangent = normalize(i.tangent);
-    i.bitangent = normalize(i.bitangent);
-    calcNormal(i);
 
     half3 indirectDiffuse = calcIndirectDiffuse(i);
     bool lightEnv = any(_WorldSpaceLightPos0.xyz);

@@ -174,6 +174,7 @@ struct Directions
 struct HookData
 {
     FragmentData i;
+    float3 untouchedNormal;
     TextureUV t;
     Directions dirs;
     DotProducts d;

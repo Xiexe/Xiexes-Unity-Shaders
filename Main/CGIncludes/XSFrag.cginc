@@ -92,11 +92,16 @@ float4 frag (
             DoFurAlpha(o,t,alpha);
         #endif
 
-        Directions dirs = GetDirections(o);
-        DotProducts d = GetDots(dirs, o);
         HookData data = (HookData) 0;
+        data.untouchedNormal = o.normal;
+        o.tangent = normalize(o.tangent);
+        o.bitangent = normalize(o.bitangent);
+        calcNormal(o);
         data.i = o;
         data.t = t;
+    
+        Directions dirs = GetDirections(o);
+        DotProducts d = GetDots(dirs, o);
         data.dirs = dirs;
         data.d = d;
         data = PreLightingHook(data);
