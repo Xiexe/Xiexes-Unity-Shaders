@@ -105,7 +105,7 @@ float4 frag (
         calcAlpha(data.i, data.t, alpha);
         calcDissolve(data.i, col.rgb);
     
-        PostLightingHook(col, data);
+        col = PostLightingHook(col, data);
         UNITY_APPLY_FOG(i.fogCoord, col);
         return float4(col.rgb, alpha);
     #endif
