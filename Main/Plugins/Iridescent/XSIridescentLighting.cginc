@@ -1,5 +1,5 @@
 ﻿half4 BRDF_XSLighting(FragmentData i, TextureUV t)
-{
+{    
     float3 untouchedNormal = i.normal;
     i.tangent = normalize(i.tangent);
     i.bitangent = normalize(i.bitangent);
@@ -114,5 +114,11 @@
     col += calcEmission(i, t, d, lightAvg);
     float4 finalColor = lerp(col, outlineColor, i.isOutline) * lerp(1, lineHalftone, _HalftoneLineIntensity * usingLineHalftone);
 
+    // Iridescent
+    float4 irMap = UNITY_SAMPLE_TEX2D_SAMPLER(_Iridescent, _MainTex, pow(d.vdn, _IridescentSamplingPow));
+    irMap *= pow(saturate(d.ndl + 0.5), 0.5);
+    irMap *= _IridescentColor;
+    finalColor += irMap * pow(d.vdn, _IridescentRimPower);
+    // finalColor += irMap;
     return finalColor;
 }

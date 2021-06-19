@@ -97,7 +97,7 @@ namespace XSToon3
         }
 
         //GUI Buttons
-        static public void CallGradientEditor(Material focusedMat = null)
+        static public void CallGradientEditor(Material focusedMat = null, string prop = null)
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -105,6 +105,9 @@ namespace XSToon3
             if (GUILayout.Button("Open Gradient Editor", GUILayout.Width(200), GUILayout.Height(20)))
             {
                 XSGradientEditor.focusedMat = focusedMat;
+                if (prop != null) {
+                    XSGradientEditor.rampProperty = prop;
+                }
                 XSGradientEditor.Init();
             }
             GUILayout.FlexibleSpace();

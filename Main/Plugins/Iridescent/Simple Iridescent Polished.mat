@@ -63,10 +63,6 @@ Material:
         m_Texture: {fileID: 2800000, guid: 70a808dc9f178e94195edb56884f68ec, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _IridescentDepthMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -152,7 +148,6 @@ Material:
     - _HalftoneType: 3
     - _Hue: 0
     - _IOR: 0
-    - _IridescentDepth: 0.001
     - _IridescentRimPower: 1.38
     - _IridescentSamplingPow: -0.8
     - _MatcapTintToDiffuse: 0
@@ -207,7 +202,6 @@ Material:
     - _UVSetDetNormal: 0
     - _UVSetDissolve: 0
     - _UVSetEmission: 0
-    - _UVSetIridescent: 1
     - _UVSetMetallic: 0
     - _UVSetNormal: 0
     - _UVSetOcclusion: 0

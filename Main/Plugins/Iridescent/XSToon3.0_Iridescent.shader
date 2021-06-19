@@ -135,6 +135,11 @@
         [HDR]_EmissionColor0("Emission Packed Color 1", Color) = (0,0,0,0)
         [HDR]_EmissionColor1("Emission Packed Color 2", Color) = (0,0,0,0)
         [IntRange]_ALUVWidth("History Sample Amount", Range(0,128)) = 128
+        
+        _Iridescent("Iridescent Gardient", 2D) = "white" {}
+        [HDR]_IridescentColor("Iridescent Color", Color) = (1,1,1,1)
+        _IridescentRimPower("Iridescent Rim Power", Float) = 1
+        _IridescentSamplingPow("Iridescent Sampling Power", Float) = 1
 
         _ClipMap("Clip Map", 2D) = "black" {}
         _WireColor("Wire Color", Color) = (0,0,0,0)
@@ -208,17 +213,15 @@
             #ifndef UNITY_PASS_FORWARDBASE
                 #define UNITY_PASS_FORWARDBASE
             #endif
-            #ifndef IRIDESCENT
-                #define IRIDESCENT
-            #endif
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include  "XSIridescentDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "XSIridescentLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -243,13 +246,14 @@
                  #define UNITY_PASS_FORWARDADD
             #endif
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include  "XSIridescentDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "XSIridescentLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -272,16 +276,17 @@
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include  "XSIridescentDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "XSIridescentLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
     }
     Fallback "Diffuse"
-    CustomEditor "XSToon3.XSToonInspector"
+    CustomEditor "XSToon3.XSToonIridescentInspector"
 }
