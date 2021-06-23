@@ -219,7 +219,9 @@
             #include  "XSIridescentDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"
             #include "../../CGIncludes/XSLightingFunctions.cginc"
-            #include "XSIridescentLighting.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "../../CGIncludes/XSPreLighting.cginc"
+            #include "XSPostLighting.cginc"
             #include "../../CGIncludes/XSVert.cginc"
             #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
@@ -251,7 +253,9 @@
             #include  "XSIridescentDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"
             #include "../../CGIncludes/XSLightingFunctions.cginc"
-            #include "XSIridescentLighting.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "../../CGIncludes/XSPreLighting.cginc"
+            #include "XSPostLighting.cginc"
             #include "../../CGIncludes/XSVert.cginc"
             #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
@@ -281,7 +285,9 @@
             #include  "XSIridescentDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"
             #include "../../CGIncludes/XSLightingFunctions.cginc"
-            #include "XSIridescentLighting.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "../../CGIncludes/XSPreLighting.cginc"
+            #include "XSPostLighting.cginc"
             #include "../../CGIncludes/XSVert.cginc"
             #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
