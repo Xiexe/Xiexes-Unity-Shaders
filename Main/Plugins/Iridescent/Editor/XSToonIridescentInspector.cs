@@ -14,11 +14,13 @@ namespace XSToon3 {
     private MaterialProperty _IridescentRimPower = null;
     private MaterialProperty _IridescentSamplingPow = null;
 
-    public override void PluginGUI(MaterialEditor materialEditor, Material material) {
+    public override void PluginGUI(MaterialEditor materialEditor, Material material)
+    {
       DrawIridescentSettings(materialEditor, material);
     }
 
-    private void DrawIridescentSettings(MaterialEditor materialEditor, Material material) {
+    private void DrawIridescentSettings(MaterialEditor materialEditor, Material material)
+    {
       Foldouts[material].ShowIridescentFoldout =
         XSStyles.ShurikenFoldout("Iridescent", Foldouts[material].ShowIridescentFoldout);
       if (Foldouts[material].ShowIridescentFoldout) {
@@ -42,9 +44,9 @@ namespace XSToon3 {
         }
 
         XSStyles.CallGradientEditor(material, "_Iridescent");
-        
+
         XSStyles.SeparatorThin();
-        
+
         materialEditor.ShaderProperty(_IridescentRimPower,
           new GUIContent("Rim Power", "Defines the rim darkening of the iridescence effect"));
         materialEditor.ShaderProperty(_IridescentSamplingPow, new GUIContent("Ramp Power", "Defines the scale and repetition of the iridescence effect. Can be negative."));

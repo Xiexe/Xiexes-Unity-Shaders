@@ -56,6 +56,8 @@ float4 frag (
             i.ntb[2] = -i.ntb[2];
         }
 
+
+
         FragmentData o = (FragmentData)0; //Populate Surface Fragment Struct
         o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color * lerp(1, float4(i.color.rgb, 1), _VertexColorAlbedo);
         o.specularMap = UNITY_SAMPLE_TEX2D_SAMPLER(_SpecularMap, _MainTex, t.specularMapUV);
@@ -99,17 +101,18 @@ float4 frag (
         calcNormal(o);
         data.i = o;
         data.t = t;
-    
+        data.isFrontface = face;
+
         Directions dirs = GetDirections(o);
         DotProducts d = GetDots(dirs, o);
         data.dirs = dirs;
         data.d = d;
         data = PreLightingHook(data);
-    
+
         float4 col = BRDF_XSLighting(data);
         calcAlpha(data.i, data.t, alpha);
         calcDissolve(data.i, col.rgb);
-    
+
         col = PostLightingHook(col, data);
         UNITY_APPLY_FOG(i.fogCoord, col);
         return float4(col.rgb, alpha);

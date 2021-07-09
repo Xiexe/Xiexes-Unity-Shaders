@@ -174,10 +174,11 @@ struct Directions
 struct HookData
 {
     FragmentData i;
-    float3 untouchedNormal;
     TextureUV t;
     Directions dirs;
     DotProducts d;
+    float3 untouchedNormal;
+    bool isFrontface;
 };
 
 struct VertexLightInformation {
