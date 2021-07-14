@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon3/XSToon3_Outlined"
+﻿Shader "Xiexe/Toon3/XSToon3_Iridescent"
 {
     Properties
     {
@@ -45,7 +45,6 @@
 
         [Enum(Yes,0, No,1)] _ScaleWithLight("Emission Scale w/ Light", Int) = 1
         _EmissionMap("Emission Map", 2D) = "white" {}
-        [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         _EmissionToDiffuse("Emission Tint To Diffuse", Range(0,1)) = 0
         _ScaleWithLightSensitivity("Scaling Sensitivity", Range(0,1)) = 1
 
@@ -136,6 +135,11 @@
         [HDR]_EmissionColor0("Emission Packed Color 1", Color) = (0,0,0,0)
         [HDR]_EmissionColor1("Emission Packed Color 2", Color) = (0,0,0,0)
         [IntRange]_ALUVWidth("History Sample Amount", Range(0,128)) = 128
+        
+        _Iridescent("Iridescent Gardient", 2D) = "white" {}
+        [HDR]_IridescentColor("Iridescent Color", Color) = (1,1,1,1)
+        _IridescentRimPower("Iridescent Rim Power", Float) = 1
+        _IridescentSamplingPow("Iridescent Sampling Power", Float) = 1
 
         _ClipMap("Clip Map", 2D) = "black" {}
         _WireColor("Wire Color", Color) = (0,0,0,0)
@@ -195,11 +199,9 @@
             Blend [_SrcBlend] [_DstBlend]
             ZWrite [_ZWrite]
             CGPROGRAM
-            #define Geometry
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
-            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -212,16 +214,16 @@
                 #define UNITY_PASS_FORWARDBASE
             #endif
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include  "XSIridescentDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "../../CGIncludes/XSPreLighting.cginc"
+            #include "XSPostLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -234,11 +236,9 @@
             ZTest LEqual
             Fog { Color (0,0,0,0) }
             CGPROGRAM
-            #define Geometry
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
-            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -248,16 +248,16 @@
                  #define UNITY_PASS_FORWARDADD
             #endif
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include  "XSIridescentDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "../../CGIncludes/XSPreLighting.cginc"
+            #include "XSPostLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -267,11 +267,9 @@
             Tags{ "LightMode" = "ShadowCaster" }
             ZWrite On ZTest LEqual
             CGPROGRAM
-            #define Geometry
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
-            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -282,19 +280,19 @@
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include  "XSIridescentDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "../../CGIncludes/XSPreLighting.cginc"
+            #include "XSPostLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
     }
     Fallback "Diffuse"
-    CustomEditor "XSToon3.XSToonInspector"
+    CustomEditor "XSToon3.XSToonIridescentInspector"
 }

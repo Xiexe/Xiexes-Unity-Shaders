@@ -1,31 +1,15 @@
-half4 BRDF_XSLighting(FragmentData i, TextureUV t)
+half4 BRDF_XSLighting(HookData data)
 {
-    float3 untouchedNormal = i.normal;
-    i.tangent = normalize(i.tangent);
-    i.bitangent = normalize(i.bitangent);
-    calcNormal(i);
+    FragmentData i = data.i;
+    float3 untouchedNormal = data.untouchedNormal;
+    TextureUV t = data.t;
+    Directions dirs = data.dirs;
+    DotProducts d = data.d;
 
     half3 indirectDiffuse = calcIndirectDiffuse(i);
     bool lightEnv = any(_WorldSpaceLightPos0.xyz);
-    half3 lightDir = calcLightDir(i);
-    half3 viewDir = calcViewDir(i.worldPos);
-    half3 stereoViewDir = calcStereoViewDir(i.worldPos);
     half4 metallicSmoothness = calcMetallicSmoothness(i);
-    half3 halfVector = normalize(lightDir + viewDir);
-    half3 reflView = calcReflView(viewDir, i.normal);
-    half3 reflLight = calcReflLight(lightDir, i.normal);
-    half3 reflViewAniso = getAnisotropicReflectionVector(viewDir, i.bitangent, i.tangent, i.normal, metallicSmoothness.a, _AnisotropicReflection);
-
-    DotProducts d = (DotProducts)0;
-    d.ndl = dot(i.normal, lightDir);
-    d.vdn = abs(dot(viewDir, i.normal));
-    d.vdh = DotClamped(viewDir, halfVector);
-    d.tdh = dot(i.tangent, halfVector);
-    d.bdh = dot(i.bitangent, halfVector);
-    d.ndh = DotClamped(i.normal, halfVector);
-    d.rdv = saturate(dot(reflLight, float4(-viewDir, 0)));
-    d.ldh = DotClamped(lightDir, halfVector);
-    d.svdn = abs(dot(stereoViewDir, i.normal));
+    half3 reflViewAniso = getAnisotropicReflectionVector(dirs.viewDir, i.bitangent, i.tangent, i.normal, metallicSmoothness.a, _AnisotropicReflection);
 
     i.albedo.rgb = rgb2hsv(i.albedo.rgb);
     i.albedo.x += fmod(lerp(0, _Hue, i.hsvMask.r), 360);
@@ -51,11 +35,11 @@ half4 BRDF_XSLighting(FragmentData i, TextureUV t)
         vertexLightDiffuse = getVertexLightsDiffuse(i, vLight);
         indirectDiffuse += vertexLightDiffuse;
 
-        vertexLightSpec = getVertexLightSpecular(i, d, vLight, i.normal, viewDir, _AnisotropicSpecular) * occlusion;
+        vertexLightSpec = getVertexLightSpecular(i, d, vLight, i.normal, dirs.viewDir, _AnisotropicSpecular) * occlusion;
     #endif
 
     half lightAvg = (dot(indirectDiffuse.rgb, grayscaleVec) + dot(lightCol.rgb, grayscaleVec)) / 2;
-    half3 envMapBlurred = getEnvMap(i, d, 5, reflView, indirectDiffuse, i.normal);
+    half3 envMapBlurred = getEnvMap(i, d, 5, dirs.reflView, indirectDiffuse, i.normal);
 
     half4 ramp = 1;
     half4 diffuse = 1;
@@ -74,9 +58,9 @@ half4 BRDF_XSLighting(FragmentData i, TextureUV t)
 
     float3 f0 = 0.16 * _Reflectivity * _Reflectivity * (1.0 - metallicSmoothness.r) + i.diffuseColor * metallicSmoothness.r;
     float3 fresnel = F_Schlick(d.vdn, f0);
-    half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflViewAniso, indirectDiffuse, viewDir, fresnel, ramp) * occlusion;
-    half3 directSpecular = calcDirectSpecular(i, d.ndl, d.ndh, d.vdn, d.ldh, lightCol, halfVector, _AnisotropicSpecular) * d.ndl * occlusion * i.attenuation;
-    half4 subsurface = calcSubsurfaceScattering(i, d, lightDir, viewDir, i.normal, lightCol, indirectDiffuse);
+    half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflViewAniso, indirectDiffuse, dirs.viewDir, fresnel, ramp) * occlusion;
+    half3 directSpecular = calcDirectSpecular(i, d.ndl, d.ndh, d.vdn, d.ldh, lightCol, dirs.halfVector, _AnisotropicSpecular) * d.ndl * occlusion * i.attenuation;
+    half4 subsurface = calcSubsurfaceScattering(i, d, dirs.lightDir, dirs.viewDir, i.normal, lightCol, indirectDiffuse);
     half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
 
     half lineHalftone = 0;
@@ -110,7 +94,7 @@ half4 BRDF_XSLighting(FragmentData i, TextureUV t)
     col += max(directSpecular.xyzz, rimLight);
     col.rgb += max(vertexLightSpec.rgb, rimLight);
     col += subsurface;
-    calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, viewDir, lightDir, ramp);
+    calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, dirs.viewDir, dirs.lightDir, ramp);
     col += calcEmission(i, t, d, lightAvg);
     float4 finalColor = lerp(col, outlineColor, i.isOutline) * lerp(1, lineHalftone, _HalftoneLineIntensity * usingLineHalftone);
 

@@ -29,7 +29,7 @@ namespace XSToon3
         public static Material focusedMat;
         private Material oldFocusedMat;
         private Texture oldTexture;
-        private string rampProperty = "_Ramp";
+        public static string rampProperty = "_Ramp";
         private ReorderableList grad_index_reorderable;
         private bool reorder;
         private static GUIContent iconToolbarPlus;

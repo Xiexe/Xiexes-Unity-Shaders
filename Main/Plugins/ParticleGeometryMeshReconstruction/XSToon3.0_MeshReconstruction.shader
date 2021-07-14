@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon3/XSToon3_Outlined"
+﻿Shader "Xiexe/Toon3/XSToon3_MeshReconstruction"
 {
     Properties
     {
@@ -169,6 +169,12 @@
         _ClipSlider14("", Vector) = (0,0,0,0)
         _ClipSlider15("", Vector) = (0,0,0,0)
 
+        _MeshVertexCount("Mesh Vertex Count", Int) = 0
+        _MeshScale("Mesh Scale", Float) = 1
+        _VertexPosUVXTexture("Vertex PosUVX Texture", 2D) = "black" {}
+        _VertexNormalUVYTexture("Vertex NormalUVY Texture", 2D) = "black" {}
+        _VertexColorTexture("Vertex Color Texture", 2D) = "black" {}
+
         //!RDPSProps
     }
 
@@ -183,11 +189,6 @@
             Comp [_StencilComp]
             Pass [_StencilOp]
         }
-//        Grabpass // Gets disabled via the editor script when not in use through the Lightmode Tag.
-//        {
-//            Tags{"LightMode" = "Always"}
-//            "_AudioTexture"
-//        }
         Pass
         {
             Name "FORWARD"
@@ -212,16 +213,16 @@
                 #define UNITY_PASS_FORWARDBASE
             #endif
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "CGIncludes/XSPreLighting.cginc"
+            #include "../../CGIncludes/XSPostLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "CGIncludes/Geom.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -248,16 +249,16 @@
                  #define UNITY_PASS_FORWARDADD
             #endif
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "CGIncludes/XSPreLighting.cginc"
+            #include "../../CGIncludes/XSPostLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "CGIncludes/Geom.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -282,19 +283,19 @@
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/XSDefines.cginc"
+            #include "../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../CGIncludes/XSLighting.cginc"
+            #include "CGIncludes/XSPreLighting.cginc"
+            #include "../../CGIncludes/XSPostLighting.cginc"
+            #include "../../CGIncludes/XSVert.cginc"
+            #include "CGIncludes/Geom.cginc"
+            #include "../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
     }
     Fallback "Diffuse"
-    CustomEditor "XSToon3.XSToonInspector"
+    CustomEditor "XSToon3.XSToonParticleGeometryMeshReconstructionInspector"
 }

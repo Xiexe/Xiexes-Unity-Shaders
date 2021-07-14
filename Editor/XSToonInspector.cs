@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace XSToon3
 {
-    public class FoldoutToggles
+    public partial class FoldoutToggles
     {
         public bool ShowMain = true;
         public bool ShowNormal = false;
@@ -29,213 +29,215 @@ namespace XSToon3
 
     public class XSToonInspector : ShaderGUI
     {
-        private static Dictionary<Material, FoldoutToggles> Foldouts = new Dictionary<Material, FoldoutToggles>();
-        BindingFlags bindingFlags = BindingFlags.Public |
+        protected static Dictionary<Material, FoldoutToggles> Foldouts = new Dictionary<Material, FoldoutToggles>();
+        protected BindingFlags bindingFlags = BindingFlags.Public |
                                     BindingFlags.NonPublic |
                                     BindingFlags.Instance |
                                     BindingFlags.Static;
 
         //Assign all properties as null at first to stop hundreds of warnings spamming the log when script gets compiled.
         //If they aren't we get warnings, because assigning with reflection seems to make Unity think that the properties never actually get used.
-        private MaterialProperty _VertexColorAlbedo = null;
-        private MaterialProperty _TilingMode = null;
-        private MaterialProperty _Culling = null;
-        private MaterialProperty _BlendMode = null;
-        private MaterialProperty _MainTex = null;
-        private MaterialProperty _HSVMask = null;
-        private MaterialProperty _Saturation = null;
-        private MaterialProperty _Hue = null;
-        private MaterialProperty _Value = null;
-        private MaterialProperty _Color = null;
-        private MaterialProperty _Cutoff = null;
-        private MaterialProperty _FadeDither = null;
-        private MaterialProperty _FadeDitherDistance = null;
-        private MaterialProperty _BumpMap = null;
-        private MaterialProperty _BumpScale = null;
-        private MaterialProperty _DetailNormalMap = null;
-        private MaterialProperty _DetailMask = null;
-        private MaterialProperty _DetailNormalMapScale = null;
-        private MaterialProperty _ReflectionMode = null;
-        private MaterialProperty _ReflectionBlendMode = null;
-        private MaterialProperty _MetallicGlossMap = null;
-        private MaterialProperty _BakedCubemap = null;
-        private MaterialProperty _Matcap = null;
-        private MaterialProperty _MatcapTintToDiffuse = null;
-        private MaterialProperty _MatcapTint = null;
-        private MaterialProperty _ReflectivityMask = null;
-        private MaterialProperty _Metallic = null;
-        private MaterialProperty _Glossiness = null;
-        private MaterialProperty _Reflectivity = null;
-        private MaterialProperty _ClearCoat = null;
-        private MaterialProperty _ClearcoatStrength = null;
-        private MaterialProperty _ClearcoatSmoothness = null;
-        private MaterialProperty _EmissionMap = null;
-        private MaterialProperty _ScaleWithLight = null;
-        private MaterialProperty _ScaleWithLightSensitivity = null;
-        private MaterialProperty _EmissionColor = null;
-        private MaterialProperty _EmissionColor0 = null;
-        private MaterialProperty _EmissionColor1 = null;
-        private MaterialProperty _EmissionToDiffuse = null;
-        private MaterialProperty _RimColor = null;
-        private MaterialProperty _RimIntensity = null;
-        private MaterialProperty _RimRange = null;
-        private MaterialProperty _RimThreshold = null;
-        private MaterialProperty _RimSharpness = null;
-        private MaterialProperty _RimAlbedoTint = null;
-        private MaterialProperty _RimCubemapTint = null;
-        private MaterialProperty _RimAttenEffect = null;
-        private MaterialProperty _SpecularSharpness = null;
-        private MaterialProperty _SpecularMap = null;
-        private MaterialProperty _SpecularIntensity = null;
-        private MaterialProperty _SpecularArea = null;
-        private MaterialProperty _AnisotropicSpecular = null;
-        private MaterialProperty _AnisotropicReflection = null;
-        private MaterialProperty _SpecularAlbedoTint = null;
-        private MaterialProperty _RampSelectionMask = null;
-        private MaterialProperty _Ramp = null;
-        private MaterialProperty _ShadowRim = null;
-        private MaterialProperty _ShadowRimRange = null;
-        private MaterialProperty _ShadowRimThreshold = null;
-        private MaterialProperty _ShadowRimSharpness = null;
-        private MaterialProperty _ShadowRimAlbedoTint = null;
-        private MaterialProperty _OcclusionMap = null;
-        private MaterialProperty _OcclusionIntensity = null;
-        private MaterialProperty _OcclusionMode = null;
-        private MaterialProperty _ThicknessMap = null;
-        private MaterialProperty _SSColor = null;
-        private MaterialProperty _SSDistortion = null;
-        private MaterialProperty _SSPower = null;
-        private MaterialProperty _SSScale = null;
-        private MaterialProperty _HalftoneDotSize = null;
-        private MaterialProperty _HalftoneDotAmount = null;
-        private MaterialProperty _HalftoneLineAmount = null;
-        private MaterialProperty _HalftoneLineIntensity = null;
-        private MaterialProperty _HalftoneType = null;
-        private MaterialProperty _UVSetAlbedo = null;
-        private MaterialProperty _UVSetNormal = null;
-        private MaterialProperty _UVSetDetNormal = null;
-        private MaterialProperty _UVSetDetMask = null;
-        private MaterialProperty _UVSetMetallic = null;
-        private MaterialProperty _UVSetSpecular = null;
-        private MaterialProperty _UVSetReflectivity = null;
-        private MaterialProperty _UVSetThickness = null;
-        private MaterialProperty _UVSetOcclusion = null;
-        private MaterialProperty _UVSetEmission = null;
-        private MaterialProperty _UVSetClipMap = null;
-        private MaterialProperty _UVSetDissolve = null;
-        private MaterialProperty _Stencil = null;
-        private MaterialProperty _StencilComp = null;
-        private MaterialProperty _StencilOp = null;
-        private MaterialProperty _OutlineAlbedoTint = null;
-        private MaterialProperty _OutlineLighting = null;
-        private MaterialProperty _OutlineMask = null;
-        private MaterialProperty _OutlineWidth = null;
-        private MaterialProperty _OutlineColor = null;
-        private MaterialProperty _OutlineNormalMode = null;
-        private MaterialProperty _OutlineUVSelect = null;
-        private MaterialProperty _ShadowSharpness = null;
-        private MaterialProperty _AdvMode = null;
-        private MaterialProperty _ClipMap = null;
-        private MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null;
-        private MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
-        private MaterialProperty _IOR = null;
-        private MaterialProperty _NormalMapMode = null;
-        private MaterialProperty _DissolveCoordinates = null;
-        private MaterialProperty _DissolveTexture = null;
-        private MaterialProperty _DissolveStrength = null;
-        private MaterialProperty _DissolveColor = null;
-        private MaterialProperty _DissolveProgress = null;
-        private MaterialProperty _UseClipsForDissolve = null;
-        private MaterialProperty _WireColor = null;
-        private MaterialProperty _WireWidth = null;
-        private MaterialProperty _SrcBlend = null;
-        private MaterialProperty _DstBlend = null;
-        private MaterialProperty _ZWrite = null;
+        protected MaterialProperty _VertexColorAlbedo = null;
+        protected MaterialProperty _TilingMode = null;
+        protected MaterialProperty _Culling = null;
+        protected MaterialProperty _BlendMode = null;
+        protected MaterialProperty _MainTex = null;
+        protected MaterialProperty _HSVMask = null;
+        protected MaterialProperty _Saturation = null;
+        protected MaterialProperty _Hue = null;
+        protected MaterialProperty _Value = null;
+        protected MaterialProperty _Color = null;
+        protected MaterialProperty _Cutoff = null;
+        protected MaterialProperty _FadeDither = null;
+        protected MaterialProperty _FadeDitherDistance = null;
+        protected MaterialProperty _BumpMap = null;
+        protected MaterialProperty _BumpScale = null;
+        protected MaterialProperty _DetailNormalMap = null;
+        protected MaterialProperty _DetailMask = null;
+        protected MaterialProperty _DetailNormalMapScale = null;
+        protected MaterialProperty _ReflectionMode = null;
+        protected MaterialProperty _ReflectionBlendMode = null;
+        protected MaterialProperty _MetallicGlossMap = null;
+        protected MaterialProperty _BakedCubemap = null;
+        protected MaterialProperty _Matcap = null;
+        protected MaterialProperty _MatcapTintToDiffuse = null;
+        protected MaterialProperty _MatcapTint = null;
+        protected MaterialProperty _ReflectivityMask = null;
+        protected MaterialProperty _Metallic = null;
+        protected MaterialProperty _Glossiness = null;
+        protected MaterialProperty _Reflectivity = null;
+        protected MaterialProperty _ClearCoat = null;
+        protected MaterialProperty _ClearcoatStrength = null;
+        protected MaterialProperty _ClearcoatSmoothness = null;
+        protected MaterialProperty _EmissionMap = null;
+        protected MaterialProperty _ScaleWithLight = null;
+        protected MaterialProperty _ScaleWithLightSensitivity = null;
+        protected MaterialProperty _EmissionColor = null;
+        protected MaterialProperty _EmissionColor0 = null;
+        protected MaterialProperty _EmissionColor1 = null;
+        protected MaterialProperty _EmissionToDiffuse = null;
+        protected MaterialProperty _RimColor = null;
+        protected MaterialProperty _RimIntensity = null;
+        protected MaterialProperty _RimRange = null;
+        protected MaterialProperty _RimThreshold = null;
+        protected MaterialProperty _RimSharpness = null;
+        protected MaterialProperty _RimAlbedoTint = null;
+        protected MaterialProperty _RimCubemapTint = null;
+        protected MaterialProperty _RimAttenEffect = null;
+        protected MaterialProperty _SpecularSharpness = null;
+        protected MaterialProperty _SpecularMap = null;
+        protected MaterialProperty _SpecularIntensity = null;
+        protected MaterialProperty _SpecularArea = null;
+        protected MaterialProperty _AnisotropicSpecular = null;
+        protected MaterialProperty _AnisotropicReflection = null;
+        protected MaterialProperty _SpecularAlbedoTint = null;
+        protected MaterialProperty _RampSelectionMask = null;
+        protected MaterialProperty _Ramp = null;
+        protected MaterialProperty _ShadowRim = null;
+        protected MaterialProperty _ShadowRimRange = null;
+        protected MaterialProperty _ShadowRimThreshold = null;
+        protected MaterialProperty _ShadowRimSharpness = null;
+        protected MaterialProperty _ShadowRimAlbedoTint = null;
+        protected MaterialProperty _OcclusionMap = null;
+        protected MaterialProperty _OcclusionIntensity = null;
+        protected MaterialProperty _OcclusionMode = null;
+        protected MaterialProperty _ThicknessMap = null;
+        protected MaterialProperty _SSColor = null;
+        protected MaterialProperty _SSDistortion = null;
+        protected MaterialProperty _SSPower = null;
+        protected MaterialProperty _SSScale = null;
+        protected MaterialProperty _HalftoneDotSize = null;
+        protected MaterialProperty _HalftoneDotAmount = null;
+        protected MaterialProperty _HalftoneLineAmount = null;
+        protected MaterialProperty _HalftoneLineIntensity = null;
+        protected MaterialProperty _HalftoneType = null;
+        protected MaterialProperty _UVSetAlbedo = null;
+        protected MaterialProperty _UVSetNormal = null;
+        protected MaterialProperty _UVSetDetNormal = null;
+        protected MaterialProperty _UVSetDetMask = null;
+        protected MaterialProperty _UVSetMetallic = null;
+        protected MaterialProperty _UVSetSpecular = null;
+        protected MaterialProperty _UVSetReflectivity = null;
+        protected MaterialProperty _UVSetThickness = null;
+        protected MaterialProperty _UVSetOcclusion = null;
+        protected MaterialProperty _UVSetEmission = null;
+        protected MaterialProperty _UVSetClipMap = null;
+        protected MaterialProperty _UVSetDissolve = null;
+        protected MaterialProperty _Stencil = null;
+        protected MaterialProperty _StencilComp = null;
+        protected MaterialProperty _StencilOp = null;
+        protected MaterialProperty _OutlineAlbedoTint = null;
+        protected MaterialProperty _OutlineLighting = null;
+        protected MaterialProperty _OutlineMask = null;
+        protected MaterialProperty _OutlineWidth = null;
+        protected MaterialProperty _OutlineColor = null;
+        protected MaterialProperty _OutlineNormalMode = null;
+        protected MaterialProperty _OutlineUVSelect = null;
+        protected MaterialProperty _ShadowSharpness = null;
+        protected MaterialProperty _AdvMode = null;
+        protected MaterialProperty _ClipMap = null;
+        protected MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null;
+        protected MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
+        protected MaterialProperty _IOR = null;
+        protected MaterialProperty _NormalMapMode = null;
+        protected MaterialProperty _DissolveCoordinates = null;
+        protected MaterialProperty _DissolveTexture = null;
+        protected MaterialProperty _DissolveStrength = null;
+        protected MaterialProperty _DissolveColor = null;
+        protected MaterialProperty _DissolveProgress = null;
+        protected MaterialProperty _UseClipsForDissolve = null;
+        protected MaterialProperty _WireColor = null;
+        protected MaterialProperty _WireWidth = null;
+        protected MaterialProperty _SrcBlend = null;
+        protected MaterialProperty _DstBlend = null;
+        protected MaterialProperty _ZWrite = null;
 
 
-        private MaterialProperty _EmissionAudioLinkChannel = null;
-        private MaterialProperty _ALGradientOnRed = null;
-        private MaterialProperty _ALGradientOnGreen = null;
-        private MaterialProperty _ALGradientOnBlue = null;
-        private MaterialProperty _ALUVWidth = null;
+        protected MaterialProperty _EmissionAudioLinkChannel = null;
+        protected MaterialProperty _ALGradientOnRed = null;
+        protected MaterialProperty _ALGradientOnGreen = null;
+        protected MaterialProperty _ALGradientOnBlue = null;
+        protected MaterialProperty _ALUVWidth = null;
 
         //Experimenting
-        private MaterialProperty _DissolveBlendPower = null;
-        private MaterialProperty _DissolveLayer1Scale = null;
-        private MaterialProperty _DissolveLayer2Scale = null;
-        private MaterialProperty _DissolveLayer1Speed = null;
-        private MaterialProperty _DissolveLayer2Speed = null;
-        private MaterialProperty _ClipMask = null;
-        private MaterialProperty _ClipIndex = null;
-        private MaterialProperty _ClipSlider00 = null;
-        private MaterialProperty _ClipSlider01 = null;
-        private MaterialProperty _ClipSlider02 = null;
-        private MaterialProperty _ClipSlider03 = null;
-        private MaterialProperty _ClipSlider04 = null;
-        private MaterialProperty _ClipSlider05 = null;
-        private MaterialProperty _ClipSlider06 = null;
-        private MaterialProperty _ClipSlider07 = null;
-        private MaterialProperty _ClipSlider08 = null;
-        private MaterialProperty _ClipSlider09 = null;
-        private MaterialProperty _ClipSlider10 = null;
-        private MaterialProperty _ClipSlider11 = null;
-        private MaterialProperty _ClipSlider12 = null;
-        private MaterialProperty _ClipSlider13 = null;
-        private MaterialProperty _ClipSlider14 = null;
-        private MaterialProperty _ClipSlider15 = null;
+        protected MaterialProperty _DissolveBlendPower = null;
+        protected MaterialProperty _DissolveLayer1Scale = null;
+        protected MaterialProperty _DissolveLayer2Scale = null;
+        protected MaterialProperty _DissolveLayer1Speed = null;
+        protected MaterialProperty _DissolveLayer2Speed = null;
+        protected MaterialProperty _ClipMask = null;
+        protected MaterialProperty _ClipIndex = null;
+        protected MaterialProperty _ClipSlider00 = null;
+        protected MaterialProperty _ClipSlider01 = null;
+        protected MaterialProperty _ClipSlider02 = null;
+        protected MaterialProperty _ClipSlider03 = null;
+        protected MaterialProperty _ClipSlider04 = null;
+        protected MaterialProperty _ClipSlider05 = null;
+        protected MaterialProperty _ClipSlider06 = null;
+        protected MaterialProperty _ClipSlider07 = null;
+        protected MaterialProperty _ClipSlider08 = null;
+        protected MaterialProperty _ClipSlider09 = null;
+        protected MaterialProperty _ClipSlider10 = null;
+        protected MaterialProperty _ClipSlider11 = null;
+        protected MaterialProperty _ClipSlider12 = null;
+        protected MaterialProperty _ClipSlider13 = null;
+        protected MaterialProperty _ClipSlider14 = null;
+        protected MaterialProperty _ClipSlider15 = null;
 
         //Material Properties for Patreon Plugins
-        private MaterialProperty _LeftRightPan = null;
-        private MaterialProperty _UpDownPan = null;
-        private MaterialProperty _Twitchyness = null;
-        private MaterialProperty _AttentionSpan = null;
-        private MaterialProperty _FollowPower = null;
-        private MaterialProperty _FollowLimit = null;
-        private MaterialProperty _LookSpeed = null;
-        private MaterialProperty _IrisSize = null;
-        private MaterialProperty _EyeOffsetLimit = null;
+        protected MaterialProperty _LeftRightPan = null;
+        protected MaterialProperty _UpDownPan = null;
+        protected MaterialProperty _Twitchyness = null;
+        protected MaterialProperty _AttentionSpan = null;
+        protected MaterialProperty _FollowPower = null;
+        protected MaterialProperty _FollowLimit = null;
+        protected MaterialProperty _LookSpeed = null;
+        protected MaterialProperty _IrisSize = null;
+        protected MaterialProperty _EyeOffsetLimit = null;
         //--
 
         //Properties for Fur plugin
-        private MaterialProperty _FurTexture = null;
-        private MaterialProperty _FurLengthMask = null;
-        private MaterialProperty _NoiseTexture = null;
-        private MaterialProperty _LayerCount = null;
-        private MaterialProperty _FurLength = null;
-        private MaterialProperty _FurWidth = null;
-        private MaterialProperty _Gravity = null;
-        private MaterialProperty _CombX = null;
-        private MaterialProperty _CombY = null;
-        private MaterialProperty _FurOcclusion = null;
-        private MaterialProperty _OcclusionFalloffMin = null;
-        private MaterialProperty _OcclusionFalloffMax = null;
-        private MaterialProperty _ColorFalloffMin = null;
-        private MaterialProperty _ColorFalloffMax = null;
-        private MaterialProperty _BottomColor = null;
-        private MaterialProperty _TopColor = null;
-        private MaterialProperty _StrandAmount = null;
+        protected MaterialProperty _FurTexture = null;
+        protected MaterialProperty _FurLengthMask = null;
+        protected MaterialProperty _NoiseTexture = null;
+        protected MaterialProperty _LayerCount = null;
+        protected MaterialProperty _FurLength = null;
+        protected MaterialProperty _FurWidth = null;
+        protected MaterialProperty _Gravity = null;
+        protected MaterialProperty _CombX = null;
+        protected MaterialProperty _CombY = null;
+        protected MaterialProperty _FurOcclusion = null;
+        protected MaterialProperty _OcclusionFalloffMin = null;
+        protected MaterialProperty _OcclusionFalloffMax = null;
+        protected MaterialProperty _ColorFalloffMin = null;
+        protected MaterialProperty _ColorFalloffMax = null;
+        protected MaterialProperty _BottomColor = null;
+        protected MaterialProperty _TopColor = null;
+        protected MaterialProperty _StrandAmount = null;
         //
 
         //!RDPSPropsInjection
 
-        private static int BlendMode;
-        private bool isPatreonShader = false;
-        private bool isEyeTracking = false;
-        private bool isFurShader = false;
-        private bool isOutlined = false;
-        private bool isCutout = false;
-        private bool isCutoutMasked = false;
-        private bool isDithered = false;
-        private bool isA2C = false;
+        private static bool OverrideRenderSettings = false;
+        protected static int BlendMode;
+        protected bool isPatreonShader = false;
+        protected bool isEyeTracking = false;
+        protected bool isFurShader = false;
+        protected bool isOutlined = false;
+        protected bool isCutout = false;
+        protected bool isCutoutMasked = false;
+        protected bool isDithered = false;
+        protected bool isA2C = false;
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
         {
             Material material = materialEditor.target as Material;
             Shader shader = material.shader;
 
-            isCutout = material.GetInt("_BlendMode") == 1;
-            isDithered = material.GetInt("_BlendMode") == 2;
-            isA2C = material.GetInt("_BlendMode") == 3;
+            BlendMode = material.GetInt("_BlendMode");
+            isCutout = BlendMode == 1;
+            isDithered = BlendMode == 2;
+            isA2C = BlendMode == 3;
             isOutlined = shader.name.Contains("Outline");
             isPatreonShader = shader.name.Contains("Patreon");
             isEyeTracking = shader.name.Contains("EyeTracking");
@@ -285,12 +287,18 @@ namespace XSToon3
             DrawRimlightSettings(materialEditor, material);
             DrawHalfToneSettings(materialEditor, material);
             DrawTransmissionSettings(materialEditor, material);
+
+            PluginGUI(materialEditor, material);
+
             DrawAdvancedSettings(materialEditor, material);
             DrawPatreonSettings(materialEditor, material);
 
             //!RDPSFunctionCallInject
 
             XSStyles.DoFooter();
+        }
+
+        public virtual void PluginGUI(MaterialEditor materialEditor, Material material) {
         }
 
         private void SetupFoldoutDictionary(Material material)
@@ -304,70 +312,66 @@ namespace XSToon3
 
         private void DoBlendModeSettings(Material material)
         {
-            int currentBlendMode = material.GetInt("_BlendMode");
-            //!RDPSBlendModeInjection
+            if (OverrideRenderSettings)
+                return;
 
-            if (BlendMode != currentBlendMode)
+            switch (BlendMode)
             {
-                BlendMode = currentBlendMode;
-                switch (BlendMode)
-                {
-                    case 0: //Opaque
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.Zero,
-                            (int) UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        break;
+                case 0: //Opaque
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.Zero,
+                        (int) UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 1: //Cutout
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.Zero,
-                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHATEST_ON");
-                        break;
+                case 1: //Cutout
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.Zero,
+                        (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.EnableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 2: //Dithered
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.Zero,
-                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHATEST_ON");
-                        break;
+                case 2: //Dithered
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.Zero,
+                        (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.EnableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 3: //Alpha To Coverage
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.Zero,
-                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
-                        material.EnableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHATEST_ON");
-                        break;
+                case 3: //Alpha To Coverage
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.Zero,
+                        (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.EnableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 4: //Transparent
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
-                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                        material.EnableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        break;
+                case 4: //Transparent
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
+                        (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 5: //Fade
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.SrcAlpha,
-                            (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
-                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                        material.EnableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        break;
+                case 5: //Fade
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.SrcAlpha,
+                        (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
+                        (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 6: //Additive
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        break;
-                }
+                case 6: //Additive
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    break;
             }
         }
 
@@ -377,6 +381,7 @@ namespace XSToon3
             material.SetInt("_DstBlend", dst);
             material.SetInt("_ZWrite", zwrite);
             material.SetInt("_AlphaToMask", alphatocoverage);
+            material.renderQueue = renderQueue;
         }
 
         private void DrawMainSettings(MaterialEditor materialEditor, Material material)
@@ -763,6 +768,8 @@ namespace XSToon3
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
 
                     XSStyles.Separator();
+                    OverrideRenderSettings = EditorGUILayout.Toggle(new GUIContent("Override Render Settings", "Allows manual control over all render settings (Queue, ZWrite, Etc.)"), OverrideRenderSettings);
+
                     materialEditor.ShaderProperty(_SrcBlend, new GUIContent("SrcBlend", ""));
                     materialEditor.ShaderProperty(_DstBlend, new GUIContent("DstBlend", ""));
                     materialEditor.ShaderProperty(_ZWrite, new GUIContent("ZWrite", ""));

@@ -6,17 +6,8 @@ void calcNormal(inout FragmentData i)
         half3 detNMap = UnpackScaleNormal(i.detailNormal, _DetailNormalMapScale);
 
         half3 blendedNormal = lerp(nMap, BlendNormals(nMap, detNMap), i.detailMask.r);
+        half3 calcedNormal = normalize(blendedNormal.x * i.tangent + blendedNormal.y * i.bitangent + blendedNormal.z * i.normal);
 
-        half3 tspace0 = half3(i.tangent.x, i.bitangent.x, i.normal.x);
-        half3 tspace1 = half3(i.tangent.y, i.bitangent.y, i.normal.y);
-        half3 tspace2 = half3(i.tangent.z, i.bitangent.z, i.normal.z);
-
-        half3 calcedNormal;
-        calcedNormal.x = dot(tspace0, blendedNormal);
-        calcedNormal.y = dot(tspace1, blendedNormal);
-        calcedNormal.z = dot(tspace2, blendedNormal);
-
-        calcedNormal = normalize(calcedNormal);
         half3 bumpedTangent = cross(i.bitangent, calcedNormal);
         half3 bumpedBitangent = cross(calcedNormal, bumpedTangent);
 
@@ -27,15 +18,7 @@ void calcNormal(inout FragmentData i)
     else
     {
         float3 vcol = i.color.rgb * 2 - 1;
-
-        half3 tspace0 = half3(i.tangent.x, i.bitangent.x, i.normal.x);
-        half3 tspace1 = half3(i.tangent.y, i.bitangent.y, i.normal.y);
-        half3 tspace2 = half3(i.tangent.z, i.bitangent.z, i.normal.z);
-
-        half3 calcedNormal;
-        calcedNormal.x = dot(tspace0, vcol);
-        calcedNormal.y = dot(tspace1, vcol);
-        calcedNormal.z = dot(tspace2, vcol);
+        half3 calcedNormal = normalize(vcol.x * i.tangent + vcol.y * i.bitangent + vcol.z * i.normal);;
 
         //calcedNormal = calcedNormal;
         i.normal = normalize(calcedNormal);
