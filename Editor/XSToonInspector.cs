@@ -218,6 +218,7 @@ namespace XSToon3
 
         //!RDPSPropsInjection
 
+        private static bool OverrideRenderSettings = false;
         protected static int BlendMode;
         protected bool isPatreonShader = false;
         protected bool isEyeTracking = false;
@@ -233,9 +234,10 @@ namespace XSToon3
             Material material = materialEditor.target as Material;
             Shader shader = material.shader;
 
-            isCutout = material.GetInt("_BlendMode") == 1;
-            isDithered = material.GetInt("_BlendMode") == 2;
-            isA2C = material.GetInt("_BlendMode") == 3;
+            BlendMode = material.GetInt("_BlendMode");
+            isCutout = BlendMode == 1;
+            isDithered = BlendMode == 2;
+            isA2C = BlendMode == 3;
             isOutlined = shader.name.Contains("Outline");
             isPatreonShader = shader.name.Contains("Patreon");
             isEyeTracking = shader.name.Contains("EyeTracking");
@@ -285,9 +287,9 @@ namespace XSToon3
             DrawRimlightSettings(materialEditor, material);
             DrawHalfToneSettings(materialEditor, material);
             DrawTransmissionSettings(materialEditor, material);
-            
+
             PluginGUI(materialEditor, material);
-            
+
             DrawAdvancedSettings(materialEditor, material);
             DrawPatreonSettings(materialEditor, material);
 
@@ -310,70 +312,66 @@ namespace XSToon3
 
         private void DoBlendModeSettings(Material material)
         {
-            int currentBlendMode = material.GetInt("_BlendMode");
-            //!RDPSBlendModeInjection
+            if (OverrideRenderSettings)
+                return;
 
-            if (BlendMode != currentBlendMode)
+            switch (BlendMode)
             {
-                BlendMode = currentBlendMode;
-                switch (BlendMode)
-                {
-                    case 0: //Opaque
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.Zero,
-                            (int) UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        break;
+                case 0: //Opaque
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.Zero,
+                        (int) UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 1: //Cutout
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.Zero,
-                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHATEST_ON");
-                        break;
+                case 1: //Cutout
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.Zero,
+                        (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.EnableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 2: //Dithered
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.Zero,
-                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHATEST_ON");
-                        break;
+                case 2: //Dithered
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.Zero,
+                        (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.EnableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 3: //Alpha To Coverage
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.Zero,
-                            (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
-                        material.EnableKeyword("_ALPHABLEND_ON");
-                        material.EnableKeyword("_ALPHATEST_ON");
-                        break;
+                case 3: //Alpha To Coverage
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.Zero,
+                        (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.EnableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 4: //Transparent
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
-                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                        material.EnableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        break;
+                case 4: //Transparent
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
+                        (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 5: //Fade
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.SrcAlpha,
-                            (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
-                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                        material.EnableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        break;
+                case 5: //Fade
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.SrcAlpha,
+                        (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
+                        (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    break;
 
-                    case 6: //Additive
-                        SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.BlendMode.One,
-                            (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
-                        material.DisableKeyword("_ALPHABLEND_ON");
-                        material.DisableKeyword("_ALPHATEST_ON");
-                        break;
-                }
+                case 6: //Additive
+                    SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.BlendMode.One,
+                        (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
+                    material.DisableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    break;
             }
         }
 
@@ -383,6 +381,7 @@ namespace XSToon3
             material.SetInt("_DstBlend", dst);
             material.SetInt("_ZWrite", zwrite);
             material.SetInt("_AlphaToMask", alphatocoverage);
+            material.renderQueue = renderQueue;
         }
 
         private void DrawMainSettings(MaterialEditor materialEditor, Material material)
@@ -769,6 +768,8 @@ namespace XSToon3
                     materialEditor.ShaderProperty(_StencilOp, _StencilOp.displayName);
 
                     XSStyles.Separator();
+                    OverrideRenderSettings = EditorGUILayout.Toggle(new GUIContent("Override Render Settings", "Allows manual control over all render settings (Queue, ZWrite, Etc.)"), OverrideRenderSettings);
+
                     materialEditor.ShaderProperty(_SrcBlend, new GUIContent("SrcBlend", ""));
                     materialEditor.ShaderProperty(_DstBlend, new GUIContent("DstBlend", ""));
                     materialEditor.ShaderProperty(_ZWrite, new GUIContent("ZWrite", ""));

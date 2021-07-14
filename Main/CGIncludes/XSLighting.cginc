@@ -35,7 +35,7 @@ half4 BRDF_XSLighting(HookData data)
         vertexLightDiffuse = getVertexLightsDiffuse(i, vLight);
         indirectDiffuse += vertexLightDiffuse;
 
-        vertexLightSpec = getVertexLightSpecular(i, d, vLight, i.normal, viewDir, _AnisotropicSpecular) * occlusion;
+        vertexLightSpec = getVertexLightSpecular(i, d, vLight, i.normal, dirs.viewDir, _AnisotropicSpecular) * occlusion;
     #endif
 
     half lightAvg = (dot(indirectDiffuse.rgb, grayscaleVec) + dot(lightCol.rgb, grayscaleVec)) / 2;
