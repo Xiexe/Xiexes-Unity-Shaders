@@ -196,7 +196,9 @@ half4 calcRimLight(FragmentData i, DotProducts d, half4 lightCol, half3 indirect
     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
     half4 rim = rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz);
     rim *= lerp(1, i.attenuation + indirectDiffuse.xyzz, _RimAttenEffect);
-    return rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
+
+    half4 rimLight = rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
+    return lerp(0, rimLight, i.rimMask.r);
 }
 
 half4 calcShadowRim(FragmentData i, DotProducts d, half3 indirectDiffuse)
@@ -205,7 +207,7 @@ half4 calcShadowRim(FragmentData i, DotProducts d, half3 indirectDiffuse)
     rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
     half4 shadowRim = lerp(1, (_ShadowRim * lerp(1, i.diffuseColor.rgbb, _ShadowRimAlbedoTint)) + (indirectDiffuse.xyzz * 0.1), rimIntensity);
 
-    return shadowRim ;
+    return lerp(1, shadowRim, i.rimMask.g);
 }
 
 float3 getAnisotropicReflectionVector(float3 viewDir, float3 bitangent, float3 tangent, float3 normal, float roughness, float anisotropy)

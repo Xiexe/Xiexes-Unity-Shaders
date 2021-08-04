@@ -93,6 +93,7 @@ namespace XSToon3
         protected MaterialProperty _SpecularAlbedoTint = null;
         protected MaterialProperty _RampSelectionMask = null;
         protected MaterialProperty _Ramp = null;
+        protected MaterialProperty _RimMask = null;
         protected MaterialProperty _ShadowRim = null;
         protected MaterialProperty _ShadowRimRange = null;
         protected MaterialProperty _ShadowRimThreshold = null;
@@ -123,6 +124,7 @@ namespace XSToon3
         protected MaterialProperty _UVSetEmission = null;
         protected MaterialProperty _UVSetClipMap = null;
         protected MaterialProperty _UVSetDissolve = null;
+        protected MaterialProperty _UVSetRimMask = null;
         protected MaterialProperty _Stencil = null;
         protected MaterialProperty _StencilComp = null;
         protected MaterialProperty _StencilOp = null;
@@ -471,13 +473,6 @@ namespace XSToon3
                 materialEditor.ShaderProperty(_UVSetOcclusion, new GUIContent("UV Set", "The UV set to use for the Occlusion Texture"), 2);
                 materialEditor.TextureScaleOffsetProperty(_OcclusionMap);
 
-                XSStyles.SeparatorThin();
-                XSStyles.constrainedShaderProperty(materialEditor, _ShadowRim, new GUIContent("Shadow Rim", "Shadow Rim Color. Set to white to disable."), 0);
-                materialEditor.ShaderProperty(_ShadowRimAlbedoTint, new GUIContent("Shadow Rim Albedo Tint", "How much the Albedo texture should effect the Shadow Rim color."));
-                materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
-                materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
-                materialEditor.ShaderProperty(_ShadowRimSharpness, new GUIContent("Sharpness", "Sharpness of the Shadow Rim"), 2);
-
             }
         }
 
@@ -665,9 +660,14 @@ namespace XSToon3
 
         private void DrawRimlightSettings(MaterialEditor materialEditor, Material material)
         {
-            Foldouts[material].ShowRimlight = XSStyles.ShurikenFoldout("Rimlight", Foldouts[material].ShowRimlight);
+            Foldouts[material].ShowRimlight = XSStyles.ShurikenFoldout("Rim Light & Shadow", Foldouts[material].ShowRimlight);
             if (Foldouts[material].ShowRimlight)
             {
+                materialEditor.TexturePropertySingleLine(new GUIContent("Rim Mask (Packed)", "Channels are used to mask out rim light and rim shadow effects. \n\n Red Channel: Rim Light Mask \n Green Channel: Rim Shadow Mask"), _RimMask);
+                materialEditor.TextureScaleOffsetProperty(_RimMask);
+                materialEditor.ShaderProperty(_UVSetRimMask, new GUIContent("UV Set", "The UV set to use for the Rim Mask"), 2);
+
+                XSStyles.SeparatorThin();
                 materialEditor.ShaderProperty(_RimColor, new GUIContent("Rimlight Tint", "The Tint of the Rimlight."));
                 materialEditor.ShaderProperty(_RimAlbedoTint, new GUIContent("Rim Albedo Tint", "How much the Albedo texture should effect the rimlight color."));
                 materialEditor.ShaderProperty(_RimCubemapTint, new GUIContent("Rim Environment Tint", "How much the Environment cubemap should effect the rimlight color."));
@@ -676,6 +676,13 @@ namespace XSToon3
                 materialEditor.ShaderProperty(_RimRange, new GUIContent("Range", "Range of the Rim"), 2);
                 materialEditor.ShaderProperty(_RimThreshold, new GUIContent("Threshold", "Threshold of the Rim"), 2);
                 materialEditor.ShaderProperty(_RimSharpness, new GUIContent("Sharpness", "Sharpness of the Rim"), 2);
+
+                XSStyles.SeparatorThin();
+                XSStyles.constrainedShaderProperty(materialEditor, _ShadowRim, new GUIContent("Shadow Rim", "Shadow Rim Color. Set to white to disable."), 0);
+                materialEditor.ShaderProperty(_ShadowRimAlbedoTint, new GUIContent("Shadow Rim Albedo Tint", "How much the Albedo texture should effect the Shadow Rim color."));
+                materialEditor.ShaderProperty(_ShadowRimRange, new GUIContent("Range", "Range of the Shadow Rim"), 2);
+                materialEditor.ShaderProperty(_ShadowRimThreshold, new GUIContent("Threshold", "Threshold of the Shadow Rim"), 2);
+                materialEditor.ShaderProperty(_ShadowRimSharpness, new GUIContent("Sharpness", "Sharpness of the Shadow Rim"), 2);
             }
         }
 
@@ -714,16 +721,6 @@ namespace XSToon3
                 materialEditor.ShaderProperty(_SSScale, new GUIContent("Transmission Scale", "Subsurface Scale"), 2);
             }
         }
-
-        // private void DrawAudioLinkSettings(MaterialEditor materialEditor, Material material)
-        // {
-        //     Foldouts[material].ShowAudioLink = XSStyles.ShurikenFoldout("Audio Link", Foldouts[material].ShowAudioLink);
-        //     if (Foldouts[material].ShowAudioLink)
-        //     {
-        //         materialEditor.ShaderProperty(_EmissionAudioLinkChannel, new GUIContent("Emission Audio Link", "Use Audio Link for Emission Brightness"));
-        //         // materialEditor.ShaderProperty(_IOR, new GUIContent("Index of Refraction", "The index of refraction of the material. Glass: 1.5, Crystal: 2.0, Ice: 1.309, Water: 1.325"));
-        //     }
-        // }
 
         private void DrawAdvancedSettings(MaterialEditor materialEditor, Material material)
         {
