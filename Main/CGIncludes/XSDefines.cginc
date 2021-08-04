@@ -111,6 +111,7 @@ struct FragmentData
     half4 dissolveMask;
     half4 dissolveMaskSecondLayer;
     half3 diffuseColor;
+    half4 rimMask;
     half attenuation;
     half3 normal;
     half3 tangent;
@@ -145,6 +146,7 @@ struct TextureUV
     half2 outlineMaskUV;
     half2 clipMapUV;
     half2 dissolveUV;
+    half2 rimMaskUV;
 };
 
 struct DotProducts
@@ -200,6 +202,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_ThicknessMap); half4 _ThicknessMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
+UNITY_DECLARE_TEX2D_NOSAMPLER(_RimMask); half4 _RimMask_ST;
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _ClipMask;
@@ -255,7 +258,8 @@ int _OutlineAlbedoTint, _OutlineLighting, _OutlineNormalMode;
 int _UVSetAlbedo, _UVSetNormal, _UVSetDetNormal,
     _UVSetDetMask, _UVSetMetallic, _UVSetSpecular,
     _UVSetThickness, _UVSetOcclusion, _UVSetReflectivity,
-    _UVSetEmission, _UVSetClipMap, _UVSetDissolve;
+    _UVSetEmission, _UVSetClipMap, _UVSetDissolve,
+    _UVSetRimMask;
 int _NormalMapMode, _OutlineUVSelect;
 int _AlphaToMask;
 int _ALGradientOnRed, _ALGradientOnGreen, _ALGradientOnBlue;

@@ -45,7 +45,6 @@
 
         [Enum(Yes,0, No,1)] _ScaleWithLight("Emission Scale w/ Light", Int) = 1
         _EmissionMap("Emission Map", 2D) = "white" {}
-        [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         _EmissionToDiffuse("Emission Tint To Diffuse", Range(0,1)) = 0
         _ScaleWithLightSensitivity("Scaling Sensitivity", Range(0,1)) = 1
 
@@ -69,6 +68,8 @@
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
+
+        _RimMask("Rim Masks", 2D) = "white" {}
         _ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
         _ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
@@ -127,6 +128,7 @@
         [Enum(UV1,0,UV2,1)] _UVSetEmission("Emission Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetClipMap("Clip Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetDissolve("Dissolve Map UVs", Int) = 0
+        [Enum(UV1,0,UV2,1)] _UVSetRimMask("Rim MAsk UVs", Int) = 0
 
         [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5,UV Based,6)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
         [ToggleUI]_ALGradientOnRed("Gradient Red", Int) = 0
@@ -168,8 +170,6 @@
         _ClipSlider13("", Vector) = (0,0,0,0)
         _ClipSlider14("", Vector) = (0,0,0,0)
         _ClipSlider15("", Vector) = (0,0,0,0)
-
-        //!RDPSProps
     }
 
     SubShader

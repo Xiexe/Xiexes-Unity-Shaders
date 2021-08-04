@@ -8,8 +8,10 @@ Textures/Shadow Ramps/MGPresets/MultiGradient_NyrraDemon.asset
 Textures/Shadow Ramps/MGPresets/MultiGradient_NyrraDemon.asset.meta
 Main/Patreon/
 Main/Patreon.meta
-Main/Plugins/Patreon/
-Main/Plugins/Patreon.meta
 Main/Plugins/*.zip
 Main/Plugins/*.zip.meta
 Main/Plugins/RDPS/
+Main/Plugins/Patreon/EyeTracking
+Main/Plugins/Patreon/XSFur
+Main/Plugins/Patreon/EyeTracking.meta
+Main/Plugins/Patreon/XSFur.meta

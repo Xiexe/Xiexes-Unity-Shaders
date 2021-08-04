@@ -54,31 +54,34 @@ void InitializeTextureUVs(
 
     #if !defined(UNITY_PASS_SHADOWCASTER)
         half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
-            t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
+        t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
 
-            half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
-            t.emissionMapUV = TRANSFORM_TEX(uvSetEmissionMap, _EmissionMap);
+        half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
+        t.emissionMapUV = TRANSFORM_TEX(uvSetEmissionMap, _EmissionMap);
 
-            half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
-            t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
+        half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
+        t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
 
-            half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
-            t.occlusionUV = TRANSFORM_TEX(uvSetOcclusion, _OcclusionMap);
+        half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
+        t.occlusionUV = TRANSFORM_TEX(uvSetOcclusion, _OcclusionMap);
 
-            half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
-            t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
+        half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
+        t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
 
-            half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
-            t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
+        half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
+        t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
 
-            half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
-            t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
+        half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
+        t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
 
-            half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
-            t.thicknessMapUV = TRANSFORM_TEX(uvSetThickness, _ThicknessMap);
+        half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
+        t.thicknessMapUV = TRANSFORM_TEX(uvSetThickness, _ThicknessMap);
 
-            half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
-            t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);
+        half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
+        t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);
+
+        half2 uvSetRimMask = (_UVSetRimMask == 0) ? i.uv : i.uv1;
+        t.rimMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _RimMask);
     #endif
 }
 

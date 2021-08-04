@@ -56,8 +56,6 @@ float4 frag (
             i.ntb[2] = -i.ntb[2];
         }
 
-
-
         FragmentData o = (FragmentData)0; //Populate Surface Fragment Struct
         o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color * lerp(1, float4(i.color.rgb, 1), _VertexColorAlbedo);
         o.specularMap = UNITY_SAMPLE_TEX2D_SAMPLER(_SpecularMap, _MainTex, t.specularMapUV);
@@ -74,6 +72,7 @@ float4 frag (
         o.clipMap = tex2Dlod(_ClipMask, float4(t.clipMapUV, 0, 0));
         o.dissolveMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV * _DissolveLayer1Scale + (_Time.y * _DissolveLayer1Speed));
         o.dissolveMaskSecondLayer = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV * _DissolveLayer2Scale + (_Time.y * _DissolveLayer2Speed));
+        o.rimMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RimMask, _MainTex, t.rimMaskUV);
 
         o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
         o.attenuation = attenuation;
