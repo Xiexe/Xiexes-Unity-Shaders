@@ -390,6 +390,7 @@ namespace XSToon3
                 texture.maxTextureSize = 512;
                 texture.mipmapEnabled = false;
                 texture.textureCompression = TextureImporterCompression.Uncompressed;
+                texture.alphaIsTransparency = true;
 
                 // texture.sRGBTexture = !isLinear; // We already do the conversion in tex.SetPixel
 
