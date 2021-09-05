@@ -222,7 +222,7 @@ int _DissolveCoordinates;
 int _UseClipsForDissolve;
 
 half4 _ShadowRim, _OutlineColor, _SSColor,
-      _EmissionColor, _EmissionColor0, _EmissionColor1,
+      _EmissionColor, _EmissionColor0, _EmissionColor1, _EmissionColor2,
       _MatcapTint, _RimColor, _DissolveColor;
 
 half _MatcapTintToDiffuse;

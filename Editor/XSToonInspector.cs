@@ -75,6 +75,7 @@ namespace XSToon3
         protected MaterialProperty _EmissionColor = null;
         protected MaterialProperty _EmissionColor0 = null;
         protected MaterialProperty _EmissionColor1 = null;
+        protected MaterialProperty _EmissionColor2 = null;
         protected MaterialProperty _EmissionToDiffuse = null;
         protected MaterialProperty _RimColor = null;
         protected MaterialProperty _RimIntensity = null;
@@ -634,20 +635,20 @@ namespace XSToon3
                 }
                 else
                 {
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map (VRC Audio Link Packed)", "Emissive map. Each channel controls different audio link reactions. RGB = Lows, Mids, Highs, Alpha Channel can be used to have extra masking as a way to combat aliasing"), _EmissionMap);
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Emission Map (VRC Audio Link Packed)", "Emissive map. Each channel controls different audio link reactions. RGB = Lows, Mids, Highs, Alpha Channel can be used to have extra masking as a way to combat aliasing"), _EmissionMap, _EmissionColor);
                     materialEditor.TextureScaleOffsetProperty(_EmissionMap);
                     materialEditor.ShaderProperty(_UVSetEmission, new GUIContent("UV Set", "The UV set to use for the Emission Map"), 2);
                     materialEditor.ShaderProperty(_EmissionToDiffuse, new GUIContent("Tint To Diffuse", "Tints the emission to the Diffuse Color"), 2);
 
                     XSStyles.SeparatorThin();
 
-                    materialEditor.ColorProperty(_EmissionColor, "Red Ch. Color (Lows)");
+                    materialEditor.ColorProperty(_EmissionColor0, "Red Ch. Color (Lows)");
                     materialEditor.ShaderProperty(_ALGradientOnRed, new GUIContent("Gradient Bar", "Uses a gradient on this channel to create an animated bar from the audio link data."), 1);
 
-                    materialEditor.ColorProperty(_EmissionColor0, "Green Ch. Color (Mids)");
+                    materialEditor.ColorProperty(_EmissionColor1, "Green Ch. Color (Mids)");
                     materialEditor.ShaderProperty(_ALGradientOnGreen, new GUIContent("Gradient Bar", "Uses a gradient on this channel to create an animated bar from the audio link data."), 1);
 
-                    materialEditor.ColorProperty(_EmissionColor1, "Blue Ch. Color (Highs)");
+                    materialEditor.ColorProperty(_EmissionColor2, "Blue Ch. Color (Highs)");
                     materialEditor.ShaderProperty(_ALGradientOnBlue, new GUIContent("Gradient Bar", "Uses a gradient on this channel to create an animated bar from the audio link data."), 1);
                 }
 

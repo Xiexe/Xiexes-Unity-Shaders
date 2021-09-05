@@ -450,6 +450,9 @@ half4 calcEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
                     float4 emissionChannelBlue = lerp(i.emissionMap.b, tHigh, _ALGradientOnBlue) * _EmissionColor1 * audioDataHighs;
                     emission = (emissionChannelRed + emissionChannelGreen + emissionChannelBlue) * lerp(1, i.diffuseColor.rgbb, _EmissionToDiffuse);
                 }
+            } else if (_EmissionAudioLinkChannel == 5) {
+                // no AudioLink
+                emission = lerp(i.emissionMap.a, i.emissionMap.a * i.diffuseColor.xyzz, _EmissionToDiffuse) * _EmissionColor;
             }
         }
 
