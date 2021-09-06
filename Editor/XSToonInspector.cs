@@ -632,6 +632,9 @@ namespace XSToon3
                     if (isUVBased) {
                         materialEditor.ShaderProperty(_ALUVWidth, new GUIContent("History Sample Amount", "Controls the amount of Audio Link history to sample."));
                     }
+                    if (isAudioLink) {
+                        materialEditor.ColorProperty(_EmissionColor0, "AudioLink Emission");
+                    }
                 }
                 else
                 {
