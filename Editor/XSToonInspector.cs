@@ -27,6 +27,14 @@ namespace XSToon3
         public bool ShowFur = false;
     }
 
+    public enum Mode
+    {
+        Opaque,
+        Cutout,
+        Fade,
+        Transparent
+    }
+
     public class XSToonInspector : ShaderGUI
     {
         protected static Dictionary<Material, FoldoutToggles> Foldouts = new Dictionary<Material, FoldoutToggles>();
@@ -320,6 +328,7 @@ namespace XSToon3
             switch (BlendMode)
             {
                 case 0: //Opaque
+                    material.SetInt("_Mode", (int)Mode.Opaque);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
@@ -328,6 +337,7 @@ namespace XSToon3
                     break;
 
                 case 1: //Cutout
+                    material.SetInt("_Mode", (int)Mode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
@@ -336,6 +346,7 @@ namespace XSToon3
                     break;
 
                 case 2: //Dithered
+                    material.SetInt("_Mode", (int)Mode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
@@ -344,6 +355,7 @@ namespace XSToon3
                     break;
 
                 case 3: //Alpha To Coverage
+                    material.SetInt("_Mode", (int)Mode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
@@ -352,6 +364,7 @@ namespace XSToon3
                     break;
 
                 case 4: //Transparent
+                    material.SetInt("_Mode", (int)Mode.Transparent);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
@@ -360,6 +373,7 @@ namespace XSToon3
                     break;
 
                 case 5: //Fade
+                    material.SetInt("_Mode", (int)Mode.Fade);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.SrcAlpha,
                         (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
@@ -368,6 +382,7 @@ namespace XSToon3
                     break;
 
                 case 6: //Additive
+                    material.SetInt("_Mode", (int)Mode.Transparent);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);

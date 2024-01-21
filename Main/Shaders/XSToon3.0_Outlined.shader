@@ -151,6 +151,7 @@
         [Enum(UnityEngine.Rendering.BlendMode)]_DstBlend ("__dst", int) = 0
         [Enum(Off,0,On,1)]_ZWrite ("__zw", int) = 1
         [HideInInspector] _AlphaToMask("__am", int) = 0
+        [HideInInspector] _Mode ("__mode", Float) = 0.0
 
         _ClipMask("Clip Mask", 2D) = "black" {}
         [IntRange]_ClipIndex("Clip Index", Range(0,7)) = 0
@@ -174,7 +175,7 @@
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" "VRCFallback"="StandardCutout" }
         Cull [_Culling]
         AlphaToMask [_AlphaToMask]
         Stencil
