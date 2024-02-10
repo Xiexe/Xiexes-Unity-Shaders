@@ -1,25 +1,12 @@
-﻿using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
-using System.IO;
+
 namespace XSToon3
 {
     [InitializeOnLoad]
     public class XSStyles : MonoBehaviour
     {
-        public static string ver = "3.0.2";
-
-        //Help URLs
-        public static string mainURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.xh0nk8x7ws1g";
-        public static string normalsURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.j7qze9btrmw8";
-        public static string shadowsURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.8l0gi0hntyfs";
-        public static string rimlightURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.tpxp2jrhrhxp";
-        public static string emissionsURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.zc983jrwb5x4";
-        public static string specularURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.gyu8l75mbtdq";
-        public static string reflURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.yqzg9axi3gi";
-        public static string sssURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.j2nk83f6azph";
-        public static string outlineURL = "https://docs.google.com/document/d/1xJ4PID_nwqVm_UCsO2c2gEdiEoWoCGeM_GDK_L8-aZE/edit#bookmark=id.jpaf9t25in8p";
-
+        public static string ver = "3.5.0";
         public static string uiPath;
         private static string patronpath;
 
@@ -99,10 +86,8 @@ namespace XSToon3
         //GUI Buttons
         static public void CallGradientEditor(Material focusedMat = null, string prop = null)
         {
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
             GUI.skin = null;
-            if (GUILayout.Button("Open Gradient Editor", GUILayout.Width(200), GUILayout.Height(20)))
+            if (GUILayout.Button("Ramp Tool \u2197\ufe0f", GUILayout.Height(20)))
             {
                 XSGradientEditor.focusedMat = focusedMat;
                 if (prop != null) {
@@ -110,8 +95,6 @@ namespace XSToon3
                 }
                 XSGradientEditor.Init();
             }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
         }
 
         static public void CallTexArrayManager()
@@ -241,12 +224,6 @@ namespace XSToon3
             if (GUILayout.Button("?", "helpButton", GUILayout.Width(16), GUILayout.Height(16)))
             {
                 Application.OpenURL(url);
-                // showBox = true;
-                // if (showBox == true)
-                // {
-                //     EditorUtility.DisplayDialog(title,
-                //                                 message, button);
-                // }
             }
         }
 
@@ -281,26 +258,6 @@ namespace XSToon3
                 Application.OpenURL("https://discord.gg/3JDeUTw");
             }
 
-        }
-
-        public static void patreonButton(int Width, int Height)
-        {
-            if (GUILayout.Button("Patreon", GUILayout.Width(Width), GUILayout.Height(Height)))
-            {
-                Application.OpenURL("https://www.patreon.com/xiexe");
-            }
-        }
-
-        public static void openInfoPanel(int Width, int Height)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Updater | Documentation", GUILayout.Width(Width), GUILayout.Height(Height)))
-            {
-                XSUpdater.Init();
-            }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
         }
 
         private static Rect DrawShuriken(string title, Vector2 contentOffset, int HeaderHeight)
@@ -369,12 +326,9 @@ namespace XSToon3
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
                 XSStyles.discordButton(70, 30);
-                XSStyles.patreonButton(70, 30);
                 XSStyles.githubButton(70, 30);
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
-
-            XSStyles.openInfoPanel(200, 20);
         }
 
         public static bool HelpBoxWithButton(GUIContent messageContent, GUIContent buttonContent)

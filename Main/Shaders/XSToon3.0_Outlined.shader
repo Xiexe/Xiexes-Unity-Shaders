@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon3/XSToon3_Outlined"
+﻿Shader "Xiexe/Toon3/Standard_Outlined"
 {
     Properties
     {

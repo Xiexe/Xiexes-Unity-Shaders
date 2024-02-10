@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon2.0/XSToonStenciler"
+﻿Shader "Xiexe/Toon3/Stenciler"
 {
 	Properties
 	{

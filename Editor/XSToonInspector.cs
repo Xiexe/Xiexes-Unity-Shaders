@@ -1,9 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System;
 using System.Reflection;
 
 namespace XSToon3
@@ -194,7 +191,7 @@ namespace XSToon3
         protected MaterialProperty _ClipSlider14 = null;
         protected MaterialProperty _ClipSlider15 = null;
 
-        //Material Properties for Patreon Plugins
+        //Material Properties for Eye tracking Plugins
         protected MaterialProperty _LeftRightPan = null;
         protected MaterialProperty _UpDownPan = null;
         protected MaterialProperty _Twitchyness = null;
@@ -230,7 +227,6 @@ namespace XSToon3
 
         private static bool OverrideRenderSettings = false;
         protected static int BlendMode;
-        protected bool isPatreonShader = false;
         protected bool isEyeTracking = false;
         protected bool isFurShader = false;
         protected bool isOutlined = false;
@@ -249,7 +245,6 @@ namespace XSToon3
             isDithered = BlendMode == 2;
             isA2C = BlendMode == 3;
             isOutlined = shader.name.Contains("Outline");
-            isPatreonShader = shader.name.Contains("Patreon");
             isEyeTracking = shader.name.Contains("EyeTracking");
             isFurShader = shader.name.Contains("Fur");
 
@@ -266,7 +261,7 @@ namespace XSToon3
             }
 
             EditorGUI.BeginChangeCheck();
-            XSStyles.ShurikenHeaderCentered("XSToon v" + XSStyles.ver);
+            XSStyles.ShurikenHeaderCentered($"XSToon v{XSStyles.ver}");
             materialEditor.ShaderProperty(_AdvMode, new GUIContent("Shader Mode", "Setting this to 'Advanced' will give you access to things such as stenciling, and other expiremental/advanced features."));
             materialEditor.ShaderProperty(_Culling, new GUIContent("Culling Mode", "Changes the culling mode. 'Off' will result in a two sided material, while 'Front' and 'Back' will cull those sides respectively"));
             materialEditor.ShaderProperty(_TilingMode, new GUIContent("Tiling Mode", "Setting this to Merged will tile and offset all textures based on the Main texture's Tiling/Offset."));
@@ -301,7 +296,7 @@ namespace XSToon3
             PluginGUI(materialEditor, material);
 
             DrawAdvancedSettings(materialEditor, material);
-            DrawPatreonSettings(materialEditor, material);
+            DrawEyeTrackingSettings(materialEditor, material);
 
             //!RDPSFunctionCallInject
 
@@ -477,8 +472,11 @@ namespace XSToon3
                     }
                 }
 
-                XSStyles.CallGradientEditor(material);
-                materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), _Ramp);
+                GUILayout.BeginHorizontal();
+                    materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), _Ramp);
+                    XSStyles.CallGradientEditor(material);
+                GUILayout.EndHorizontal();
+
                 materialEditor.ShaderProperty(_ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
 
                 XSStyles.SeparatorThin();
@@ -792,33 +790,28 @@ namespace XSToon3
             }
         }
 
-        private void DrawPatreonSettings(MaterialEditor materialEditor, Material material)
+        private void DrawEyeTrackingSettings(MaterialEditor materialEditor, Material material)
         {
-            //Plugins for Patreon releases
-            if (isPatreonShader)
+            if (isEyeTracking)
             {
-                if (isEyeTracking)
+                Foldouts[material].ShowEyeTracking = XSStyles.ShurikenFoldout("Eye Tracking Settings", Foldouts[material].ShowEyeTracking);
+                if (Foldouts[material].ShowEyeTracking)
                 {
-                    Foldouts[material].ShowEyeTracking = XSStyles.ShurikenFoldout("Eye Tracking Settings", Foldouts[material].ShowEyeTracking);
-                    if (Foldouts[material].ShowEyeTracking)
-                    {
-                        materialEditor.ShaderProperty(_LeftRightPan, new GUIContent("Left Right Adj.", "Adjusts the eyes manually left or right."));
-                        materialEditor.ShaderProperty(_UpDownPan, new GUIContent("Up Down Adj.", "Adjusts the eyes manually up or down."));
+                    materialEditor.ShaderProperty(_LeftRightPan, new GUIContent("Left Right Adj.", "Adjusts the eyes manually left or right."));
+                    materialEditor.ShaderProperty(_UpDownPan, new GUIContent("Up Down Adj.", "Adjusts the eyes manually up or down."));
 
-                        XSStyles.SeparatorThin();
-                        materialEditor.ShaderProperty(_AttentionSpan, new GUIContent("Attention Span", "How often should the eyes look at the target; 0 = never, 1 = always, 0.5 = half of the time."));
-                        materialEditor.ShaderProperty(_FollowPower, new GUIContent("Follow Power", "The influence the target has on the eye"));
-                        materialEditor.ShaderProperty(_LookSpeed, new GUIContent("Look Speed", "How fast the eye transitions to looking at the target"));
-                        materialEditor.ShaderProperty(_Twitchyness, new GUIContent("Refocus Frequency", "How much should the eyes look around near the target?"));
+                    XSStyles.SeparatorThin();
+                    materialEditor.ShaderProperty(_AttentionSpan, new GUIContent("Attention Span", "How often should the eyes look at the target; 0 = never, 1 = always, 0.5 = half of the time."));
+                    materialEditor.ShaderProperty(_FollowPower, new GUIContent("Follow Power", "The influence the target has on the eye"));
+                    materialEditor.ShaderProperty(_LookSpeed, new GUIContent("Look Speed", "How fast the eye transitions to looking at the target"));
+                    materialEditor.ShaderProperty(_Twitchyness, new GUIContent("Refocus Frequency", "How much should the eyes look around near the target?"));
 
-                        XSStyles.SeparatorThin();
-                        materialEditor.ShaderProperty(_IrisSize, new GUIContent("Iris Size", "Size of the iris"));
-                        materialEditor.ShaderProperty(_FollowLimit, new GUIContent("Follow Limit", "Limits the angle from the front of the face on how far the eyes can track/rotate."));
-                        materialEditor.ShaderProperty(_EyeOffsetLimit, new GUIContent("Offset Limit", "Limit for how far the eyes can turn"));
-                    }
+                    XSStyles.SeparatorThin();
+                    materialEditor.ShaderProperty(_IrisSize, new GUIContent("Iris Size", "Size of the iris"));
+                    materialEditor.ShaderProperty(_FollowLimit, new GUIContent("Follow Limit", "Limits the angle from the front of the face on how far the eyes can track/rotate."));
+                    materialEditor.ShaderProperty(_EyeOffsetLimit, new GUIContent("Offset Limit", "Limit for how far the eyes can turn"));
                 }
             }
-            //
         }
 
         private void DrawFurSettings(MaterialEditor materialEditor, Material material)
