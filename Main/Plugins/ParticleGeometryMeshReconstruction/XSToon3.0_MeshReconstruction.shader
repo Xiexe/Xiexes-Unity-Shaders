@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon3/XSToon3_MeshReconstruction"
+﻿Shader "Xiexe/Toon3/MeshReconstruction"
 {
     Properties
     {

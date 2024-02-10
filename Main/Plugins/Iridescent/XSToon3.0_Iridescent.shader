@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon3/XSToon3_Iridescent"
+﻿Shader "Xiexe/Toon3/Iridescent"
 {
     Properties
     {

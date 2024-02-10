@@ -186,7 +186,7 @@ half4 calcMetallicSmoothness(FragmentData i)
 {
     half roughness = 1-(_Glossiness * i.metallicGlossMap.a);
     roughness *= 1.7 - 0.7 * roughness;
-    half metallic = lerp(0, i.metallicGlossMap.r * _Metallic, i.reflectivityMask.r);
+    half metallic = i.metallicGlossMap.r * _Metallic;
     return half4(metallic, 0, 0, roughness);
 }
 

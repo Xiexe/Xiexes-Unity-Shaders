@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon3/Standard"
+﻿Shader "Xiexe/Toon3/Standard_Fur"
 {
     Properties
     {
@@ -68,8 +68,6 @@
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
-
-        _RimMask("Rim Masks", 2D) = "white" {}
         _ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
         _ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
@@ -128,16 +126,14 @@
         [Enum(UV1,0,UV2,1)] _UVSetEmission("Emission Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetClipMap("Clip Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetDissolve("Dissolve Map UVs", Int) = 0
-        [Enum(UV1,0,UV2,1)] _UVSetRimMask("Rim MAsk UVs", Int) = 0
 
-        [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5,UV Based,6)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
+        [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
         [ToggleUI]_ALGradientOnRed("Gradient Red", Int) = 0
         [ToggleUI]_ALGradientOnGreen("Gradient Green", Int) = 0
         [ToggleUI]_ALGradientOnBlue("Gradient Blue", Int) = 0
         [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         [HDR]_EmissionColor0("Emission Packed Color 1", Color) = (0,0,0,0)
         [HDR]_EmissionColor1("Emission Packed Color 2", Color) = (0,0,0,0)
-        [IntRange]_ALUVWidth("History Sample Amount", Range(0,128)) = 128
 
         _ClipMap("Clip Map", 2D) = "black" {}
         _WireColor("Wire Color", Color) = (0,0,0,0)
@@ -147,11 +143,10 @@
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
 
-        [Enum(UnityEngine.Rendering.BlendMode)]_SrcBlend ("__src", int) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)]_DstBlend ("__dst", int) = 0
-        [Enum(Off,0,On,1)]_ZWrite ("__zw", int) = 1
+        [HideInInspector] _SrcBlend ("__src", int) = 1
+        [HideInInspector] _DstBlend ("__dst", int) = 0
+        [HideInInspector] _ZWrite ("__zw", int) = 1
         [HideInInspector] _AlphaToMask("__am", int) = 0
-        [HideInInspector] _Mode ("__mode", Float) = 0.0
 
         _ClipMask("Clip Mask", 2D) = "black" {}
         [IntRange]_ClipIndex("Clip Index", Range(0,7)) = 0
@@ -171,24 +166,40 @@
         _ClipSlider13("", Vector) = (0,0,0,0)
         _ClipSlider14("", Vector) = (0,0,0,0)
         _ClipSlider15("", Vector) = (0,0,0,0)
+
+        //Fur properties
+        _TopColor("Top Color", Color) = (1,1,1,1)
+        _BottomColor("Bottom Color", Color) = (1,1,1,1)
+        _ColorFalloffMin("Color Falloff Min", Range(0,1)) = 0
+        _ColorFalloffMax("Color Falloff Max", Range(0,1)) = 1
+
+        _FurTexture("Fur Texture", 2D) = "white" {}
+        _FurLengthMask("Length Mask", 2D) = "white" {}
+        _NoiseTexture("Noise Texture", 2D) = "white" {}
+        [IntRange]_StrandAmount("Strand Count", Range(0,200)) = 10
+        [IntRange]_LayerCount("Fur Layer Count", Range(1,32)) = 10
+        _FurLength("Fur Length", Range(0,1)) = 0.2
+        _FurWidth("Fur Width", Range(0.35, 0.65)) = 0.5
+        _Gravity("Gravity", Range(0,1)) = 0
+        _CombX("Comb X", Range(-1,1)) = 0
+        _CombY("Comb Y", Range(-1,1)) = 0
+        _FurOcclusion("Fur Occlusion", Range(0,1)) = 0.5
+        _OcclusionFalloffMin("Occlusion Falloff Min", Range(0,1)) = 0
+        _OcclusionFalloffMax("Occlusion Falloff Max", Range(0,1)) = 1
+        //!RDPSProps
     }
 
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry" "VRCFallback"="StandardCutout" }
+        Tags { "RenderType"="Opaque" "Queue"="Geometry" }
         Cull [_Culling]
-        AlphaToMask [_AlphaToMask]
+        AlphaToMask On
         Stencil
         {
             Ref [_Stencil]
             Comp [_StencilComp]
             Pass [_StencilOp]
         }
-//        Grabpass // Gets disabled via the editor script when not in use through the Lightmode Tag.
-//        {
-//            Tags{"LightMode" = "Always"}
-//            "_AudioTexture"
-//        }
         Pass
         {
             Name "FORWARD"
@@ -199,6 +210,7 @@
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
+            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -210,16 +222,20 @@
             #ifndef UNITY_PASS_FORWARDBASE
                 #define UNITY_PASS_FORWARDBASE
             #endif
-
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #define Geometry
+            #define Fur
+            #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/XSDefines.cginc"
+            #include "../CGInc/Defines.cginc"
+            #include "../../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../CGInc/FurHelpers.cginc"
+            #include "../../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../../CGIncludes/XSLighting.cginc"
+            #include "../../../CGIncludes/XSPreLighting.cginc"
+            #include "../../../CGIncludes/XSPostLighting.cginc"
+            #include "../../../CGIncludes/XSVert.cginc"
+            #include "../CGInc/GeometryShader.cginc"
+            #include "../../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -235,6 +251,7 @@
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
+            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -243,16 +260,20 @@
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
-
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #define Geometry
+            #define Fur
+            #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/XSDefines.cginc"
+            #include "../CGInc/Defines.cginc"
+            #include "../../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../CGInc/FurHelpers.cginc"
+            #include "../../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../../CGIncludes/XSLighting.cginc"
+            #include "../../../CGIncludes/XSPreLighting.cginc"
+            #include "../../../CGIncludes/XSPostLighting.cginc"
+            #include "../../../CGIncludes/XSVert.cginc"
+            #include "../CGInc/GeometryShader.cginc"
+            #include "../../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
 
@@ -265,6 +286,7 @@
             //#!RDPSTypeDefine
             #pragma target 5.0
             #pragma vertex vert
+            #pragma geometry geom
             #pragma fragment frag
             #pragma shader_feature _ALPHABLEND_ON
             #pragma shader_feature _ALPHATEST_ON
@@ -274,16 +296,20 @@
                 #define UNITY_PASS_SHADOWCASTER
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
-
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #define Geometry
+            #define Fur
+            #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/XSDefines.cginc"
+            #include "../CGInc/Defines.cginc"
+            #include "../../../CGIncludes/XSHelperFunctions.cginc"
+            #include "../CGInc/FurHelpers.cginc"
+            #include "../../../CGIncludes/XSLightingFunctions.cginc"
+            #include "../../../CGIncludes/XSLighting.cginc"
+            #include "../../../CGIncludes/XSPreLighting.cginc"
+            #include "../../../CGIncludes/XSPostLighting.cginc"
+            #include "../../../CGIncludes/XSVert.cginc"
+            #include "../CGInc/GeometryShader.cginc"
+            #include "../../../CGIncludes/XSFrag.cginc"
             ENDCG
         }
     }
