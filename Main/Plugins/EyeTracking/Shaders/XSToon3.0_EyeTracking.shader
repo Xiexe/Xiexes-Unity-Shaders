@@ -1,4 +1,4 @@
-﻿Shader "Xiexe/Toon3/Patreon/XSToon3_2DEyeTracking"
+﻿Shader "Xiexe/Toon3/2DEyeTracking"
 {
     Properties
     {

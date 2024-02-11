@@ -340,6 +340,74 @@ void calcDissolve(inout FragmentData i, inout float3 col)
     #endif
 }
 
+void discardTile(inout half4 pos, half2 uv, int x, int y, int discardTile)
+{
+    if(discardTile < 0.5) return;
+    if(uv.x > x && uv.x < x + 1 && uv.y > y && uv.y < y + 1)
+    {
+        pos = asfloat(-1);
+    }
+}
+
+void discardTile(half2 uv, int x, int y, int discardTile)
+{
+    if(discardTile < 0.5) return;
+    if(uv.x > x && uv.x < x + 1 && uv.y > y && uv.y < y + 1)
+    {
+        discard;
+    }
+}
+
+void calcUvDiscard(half2 uv)
+{
+    // If we're discarding in the vertex shader, then we don't care about blend mode.
+    // If we're discarding in the pixel shader, then we do care about blend mode.
+    if(_BlendMode < 1) return; // It's turned off for this blend mode.
+
+    discardTile(uv, 0, 0, _DiscardTile0);
+    discardTile(uv, 1, 0, _DiscardTile1);
+    discardTile(uv, 2, 0, _DiscardTile2);
+    discardTile(uv, 3, 0, _DiscardTile3);
+
+    discardTile(uv, 0, 1, _DiscardTile4);
+    discardTile(uv, 1, 1, _DiscardTile5);
+    discardTile(uv, 2, 1, _DiscardTile6);
+    discardTile(uv, 3, 1, _DiscardTile7);
+
+    discardTile(uv, 0, 2, _DiscardTile8);
+    discardTile(uv, 1, 2, _DiscardTile9);
+    discardTile(uv, 2, 2, _DiscardTile10);
+    discardTile(uv, 3, 2, _DiscardTile11);
+
+    discardTile(uv, 0, 3, _DiscardTile12);
+    discardTile(uv, 1, 3, _DiscardTile13);
+    discardTile(uv, 2, 3, _DiscardTile14);
+    discardTile(uv, 3, 3, _DiscardTile15);
+}
+
+void calcUvDiscard(half2 uv, inout half4 pos)
+{
+    discardTile(pos, uv, 0, 0, _DiscardTile0);
+    discardTile(pos, uv, 1, 0, _DiscardTile1);
+    discardTile(pos, uv, 2, 0, _DiscardTile2);
+    discardTile(pos, uv, 3, 0, _DiscardTile3);
+
+    discardTile(pos, uv, 0, 1, _DiscardTile4);
+    discardTile(pos, uv, 1, 1, _DiscardTile5);
+    discardTile(pos, uv, 2, 1, _DiscardTile6);
+    discardTile(pos, uv, 3, 1, _DiscardTile7);
+
+    discardTile(pos, uv, 0, 2, _DiscardTile8);
+    discardTile(pos, uv, 1, 2, _DiscardTile9);
+    discardTile(pos, uv, 2, 2, _DiscardTile10);
+    discardTile(pos, uv, 3, 2, _DiscardTile11);
+
+    discardTile(pos, uv, 0, 3, _DiscardTile12);
+    discardTile(pos, uv, 1, 3, _DiscardTile13);
+    discardTile(pos, uv, 2, 3, _DiscardTile14);
+    discardTile(pos, uv, 3, 3, _DiscardTile15);
+}
+
 //todo: What the fuck is going on here?
 void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
 {

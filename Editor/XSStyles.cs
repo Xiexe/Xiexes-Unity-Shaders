@@ -230,7 +230,7 @@ namespace XSToon3
         //Find Asset Path
         public static string findAssetPath(string finalFilePath)
         {
-            string[] guids1 = AssetDatabase.FindAssets("XSUpdater", null);
+            string[] guids1 = AssetDatabase.FindAssets("XSStyles", null);
             string untouchedString = AssetDatabase.GUIDToAssetPath(guids1[0]);
             string[] splitString = untouchedString.Split('/');
 

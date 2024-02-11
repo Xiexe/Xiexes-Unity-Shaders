@@ -8,9 +8,22 @@ float4 frag (
     ) : SV_Target
 {
     UNITY_SETUP_INSTANCE_ID(i);
-    TextureUV t = (TextureUV)0; // Populate UVs
-    if(_TilingMode != 1) { InitializeTextureUVs(i, t); } else { InitializeTextureUVsMerged(i, t); };
 
+    if(_UVDiscardMode == 2)
+    {
+        calcUvDiscard(_UVDiscardChannel == 1 ? i.uv : i.uv1);
+    }
+    
+    TextureUV t = (TextureUV)0; // Populate UVs
+    if(_TilingMode != 1)
+    {
+        InitializeTextureUVs(i, t);
+    }
+    else
+    {
+        InitializeTextureUVsMerged(i, t);
+    };
+    
     #ifdef UNITY_PASS_SHADOWCASTER
         FragmentData o = (FragmentData)0; //Populate Lighting Struct, but only with important shadowcaster stuff!
         o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color;
@@ -29,6 +42,7 @@ float4 frag (
             DoFurAlpha(o,t,alpha);
         #endif
 
+        
         calcAlpha(o, t, alpha);
         calcDissolve(o, o.albedo.rgb);
         return alpha;
@@ -111,7 +125,7 @@ float4 frag (
         float4 col = BRDF_XSLighting(data);
         calcAlpha(data.i, data.t, alpha);
         calcDissolve(data.i, col.rgb);
-
+    
         col = PostLightingHook(col, data);
         UNITY_APPLY_FOG(i.fogCoord, col);
         return float4(col.rgb, alpha);
