@@ -265,6 +265,12 @@ int _AlphaToMask;
 int _ALGradientOnRed, _ALGradientOnGreen, _ALGradientOnBlue;
 int _ALUVWidth;
 
+int _UVDiscardMode, _UVDiscardChannel,
+    _DiscardTile0,_DiscardTile1,_DiscardTile2,_DiscardTile3,
+    _DiscardTile4,_DiscardTile5,_DiscardTile6,_DiscardTile7,
+    _DiscardTile8,_DiscardTile9,_DiscardTile10,_DiscardTile11,
+    _DiscardTile12,_DiscardTile13,_DiscardTile14,_DiscardTile15;
+
 //!RDPSDefines
 
 //Defines for helper functions

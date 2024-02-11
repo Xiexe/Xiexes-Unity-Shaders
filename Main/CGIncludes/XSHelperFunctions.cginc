@@ -43,44 +43,44 @@ void InitializeTextureUVs(
     t.uv1 = i.uv1;
     t.uv2 = i.uv2;
 
-    half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
+    half2 uvSetAlbedo = (_UVSetAlbedo == OPTION_UV1) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
 
-    half2 uvSetClipMap = (_UVSetClipMap == 0) ? i.uv : i.uv1;
+    half2 uvSetClipMap = (_UVSetClipMap == OPTION_UV1) ? i.uv : i.uv1;
     t.clipMapUV = TRANSFORM_TEX(uvSetClipMap, _ClipMap);
 
-    half2 uvSetDissolveMap = (_UVSetDissolve == 0) ? i.uv : i.uv1;
+    half2 uvSetDissolveMap = (_UVSetDissolve == OPTION_UV1) ? i.uv : i.uv1;
     t.dissolveUV = TRANSFORM_TEX(uvSetDissolveMap, _DissolveTexture);
 
     #if !defined(UNITY_PASS_SHADOWCASTER)
-        half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
+        half2 uvSetNormalMap = (_UVSetNormal == OPTION_UV1) ? i.uv : i.uv1;
         t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
 
-        half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
+        half2 uvSetEmissionMap = (_UVSetEmission == OPTION_UV1) ? i.uv : i.uv1;
         t.emissionMapUV = TRANSFORM_TEX(uvSetEmissionMap, _EmissionMap);
 
-        half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
+        half2 uvSetMetallicGlossMap = (_UVSetMetallic == OPTION_UV1) ? i.uv : i.uv1;
         t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
 
-        half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
+        half2 uvSetOcclusion = (_UVSetOcclusion == OPTION_UV1) ? i.uv : i.uv1;
         t.occlusionUV = TRANSFORM_TEX(uvSetOcclusion, _OcclusionMap);
 
-        half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
+        half2 uvSetDetailNormal = (_UVSetDetNormal == OPTION_UV1) ? i.uv : i.uv1;
         t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
 
-        half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
+        half2 uvSetDetailMask = (_UVSetDetMask == OPTION_UV1) ? i.uv : i.uv1;
         t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
 
-        half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
+        half2 uvSetSpecularMap = (_UVSetSpecular == OPTION_UV1) ? i.uv : i.uv1;
         t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
 
-        half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
+        half2 uvSetThickness = (_UVSetThickness == OPTION_UV1) ? i.uv : i.uv1;
         t.thicknessMapUV = TRANSFORM_TEX(uvSetThickness, _ThicknessMap);
 
-        half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
+        half2 uvSetReflectivityMask = (_UVSetReflectivity == OPTION_UV1) ? i.uv : i.uv1;
         t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);
 
-        half2 uvSetRimMask = (_UVSetRimMask == 0) ? i.uv : i.uv1;
+        half2 uvSetRimMask = (_UVSetRimMask == OPTION_UV1) ? i.uv : i.uv1;
         t.rimMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _RimMask);
     #endif
 }
@@ -120,7 +120,7 @@ void InitializeTextureUVsMerged(
     t.uv1 = i.uv1;
     t.uv2 = i.uv2;
 
-    half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
+    half2 uvSetAlbedo = (_UVSetAlbedo == OPTION_UV1) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
     t.normalMapUV = t.albedoUV;
     t.emissionMapUV = t.albedoUV;
@@ -134,7 +134,7 @@ void InitializeTextureUVsMerged(
     t.clipMapUV = t.albedoUV;
 
     //Dissolve map makes sense to be on a sep. UV always.
-    half2 uvSetDissolveMap = (_UVSetDissolve == 0) ? i.uv : i.uv1;
+    half2 uvSetDissolveMap = (_UVSetDissolve == OPTION_UV1) ? i.uv : i.uv1;
     t.dissolveUV = TRANSFORM_TEX(uvSetDissolveMap, _DissolveTexture);
 }
 
@@ -305,20 +305,20 @@ void calcDissolve(inout FragmentData i, inout float3 col)
         half dissolveAmt = Remap_Float(mask, float2(0,1), float2(0.25, 0.75));
         half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AdjustAlphaUsingTextureArray(i, 1), _UseClipsForDissolve));
         half dissolve = 0;
-        if (_DissolveCoordinates == 0)
+        if (_DissolveCoordinates == DISSOLVE_COORDINATE_UV)
         {
             dissolve = dissolveAmt - dissolveProgress;
             clip(dissolve);
         }
 
-        if(_DissolveCoordinates == 1)
+        if(_DissolveCoordinates == DISSOLVE_COORDINATE_ROOT)
         {
             half distToCenter = 1-length(i.objPos);
             dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
             clip(dissolve);
         }
 
-        if(_DissolveCoordinates == 2)
+        if(_DissolveCoordinates == DISSOLVE_COORDINATE_HEIGHT)
         {
             half distToCenter = (1-i.objPos.y) * 0.5 + 0.5;
             dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
@@ -340,6 +340,74 @@ void calcDissolve(inout FragmentData i, inout float3 col)
     #endif
 }
 
+void discardTile(inout half4 pos, half2 uv, int x, int y, int discardTile)
+{
+    if(discardTile < 0.5) return;
+    if(uv.x > x && uv.x < x + 1 && uv.y > y && uv.y < y + 1)
+    {
+        pos = asfloat(-1);
+    }
+}
+
+void discardTile(half2 uv, int x, int y, int discardTile)
+{
+    if(discardTile < 0.5) return;
+    if(uv.x > x && uv.x < x + 1 && uv.y > y && uv.y < y + 1)
+    {
+        discard;
+    }
+}
+
+void calcUvDiscard(half2 uv)
+{
+    // If we're discarding in the vertex shader, then we don't care about blend mode.
+    // If we're discarding in the pixel shader, then we do care about blend mode.
+    if(_BlendMode == BLEND_OPAQUE) return; // It's turned off for this blend mode.
+
+    discardTile(uv, 0, 0, _DiscardTile0);
+    discardTile(uv, 1, 0, _DiscardTile1);
+    discardTile(uv, 2, 0, _DiscardTile2);
+    discardTile(uv, 3, 0, _DiscardTile3);
+
+    discardTile(uv, 0, 1, _DiscardTile4);
+    discardTile(uv, 1, 1, _DiscardTile5);
+    discardTile(uv, 2, 1, _DiscardTile6);
+    discardTile(uv, 3, 1, _DiscardTile7);
+
+    discardTile(uv, 0, 2, _DiscardTile8);
+    discardTile(uv, 1, 2, _DiscardTile9);
+    discardTile(uv, 2, 2, _DiscardTile10);
+    discardTile(uv, 3, 2, _DiscardTile11);
+
+    discardTile(uv, 0, 3, _DiscardTile12);
+    discardTile(uv, 1, 3, _DiscardTile13);
+    discardTile(uv, 2, 3, _DiscardTile14);
+    discardTile(uv, 3, 3, _DiscardTile15);
+}
+
+void calcUvDiscard(half2 uv, inout half4 pos)
+{
+    discardTile(pos, uv, 0, 0, _DiscardTile0);
+    discardTile(pos, uv, 1, 0, _DiscardTile1);
+    discardTile(pos, uv, 2, 0, _DiscardTile2);
+    discardTile(pos, uv, 3, 0, _DiscardTile3);
+
+    discardTile(pos, uv, 0, 1, _DiscardTile4);
+    discardTile(pos, uv, 1, 1, _DiscardTile5);
+    discardTile(pos, uv, 2, 1, _DiscardTile6);
+    discardTile(pos, uv, 3, 1, _DiscardTile7);
+
+    discardTile(pos, uv, 0, 2, _DiscardTile8);
+    discardTile(pos, uv, 1, 2, _DiscardTile9);
+    discardTile(pos, uv, 2, 2, _DiscardTile10);
+    discardTile(pos, uv, 3, 2, _DiscardTile11);
+
+    discardTile(pos, uv, 0, 3, _DiscardTile12);
+    discardTile(pos, uv, 1, 3, _DiscardTile13);
+    discardTile(pos, uv, 2, 3, _DiscardTile14);
+    discardTile(pos, uv, 3, 3, _DiscardTile15);
+}
+
 //todo: What the fuck is going on here?
 void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
 {
@@ -355,7 +423,7 @@ void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
 
         #if !defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Dithered / Cutout transparency
             float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
-            if(_BlendMode == 2)
+            if(_BlendMode == BLEND_DITHERED)
             {
                 half dither = calcDither(i.screenUV.xy);
                 float fadeDist = abs(_FadeDitherDistance);
@@ -366,7 +434,7 @@ void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
                 clip(modifiedAlpha - dither);
             }
 
-            if(_BlendMode == 1)
+            if(_BlendMode == BLEND_CUTOUT)
             {
                 clip(modifiedAlpha - _Cutoff);
             }

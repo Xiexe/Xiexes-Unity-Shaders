@@ -268,7 +268,7 @@ half3 calcIndirectSpecular(FragmentData i, DotProducts d, half4 metallicSmoothne
     half3 spec = half3(0,0,0);
 
     UNITY_BRANCH
-    if(_ReflectionMode == 0) // PBR
+    if(_ReflectionMode == REFLECTIONMODE_PBR) // PBR
     {
         #if defined(UNITY_PASS_FORWARDBASE) //Indirect PBR specular should only happen in the forward base pass. Otherwise each extra light adds another indirect sample, which could mean you're getting too much light.
             half3 reflectionUV1 = getReflectionUV(reflDir, i.worldPos, unity_SpecCube0_ProbePosition, unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax);
@@ -299,7 +299,7 @@ half3 calcIndirectSpecular(FragmentData i, DotProducts d, half4 metallicSmoothne
             spec = indirectSpecular * fresnel;
         #endif
     }
-    else if(_ReflectionMode == 1) //Baked Cubemap
+    else if(_ReflectionMode == REFLECTIONMODE_BAKEDPBR) //Baked Cubemap
     {
         half3 indirectSpecular = texCUBElod(_BakedCubemap, half4(reflDir, metallicSmoothness.w * UNITY_SPECCUBE_LOD_STEPS));;
         spec = indirectSpecular * fresnel;
@@ -309,7 +309,7 @@ half3 calcIndirectSpecular(FragmentData i, DotProducts d, half4 metallicSmoothne
             spec *= (indirectLight + (_LightColor0 * i.attenuation) * 0.5);
         }
     }
-    else if (_ReflectionMode == 2) //Matcap
+    else if (_ReflectionMode == REFLECTIONMODE_MATCAP) //Matcap
     {
         half3 upVector = half3(0,1,0);
         half2 remapUV = matcapSample(upVector, viewDir, i.normal);
@@ -414,7 +414,7 @@ half4 calcEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
 {
     #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
         float4 emission = 0;
-        if(_EmissionAudioLinkChannel == 0)
+        if(_EmissionAudioLinkChannel == AUDIOLINK_OFF)
         {
             emission = lerp(i.emissionMap, i.emissionMap * i.diffuseColor.xyzz, _EmissionToDiffuse) * _EmissionColor;
         }
@@ -422,10 +422,10 @@ half4 calcEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
         {
             if(AudioLinkIsAvailable())
             {
-                if(_EmissionAudioLinkChannel != 5)
+                if(_EmissionAudioLinkChannel != AUDIOLINK_PACKEDMAP)
                 {
                     int2 aluv;
-                    if (_EmissionAudioLinkChannel == 6)
+                    if (_EmissionAudioLinkChannel == AUDIOLINK_UV)
                     {
                         aluv = int2(t.emissionMapUV.x * _ALUVWidth, t.emissionMapUV.y);
                     } else
@@ -481,7 +481,7 @@ void calcReflectionBlending(FragmentData i, inout half4 col, half3 indirectSpecu
 void calcClearcoat(inout half4 col, FragmentData i, DotProducts d, half3 untouchedNormal, half3 indirectDiffuse, half3 lightCol, half3 viewDir, half3 lightDir, half4 ramp)
 {
     UNITY_BRANCH
-    if(_ClearCoat != 0)
+    if(_ClearCoat != OPTION_OFF)
     {
         untouchedNormal = normalize(untouchedNormal);
         half clearcoatSmoothness = _ClearcoatSmoothness * i.metallicGlossMap.g;

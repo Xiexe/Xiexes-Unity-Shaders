@@ -17,6 +17,7 @@ namespace XSToon3
         public bool ShowSubsurface = false;
         public bool ShowOutlines = false;
         public bool ShowEmission = false;
+        public bool ShowUvDiscard = false;
         public bool ShowAdvanced = false;
         public bool ShowEyeTracking = false;
         public bool ShowAudioLink = false;
@@ -142,6 +143,8 @@ namespace XSToon3
         protected MaterialProperty _OutlineUVSelect = null;
         protected MaterialProperty _ShadowSharpness = null;
         protected MaterialProperty _AdvMode = null;
+        protected MaterialProperty _UVDiscardMode = null;
+        protected MaterialProperty _UVDiscardChannel = null;
         protected MaterialProperty _ClipMap = null;
         protected MaterialProperty _ClipAgainstVertexColorGreaterZeroFive = null;
         protected MaterialProperty _ClipAgainstVertexColorLessZeroFive = null;
@@ -234,6 +237,26 @@ namespace XSToon3
         protected bool isCutoutMasked = false;
         protected bool isDithered = false;
         protected bool isA2C = false;
+        
+        // Stuff for UV Discard because toggles are cursed when you want to draw a grid in editor
+        private static bool DidSetupDiscardGrid = false;
+        protected bool DiscardTile0 = false;
+        protected bool DiscardTile1 = false;
+        protected bool DiscardTile2 = false;
+        protected bool DiscardTile3 = false;
+        protected bool DiscardTile4 = false;
+        protected bool DiscardTile5 = false;
+        protected bool DiscardTile6 = false;
+        protected bool DiscardTile7 = false;
+        protected bool DiscardTile8 = false;
+        protected bool DiscardTile9 = false;
+        protected bool DiscardTile10 = false;
+        protected bool DiscardTile11 = false;
+        protected bool DiscardTile12 = false;
+        protected bool DiscardTile13 = false;
+        protected bool DiscardTile14 = false;
+        protected bool DiscardTile15 = false;
+        //
 
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] props)
         {
@@ -282,8 +305,9 @@ namespace XSToon3
 
             DrawMainSettings(materialEditor, material);
             DrawFurSettings(materialEditor, material);
-            DrawDissolveSettings(materialEditor, material);
             DrawShadowSettings(materialEditor, material);
+            DrawDissolveSettings(materialEditor, material);
+            DrawUvDiscardSettings(materialEditor, material);
             DrawOutlineSettings(materialEditor, material);
             DrawNormalSettings(materialEditor, material);
             DrawSpecularSettings(materialEditor, material);
@@ -608,6 +632,7 @@ namespace XSToon3
                     material.SetFloat("_ClearCoat", 0);
                     material.SetTexture("_MetallicGlossMap", null);
                 }
+                
                 if (_ReflectionMode.floatValue != 3)
                 {
                     XSStyles.SeparatorThin();
@@ -616,12 +641,19 @@ namespace XSToon3
                     materialEditor.ShaderProperty(_UVSetReflectivity, new GUIContent("UV Set", "The UV set to use for the Reflectivity Mask"), 2);
                     materialEditor.ShaderProperty(_Reflectivity, new GUIContent("Reflectivity", "The strength of the reflections."), 2);
                 }
+                
                 if (_ReflectionMode.floatValue == 3)
                 {
                     material.SetFloat("_Metallic", 0);
                     material.SetFloat("_ReflectionBlendMode", 0);
                     material.SetFloat("_ClearCoat", 0);
                 }
+            }
+            else
+            {
+                material.SetFloat("_Metallic", 0);
+                material.SetFloat("_ReflectionBlendMode", 0);
+                material.SetFloat("_ClearCoat", 0);
             }
         }
 
@@ -732,6 +764,93 @@ namespace XSToon3
                 materialEditor.ShaderProperty(_SSDistortion, new GUIContent("Transmission Distortion", "How much the Transmission should follow the normals of the mesh and/or normal map."), 2);
                 materialEditor.ShaderProperty(_SSPower, new GUIContent("Transmission Power", "Subsurface Power"), 2);
                 materialEditor.ShaderProperty(_SSScale, new GUIContent("Transmission Scale", "Subsurface Scale"), 2);
+            }
+        }
+
+        private void DrawUvDiscardSettings(MaterialEditor materialEditor, Material material)
+        {
+            if (BlendMode is (int)Mode.Opaque)
+            {
+                if(material.GetInt("_UVDiscardMode") == 2)
+                {
+                    material.SetInt("_UVDiscardMode", 1);
+                }
+            }
+            
+            Foldouts[material].ShowUvDiscard = XSStyles.ShurikenFoldout("UV Tile Discard", Foldouts[material].ShowUvDiscard);
+            if (Foldouts[material].ShowUvDiscard)
+            {
+                DiscardTile0 = material.GetInt("_DiscardTile0") > 0.5f;
+                DiscardTile1 = material.GetInt("_DiscardTile1") > 0.5f;
+                DiscardTile2 = material.GetInt("_DiscardTile2") > 0.5f;
+                DiscardTile3 = material.GetInt("_DiscardTile3") > 0.5f;
+                DiscardTile4 = material.GetInt("_DiscardTile4") > 0.5f;
+                DiscardTile5 = material.GetInt("_DiscardTile5") > 0.5f;
+                DiscardTile6 = material.GetInt("_DiscardTile6") > 0.5f;
+                DiscardTile7 = material.GetInt("_DiscardTile7") > 0.5f;
+                DiscardTile8 = material.GetInt("_DiscardTile8") > 0.5f;
+                DiscardTile9 = material.GetInt("_DiscardTile9") > 0.5f;
+                DiscardTile10 = material.GetInt("_DiscardTile10") > 0.5f;
+                DiscardTile11 = material.GetInt("_DiscardTile11") > 0.5f;
+                DiscardTile12 = material.GetInt("_DiscardTile12") > 0.5f;
+                DiscardTile13 = material.GetInt("_DiscardTile13") > 0.5f;
+                DiscardTile14 = material.GetInt("_DiscardTile14") > 0.5f;
+                DiscardTile15 = material.GetInt("_DiscardTile15") > 0.5f;
+
+                if (BlendMode is not (int)Mode.Opaque)
+                {
+                    materialEditor.ShaderProperty(_UVDiscardMode,
+                        new GUIContent("UV Discard Mode",
+                            "How to discard pixels based on UV tile. It's recommended to use Vertex for performance reasons."));
+                }
+
+                materialEditor.ShaderProperty(_UVDiscardChannel, new GUIContent("Channel", "Discard pixels based on UV tile."));
+
+                GUILayout.BeginHorizontal(GUILayout.MaxWidth(80));
+                DiscardTile12 = EditorGUILayout.Toggle(DiscardTile12);
+                DiscardTile13 = EditorGUILayout.Toggle(DiscardTile13);
+                DiscardTile14 = EditorGUILayout.Toggle(DiscardTile14);
+                DiscardTile15 = EditorGUILayout.Toggle(DiscardTile15);
+                GUILayout.EndHorizontal();
+                
+                GUILayout.BeginHorizontal(GUILayout.MaxWidth(80));
+                DiscardTile8 = EditorGUILayout.Toggle(DiscardTile8);
+                DiscardTile9 = EditorGUILayout.Toggle(DiscardTile9);
+                DiscardTile10 = EditorGUILayout.Toggle(DiscardTile10);
+                DiscardTile11 = EditorGUILayout.Toggle(DiscardTile11);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal(GUILayout.MaxWidth(80));
+                DiscardTile4 = EditorGUILayout.Toggle(DiscardTile4);
+                DiscardTile5 = EditorGUILayout.Toggle(DiscardTile5);
+                DiscardTile6 = EditorGUILayout.Toggle(DiscardTile6);
+                DiscardTile7 = EditorGUILayout.Toggle(DiscardTile7);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal(GUILayout.MaxWidth(80));
+                DiscardTile0 = EditorGUILayout.Toggle(DiscardTile0);
+                DiscardTile1 = EditorGUILayout.Toggle(DiscardTile1);
+                DiscardTile2 = EditorGUILayout.Toggle(DiscardTile2);
+                DiscardTile3 = EditorGUILayout.Toggle(DiscardTile3);
+                GUILayout.EndHorizontal();
+
+
+                material.SetInt("_DiscardTile0", DiscardTile0 ? 1 : 0);
+                material.SetInt("_DiscardTile1", DiscardTile1 ? 1 : 0);
+                material.SetInt("_DiscardTile2", DiscardTile2 ? 1 : 0);
+                material.SetInt("_DiscardTile3", DiscardTile3 ? 1 : 0);
+                material.SetInt("_DiscardTile4", DiscardTile4 ? 1 : 0);
+                material.SetInt("_DiscardTile5", DiscardTile5 ? 1 : 0);
+                material.SetInt("_DiscardTile6", DiscardTile6 ? 1 : 0);
+                material.SetInt("_DiscardTile7", DiscardTile7 ? 1 : 0);
+                material.SetInt("_DiscardTile8", DiscardTile8 ? 1 : 0);
+                material.SetInt("_DiscardTile9", DiscardTile9 ? 1 : 0);
+                material.SetInt("_DiscardTile10", DiscardTile10 ? 1 : 0);
+                material.SetInt("_DiscardTile11", DiscardTile11 ? 1 : 0);
+                material.SetInt("_DiscardTile12", DiscardTile12 ? 1 : 0);
+                material.SetInt("_DiscardTile13", DiscardTile13 ? 1 : 0);
+                material.SetInt("_DiscardTile14", DiscardTile14 ? 1 : 0);
+                material.SetInt("_DiscardTile15", DiscardTile15 ? 1 : 0);
             }
         }
 

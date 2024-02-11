@@ -19,7 +19,12 @@ VertexOutput vert (VertexInput v)
     float3 tangent = UnityObjectToWorldDir(v.tangent.xyz);
     half tangentSign = v.tangent.w * unity_WorldTransformParams.w;
     float3 bitangent = cross(wnormal, tangent) * tangentSign;
-
+    
+    if(_UVDiscardMode == UVDISCARD_VERTEX)
+    {
+        calcUvDiscard(_UVDiscardChannel == 1 ? v.uv : v.uv1, v.vertex);
+    }
+    
     #if defined(Geometry)
         o.vertex = v.vertex;
     #endif
@@ -36,7 +41,7 @@ VertexOutput vert (VertexInput v)
     o.normal = v.normal;
     o.screenPos = ComputeScreenPos(o.pos);
     o.objPos = normalize(v.vertex);
-
+    
     #if !defined(UNITY_PASS_SHADOWCASTER)
         UNITY_TRANSFER_SHADOW(o, o.uv);
         UNITY_TRANSFER_FOG(o, o.pos);

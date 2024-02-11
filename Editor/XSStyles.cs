@@ -6,7 +6,7 @@ namespace XSToon3
     [InitializeOnLoad]
     public class XSStyles : MonoBehaviour
     {
-        public static string ver = "3.5.0";
+        public static string ver = "3.5.1";
         public static string uiPath;
         private static string patronpath;
 
@@ -230,7 +230,7 @@ namespace XSToon3
         //Find Asset Path
         public static string findAssetPath(string finalFilePath)
         {
-            string[] guids1 = AssetDatabase.FindAssets("XSUpdater", null);
+            string[] guids1 = AssetDatabase.FindAssets("XSStyles", null);
             string untouchedString = AssetDatabase.GUIDToAssetPath(guids1[0]);
             string[] splitString = untouchedString.Split('/');
 

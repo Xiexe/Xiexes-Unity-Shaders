@@ -148,6 +148,25 @@
         [HideInInspector] _ZWrite ("__zw", int) = 1
         [HideInInspector] _AlphaToMask("__am", int) = 0
 
+        [Enum(Off,0,Vertex,1,Pixel,2)] _UVDiscardMode ("Discard Mode", int) = 0
+        [Enum(UV1,0,UV2,1)] _UVDiscardChannel ("Discard Channel", int) = 0
+        [ToggleUI]_DiscardTile0("Tile 0", int) = 0
+        [ToggleUI]_DiscardTile1("Tile 1", int) = 0
+        [ToggleUI]_DiscardTile2("Tile 2", int) = 0
+        [ToggleUI]_DiscardTile3("Tile 3", int) = 0
+        [ToggleUI]_DiscardTile4("Tile 4", int) = 0
+        [ToggleUI]_DiscardTile5("Tile 5", int) = 0
+        [ToggleUI]_DiscardTile6("Tile 6", int) = 0
+        [ToggleUI]_DiscardTile7("Tile 7", int) = 0
+        [ToggleUI]_DiscardTile8("Tile 8", int) = 0
+        [ToggleUI]_DiscardTile9("Tile 9", int) = 0
+        [ToggleUI]_DiscardTile10("Tile 10", int) = 0
+        [ToggleUI]_DiscardTile11("Tile 11", int) = 0
+        [ToggleUI]_DiscardTile12("Tile 12", int) = 0
+        [ToggleUI]_DiscardTile13("Tile 13", int) = 0
+        [ToggleUI]_DiscardTile14("Tile 14", int) = 0
+        [ToggleUI]_DiscardTile15("Tile 15", int) = 0
+        
         _ClipMask("Clip Mask", 2D) = "black" {}
         [IntRange]_ClipIndex("Clip Index", Range(0,7)) = 0
         _ClipSlider00("", Vector) = (0,0,0,0)
@@ -225,6 +244,7 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"
             #include "../../../CGIncludes/XSHelperFunctions.cginc"
@@ -263,6 +283,7 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"
             #include "../../../CGIncludes/XSHelperFunctions.cginc"
@@ -299,6 +320,7 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"
             #include "../../../CGIncludes/XSHelperFunctions.cginc"
