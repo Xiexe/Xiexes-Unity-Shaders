@@ -9,7 +9,7 @@ float4 frag (
 {
     UNITY_SETUP_INSTANCE_ID(i);
 
-    if(_UVDiscardMode == 2)
+    if(_UVDiscardMode == UVDISCARD_PIXEL)
     {
         calcUvDiscard(_UVDiscardChannel == 1 ? i.uv : i.uv1);
     }

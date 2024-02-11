@@ -68,13 +68,13 @@ half4 BRDF_XSLighting(HookData data)
     half stipplingRim = 0;
     half stipplingIndirect = 0;
     bool usingLineHalftone = 0;
-    if(_HalftoneType == 0 || _HalftoneType == 2)
+    if(_HalftoneType == HALFTONE_SHADOWS || _HalftoneType == HALFTONE_SHADOWS_AND_HIGHLIGHTS)
     {
         lineHalftone = lerp(1, LineHalftone(i, 1), 1-saturate(dot(shadowRim * ramp, grayscaleVec)));
         usingLineHalftone = 1;
     }
 
-    if(_HalftoneType == 1 || _HalftoneType == 2)
+    if(_HalftoneType == HALFTONE_HIGHLIGHTS || _HalftoneType == HALFTONE_SHADOWS_AND_HIGHLIGHTS)
     {
         stipplingDirect = DotHalftone(i, saturate(dot(directSpecular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
         stipplingRim = DotHalftone(i, saturate(dot(rimLight, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));

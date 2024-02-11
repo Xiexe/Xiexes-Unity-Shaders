@@ -43,44 +43,44 @@ void InitializeTextureUVs(
     t.uv1 = i.uv1;
     t.uv2 = i.uv2;
 
-    half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
+    half2 uvSetAlbedo = (_UVSetAlbedo == OPTION_UV1) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
 
-    half2 uvSetClipMap = (_UVSetClipMap == 0) ? i.uv : i.uv1;
+    half2 uvSetClipMap = (_UVSetClipMap == OPTION_UV1) ? i.uv : i.uv1;
     t.clipMapUV = TRANSFORM_TEX(uvSetClipMap, _ClipMap);
 
-    half2 uvSetDissolveMap = (_UVSetDissolve == 0) ? i.uv : i.uv1;
+    half2 uvSetDissolveMap = (_UVSetDissolve == OPTION_UV1) ? i.uv : i.uv1;
     t.dissolveUV = TRANSFORM_TEX(uvSetDissolveMap, _DissolveTexture);
 
     #if !defined(UNITY_PASS_SHADOWCASTER)
-        half2 uvSetNormalMap = (_UVSetNormal == 0) ? i.uv : i.uv1;
+        half2 uvSetNormalMap = (_UVSetNormal == OPTION_UV1) ? i.uv : i.uv1;
         t.normalMapUV = TRANSFORM_TEX(uvSetNormalMap, _BumpMap);
 
-        half2 uvSetEmissionMap = (_UVSetEmission == 0) ? i.uv : i.uv1;
+        half2 uvSetEmissionMap = (_UVSetEmission == OPTION_UV1) ? i.uv : i.uv1;
         t.emissionMapUV = TRANSFORM_TEX(uvSetEmissionMap, _EmissionMap);
 
-        half2 uvSetMetallicGlossMap = (_UVSetMetallic == 0) ? i.uv : i.uv1;
+        half2 uvSetMetallicGlossMap = (_UVSetMetallic == OPTION_UV1) ? i.uv : i.uv1;
         t.metallicGlossMapUV = TRANSFORM_TEX(uvSetMetallicGlossMap, _MetallicGlossMap);
 
-        half2 uvSetOcclusion = (_UVSetOcclusion == 0) ? i.uv : i.uv1;
+        half2 uvSetOcclusion = (_UVSetOcclusion == OPTION_UV1) ? i.uv : i.uv1;
         t.occlusionUV = TRANSFORM_TEX(uvSetOcclusion, _OcclusionMap);
 
-        half2 uvSetDetailNormal = (_UVSetDetNormal == 0) ? i.uv : i.uv1;
+        half2 uvSetDetailNormal = (_UVSetDetNormal == OPTION_UV1) ? i.uv : i.uv1;
         t.detailNormalUV = TRANSFORM_TEX(uvSetDetailNormal, _DetailNormalMap);
 
-        half2 uvSetDetailMask = (_UVSetDetMask == 0) ? i.uv : i.uv1;
+        half2 uvSetDetailMask = (_UVSetDetMask == OPTION_UV1) ? i.uv : i.uv1;
         t.detailMaskUV = TRANSFORM_TEX(uvSetDetailMask, _DetailMask);
 
-        half2 uvSetSpecularMap = (_UVSetSpecular == 0) ? i.uv : i.uv1;
+        half2 uvSetSpecularMap = (_UVSetSpecular == OPTION_UV1) ? i.uv : i.uv1;
         t.specularMapUV = TRANSFORM_TEX(uvSetSpecularMap, _SpecularMap);
 
-        half2 uvSetThickness = (_UVSetThickness == 0) ? i.uv : i.uv1;
+        half2 uvSetThickness = (_UVSetThickness == OPTION_UV1) ? i.uv : i.uv1;
         t.thicknessMapUV = TRANSFORM_TEX(uvSetThickness, _ThicknessMap);
 
-        half2 uvSetReflectivityMask = (_UVSetReflectivity == 0) ? i.uv : i.uv1;
+        half2 uvSetReflectivityMask = (_UVSetReflectivity == OPTION_UV1) ? i.uv : i.uv1;
         t.reflectivityMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _ReflectivityMask);
 
-        half2 uvSetRimMask = (_UVSetRimMask == 0) ? i.uv : i.uv1;
+        half2 uvSetRimMask = (_UVSetRimMask == OPTION_UV1) ? i.uv : i.uv1;
         t.rimMaskUV = TRANSFORM_TEX(uvSetReflectivityMask, _RimMask);
     #endif
 }
@@ -120,7 +120,7 @@ void InitializeTextureUVsMerged(
     t.uv1 = i.uv1;
     t.uv2 = i.uv2;
 
-    half2 uvSetAlbedo = (_UVSetAlbedo == 0) ? i.uv : i.uv1;
+    half2 uvSetAlbedo = (_UVSetAlbedo == OPTION_UV1) ? i.uv : i.uv1;
     t.albedoUV = TRANSFORM_TEX(uvSetAlbedo, _MainTex);
     t.normalMapUV = t.albedoUV;
     t.emissionMapUV = t.albedoUV;
@@ -134,7 +134,7 @@ void InitializeTextureUVsMerged(
     t.clipMapUV = t.albedoUV;
 
     //Dissolve map makes sense to be on a sep. UV always.
-    half2 uvSetDissolveMap = (_UVSetDissolve == 0) ? i.uv : i.uv1;
+    half2 uvSetDissolveMap = (_UVSetDissolve == OPTION_UV1) ? i.uv : i.uv1;
     t.dissolveUV = TRANSFORM_TEX(uvSetDissolveMap, _DissolveTexture);
 }
 
@@ -305,20 +305,20 @@ void calcDissolve(inout FragmentData i, inout float3 col)
         half dissolveAmt = Remap_Float(mask, float2(0,1), float2(0.25, 0.75));
         half dissolveProgress = saturate(_DissolveProgress + lerp(0, 1-AdjustAlphaUsingTextureArray(i, 1), _UseClipsForDissolve));
         half dissolve = 0;
-        if (_DissolveCoordinates == 0)
+        if (_DissolveCoordinates == DISSOLVE_COORDINATE_UV)
         {
             dissolve = dissolveAmt - dissolveProgress;
             clip(dissolve);
         }
 
-        if(_DissolveCoordinates == 1)
+        if(_DissolveCoordinates == DISSOLVE_COORDINATE_ROOT)
         {
             half distToCenter = 1-length(i.objPos);
             dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
             clip(dissolve);
         }
 
-        if(_DissolveCoordinates == 2)
+        if(_DissolveCoordinates == DISSOLVE_COORDINATE_HEIGHT)
         {
             half distToCenter = (1-i.objPos.y) * 0.5 + 0.5;
             dissolve = ((distToCenter + dissolveAmt) * 0.5) - dissolveProgress;
@@ -362,7 +362,7 @@ void calcUvDiscard(half2 uv)
 {
     // If we're discarding in the vertex shader, then we don't care about blend mode.
     // If we're discarding in the pixel shader, then we do care about blend mode.
-    if(_BlendMode < 1) return; // It's turned off for this blend mode.
+    if(_BlendMode == BLEND_OPAQUE) return; // It's turned off for this blend mode.
 
     discardTile(uv, 0, 0, _DiscardTile0);
     discardTile(uv, 1, 0, _DiscardTile1);
@@ -423,7 +423,7 @@ void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
 
         #if !defined(_ALPHABLEND_ON) && defined(_ALPHATEST_ON) // Dithered / Cutout transparency
             float modifiedAlpha = lerp(AdjustAlphaUsingTextureArray(i, i.albedo.a), i.albedo.a, _UseClipsForDissolve);
-            if(_BlendMode == 2)
+            if(_BlendMode == BLEND_DITHERED)
             {
                 half dither = calcDither(i.screenUV.xy);
                 float fadeDist = abs(_FadeDitherDistance);
@@ -434,7 +434,7 @@ void calcAlpha(inout FragmentData i, TextureUV t, inout float alpha)
                 clip(modifiedAlpha - dither);
             }
 
-            if(_BlendMode == 1)
+            if(_BlendMode == BLEND_CUTOUT)
             {
                 clip(modifiedAlpha - _Cutoff);
             }

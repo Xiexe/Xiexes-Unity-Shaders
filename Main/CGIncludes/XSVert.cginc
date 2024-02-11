@@ -20,7 +20,7 @@ VertexOutput vert (VertexInput v)
     half tangentSign = v.tangent.w * unity_WorldTransformParams.w;
     float3 bitangent = cross(wnormal, tangent) * tangentSign;
     
-    if(_UVDiscardMode == 1)
+    if(_UVDiscardMode == UVDISCARD_VERTEX)
     {
         calcUvDiscard(_UVDiscardChannel == 1 ? v.uv : v.uv1, v.vertex);
     }

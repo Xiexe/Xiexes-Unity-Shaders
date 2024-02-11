@@ -154,7 +154,7 @@
         [HideInInspector] _Mode ("__mode", Float) = 0.0
         
         [Enum(Off,0,Vertex,1,Pixel,2)] _UVDiscardMode ("Discard Mode", int) = 0
-        [Enum(UV1,1,UV2,2)] _UVDiscardChannel ("Discard Channel", int) = 0
+        [Enum(UV1,0,UV2,1)] _UVDiscardChannel ("Discard Channel", int) = 0
         [ToggleUI]_DiscardTile0("Tile 0", int) = 0
         [ToggleUI]_DiscardTile1("Tile 1", int) = 0
         [ToggleUI]_DiscardTile2("Tile 2", int) = 0
@@ -231,6 +231,7 @@
             #endif
 
             #include "../CGIncludes/AudioLink.cginc"
+            #include "../CGIncludes/Enums.cginc"
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
@@ -264,6 +265,7 @@
             #endif
 
             #include "../CGIncludes/AudioLink.cginc"
+            #include "../CGIncludes/Enums.cginc"
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
@@ -295,6 +297,7 @@
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
             #include "../CGIncludes/AudioLink.cginc"
+            #include "../CGIncludes/Enums.cginc"
             #include "../CGIncludes/XSDefines.cginc"
             #include "../CGIncludes/XSHelperFunctions.cginc"
             #include "../CGIncludes/XSLightingFunctions.cginc"
