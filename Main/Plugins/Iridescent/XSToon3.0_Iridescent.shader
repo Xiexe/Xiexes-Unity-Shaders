@@ -134,6 +134,7 @@
         [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         [HDR]_EmissionColor0("Emission Packed Color 1", Color) = (0,0,0,0)
         [HDR]_EmissionColor1("Emission Packed Color 2", Color) = (0,0,0,0)
+        [HDR]_EmissionColor2("Emission Packed Color 3", Color) = (0,0,0,0)
         [IntRange]_ALUVWidth("History Sample Amount", Range(0,128)) = 128
         
         _Iridescent("Iridescent Gardient", 2D) = "white" {}
