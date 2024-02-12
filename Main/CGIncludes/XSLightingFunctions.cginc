@@ -355,7 +355,7 @@ half4 calcDiffuse(FragmentData i, DotProducts d, half3 indirectDiffuse, half4 li
     half grayIndirect = dot(indirectDiffuse, float3(1,1,1));
     half attenFactor = lerp(i.attenuation, 1, smoothstep(0, 0.2, grayIndirect));
 
-    diffuse = ramp * attenFactor * lightCol + indirect;
+    diffuse = lerp(1, ramp, ramp.a) * attenFactor * lightCol + indirect;
     diffuse = i.albedo * diffuse;
     return diffuse;
 }
