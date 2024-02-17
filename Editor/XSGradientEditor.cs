@@ -466,33 +466,39 @@ namespace XSToon3
                 XSMultiGradient old_xsmg = xsmg;
                 
                 finalFilePath = XSStyles.findAssetPath(finalFilePath);
-                XSMultiGradient materialGradient = AssetDatabase.LoadAssetAtPath<XSMultiGradient>($"{finalFilePath}/WorkingGradients/{focusedMat.name}_{AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(focusedMat))}.asset");
-                if (materialGradient != null)
+                string materialGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(focusedMat));
+                string[] possibleGradients = AssetDatabase.FindAssets($"t:XSMultiGradient {materialGuid}", new string[] { $"{finalFilePath}/WorkingGradients" });
+                if (possibleGradients.Length > 0)
                 {
-                    Debug.Log("Loading old gradient for material: " + focusedMat.name);
-                    xsmg = materialGradient;
-                    if (xsmg != old_xsmg)
+                    string gradientPath = AssetDatabase.GUIDToAssetPath(possibleGradients[0]);
+                    XSMultiGradient materialGradient = AssetDatabase.LoadAssetAtPath<XSMultiGradient>(gradientPath);
+                    if (materialGradient != null)
                     {
-                        if (xsmg != null)
+                        Debug.Log("Found gradient asset for material: " + focusedMat.name);
+                        xsmg = materialGradient;
+                        if (xsmg != old_xsmg)
                         {
-                            this.gradients = xsmg.gradients;
-                            this.gradients_index = xsmg.order;
-                            makeReorderedList();
-                        }
-                        else
-                        {
-                            List<Gradient> new_Grads = new List<Gradient>();
-                            for (int i = 0; i < this.gradients.Count; i++)
+                            if (xsmg != null)
                             {
-                                new_Grads.Add(reflessGradient(this.gradients[i]));
+                                this.gradients = xsmg.gradients;
+                                this.gradients_index = xsmg.order;
+                                makeReorderedList();
+                            }
+                            else
+                            {
+                                List<Gradient> new_Grads = new List<Gradient>();
+                                for (int i = 0; i < this.gradients.Count; i++)
+                                {
+                                    new_Grads.Add(reflessGradient(this.gradients[i]));
+                                }
+
+                                this.gradients = new_Grads;
+                                this.gradients_index = reflessIndexes(this.gradients_index);
+                                makeReorderedList();
                             }
 
-                            this.gradients = new_Grads;
-                            this.gradients_index = reflessIndexes(this.gradients_index);
-                            makeReorderedList();
+                            changed = true;
                         }
-
-                        changed = true;
                     }
                 }
             }
