@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 using System.Collections.Generic;
 using System.Reflection;
@@ -24,30 +25,7 @@ namespace XSToon3
         public bool ShowDissolve = false;
         public bool ShowFur = false;
     }
-
-    public enum BlendingMode
-    {
-        Opaque,
-        Cutout,
-        Fade,
-        Transparent
-    }
-
-    public enum ReflectionMode
-    {
-        PBR,
-        BakedCube,
-        Matcap
-    }
     
-    public enum NormalMapMode
-    {
-        MeshNormals,
-        VertexColors,
-        Texture,
-        VertexColorsAndTexture
-    }
-
     public class XSToonInspector : ShaderGUI
     {
         protected static Dictionary<Material, FoldoutToggles> Foldouts = new Dictionary<Material, FoldoutToggles>();
@@ -361,8 +339,8 @@ namespace XSToon3
 
             switch (BlendMode)
             {
-                case 0: //Opaque
-                    material.SetInt("_Mode", (int)BlendingMode.Opaque);
+                case (int)Enums.AlphaMode.Opaque:
+                    material.SetInt("_Mode", (int)Enums.ShaderBlendMode.Opaque);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
@@ -370,8 +348,8 @@ namespace XSToon3
                     material.DisableKeyword("_ALPHATEST_ON");
                     break;
 
-                case 1: //Cutout
-                    material.SetInt("_Mode", (int)BlendingMode.Cutout);
+                case (int)Enums.AlphaMode.Cutout:
+                    material.SetInt("_Mode", (int)Enums.ShaderBlendMode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
@@ -379,8 +357,8 @@ namespace XSToon3
                     material.EnableKeyword("_ALPHATEST_ON");
                     break;
 
-                case 2: //Dithered
-                    material.SetInt("_Mode", (int)BlendingMode.Cutout);
+                case (int)Enums.AlphaMode.Dithered:
+                    material.SetInt("_Mode", (int)Enums.ShaderBlendMode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
@@ -388,8 +366,8 @@ namespace XSToon3
                     material.EnableKeyword("_ALPHATEST_ON");
                     break;
 
-                case 3: //Alpha To Coverage
-                    material.SetInt("_Mode", (int)BlendingMode.Cutout);
+                case (int)Enums.AlphaMode.AlphaToCoverage:
+                    material.SetInt("_Mode", (int)Enums.ShaderBlendMode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
@@ -397,8 +375,8 @@ namespace XSToon3
                     material.EnableKeyword("_ALPHATEST_ON");
                     break;
 
-                case 4: //Transparent
-                    material.SetInt("_Mode", (int)BlendingMode.Transparent);
+                case (int)Enums.AlphaMode.Transparent:
+                    material.SetInt("_Mode", (int)Enums.ShaderBlendMode.Transparent);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
@@ -406,8 +384,8 @@ namespace XSToon3
                     material.DisableKeyword("_ALPHATEST_ON");
                     break;
 
-                case 5: //Fade
-                    material.SetInt("_Mode", (int)BlendingMode.Fade);
+                case (int)Enums.AlphaMode.Fade:
+                    material.SetInt("_Mode", (int)Enums.ShaderBlendMode.Fade);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.SrcAlpha,
                         (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
@@ -415,8 +393,8 @@ namespace XSToon3
                     material.DisableKeyword("_ALPHATEST_ON");
                     break;
 
-                case 6: //Additive
-                    material.SetInt("_Mode", (int)BlendingMode.Transparent);
+                case (int)Enums.AlphaMode.Additive:
+                    material.SetInt("_Mode", (int)Enums.ShaderBlendMode.Transparent);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
@@ -555,7 +533,9 @@ namespace XSToon3
             if (Foldouts[material].ShowNormal)
             {
                 materialEditor.ShaderProperty(_NormalMapMode, new GUIContent("Normal Map Source", "How to alter the normals of the mesh, using which source?"));
-                if (_NormalMapMode.floatValue == 0)
+                
+                Enums.NormalMapMode normalMapMode = (Enums.NormalMapMode)_NormalMapMode.floatValue;
+                if (normalMapMode == Enums.NormalMapMode.Texture)
                 {
                     materialEditor.TexturePropertySingleLine(new GUIContent("Normal Map", "Normal Map"), _BumpMap);
                     materialEditor.ShaderProperty(_BumpScale, new GUIContent("Normal Strength", "Strength of the main Normal Map"), 2);
@@ -598,10 +578,11 @@ namespace XSToon3
             if (Foldouts[material].ShowReflection)
             {
                 materialEditor.ShaderProperty(_ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
-                
-                switch ((int)_ReflectionMode.floatValue)
+
+                Enums.ReflectionMode reflectionMode = (Enums.ReflectionMode)_ReflectionMode.floatValue;
+                switch (reflectionMode)
                 {
-                    case (int)ReflectionMode.PBR:
+                    case Enums.ReflectionMode.PBR:
                     {
                         materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
                         materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
@@ -621,7 +602,7 @@ namespace XSToon3
                         break;
                     }
                     
-                    case (int)ReflectionMode.BakedCube:
+                    case Enums.ReflectionMode.BakedCube:
                     {
                         materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
                         materialEditor.ShaderProperty(_ClearCoat, new GUIContent("Clearcoat", "Clearcoat"));
@@ -641,7 +622,7 @@ namespace XSToon3
                         break;
                     }
                     
-                    case (int)ReflectionMode.Matcap:
+                    case Enums.ReflectionMode.Matcap:
                     {
                         materialEditor.ShaderProperty(_ReflectionBlendMode, new GUIContent("Reflection Blend Mode", "Blend mode for reflection. Additive is Color + reflection, Multiply is Color * reflection, and subtractive is Color - reflection"));
 
@@ -656,7 +637,7 @@ namespace XSToon3
                     }
                 }
                 
-                if (_ReflectionMode.floatValue != (int)ReflectionMode.Matcap)
+                if (reflectionMode != Enums.ReflectionMode.Matcap)
                 {
                     XSStyles.SeparatorThin();
                     materialEditor.TexturePropertySingleLine(new GUIContent("Reflectivity Mask", "Mask for reflections."), _ReflectivityMask);
@@ -779,7 +760,7 @@ namespace XSToon3
 
         private void DrawUvDiscardSettings(MaterialEditor materialEditor, Material material)
         {
-            if (BlendMode == (int)BlendingMode.Opaque)
+            if (BlendMode == (int)Enums.AlphaMode.Opaque)
             {
                 if(material.GetInt("_UVDiscardMode") == 2)
                 {
@@ -807,7 +788,7 @@ namespace XSToon3
                 DiscardTile14 = material.GetInt("_DiscardTile14") > 0.5f;
                 DiscardTile15 = material.GetInt("_DiscardTile15") > 0.5f;
 
-                if (BlendMode != (int)BlendingMode.Opaque)
+                if (BlendMode != (int)Enums.AlphaMode.Opaque)
                 {
                     materialEditor.ShaderProperty(_UVDiscardMode,
                         new GUIContent("UV Discard Mode",
