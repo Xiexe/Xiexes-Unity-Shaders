@@ -25,7 +25,7 @@ namespace XSToon3
         public bool ShowFur = false;
     }
 
-    public enum Mode
+    public enum BlendingMode
     {
         Opaque,
         Cutout,
@@ -347,7 +347,7 @@ namespace XSToon3
             switch (BlendMode)
             {
                 case 0: //Opaque
-                    material.SetInt("_Mode", (int)Mode.Opaque);
+                    material.SetInt("_Mode", (int)BlendingMode.Opaque);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.Geometry, 1, 0);
@@ -356,7 +356,7 @@ namespace XSToon3
                     break;
 
                 case 1: //Cutout
-                    material.SetInt("_Mode", (int)Mode.Cutout);
+                    material.SetInt("_Mode", (int)BlendingMode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
@@ -365,7 +365,7 @@ namespace XSToon3
                     break;
 
                 case 2: //Dithered
-                    material.SetInt("_Mode", (int)Mode.Cutout);
+                    material.SetInt("_Mode", (int)BlendingMode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 0);
@@ -374,7 +374,7 @@ namespace XSToon3
                     break;
 
                 case 3: //Alpha To Coverage
-                    material.SetInt("_Mode", (int)Mode.Cutout);
+                    material.SetInt("_Mode", (int)BlendingMode.Cutout);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.Zero,
                         (int) UnityEngine.Rendering.RenderQueue.AlphaTest, 1, 1);
@@ -383,7 +383,7 @@ namespace XSToon3
                     break;
 
                 case 4: //Transparent
-                    material.SetInt("_Mode", (int)Mode.Transparent);
+                    material.SetInt("_Mode", (int)BlendingMode.Transparent);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
@@ -392,7 +392,7 @@ namespace XSToon3
                     break;
 
                 case 5: //Fade
-                    material.SetInt("_Mode", (int)Mode.Fade);
+                    material.SetInt("_Mode", (int)BlendingMode.Fade);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.SrcAlpha,
                         (int) UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
@@ -401,7 +401,7 @@ namespace XSToon3
                     break;
 
                 case 6: //Additive
-                    material.SetInt("_Mode", (int)Mode.Transparent);
+                    material.SetInt("_Mode", (int)BlendingMode.Transparent);
                     SetBlend(material, (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.BlendMode.One,
                         (int) UnityEngine.Rendering.RenderQueue.Transparent, 0, 0);
@@ -769,7 +769,7 @@ namespace XSToon3
 
         private void DrawUvDiscardSettings(MaterialEditor materialEditor, Material material)
         {
-            if (BlendMode is (int)Mode.Opaque)
+            if (BlendMode == (int)BlendingMode.Opaque)
             {
                 if(material.GetInt("_UVDiscardMode") == 2)
                 {
@@ -797,7 +797,7 @@ namespace XSToon3
                 DiscardTile14 = material.GetInt("_DiscardTile14") > 0.5f;
                 DiscardTile15 = material.GetInt("_DiscardTile15") > 0.5f;
 
-                if (BlendMode is not (int)Mode.Opaque)
+                if (BlendMode != (int)BlendingMode.Opaque)
                 {
                     materialEditor.ShaderProperty(_UVDiscardMode,
                         new GUIContent("UV Discard Mode",

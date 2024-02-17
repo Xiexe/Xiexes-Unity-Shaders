@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: UVDiscardTest
-  m_Shader: {fileID: 4800000, guid: 3a74f10861cf4644cb585676682180ed, type: 3}
+  m_Shader: {fileID: 4800000, guid: 987bc88b07487cd439680f2574277bf6, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -60,6 +60,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HSVMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Iridescent:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -121,6 +125,7 @@ Material:
     - _AlphaToMask: 0
     - _AnisotropicReflection: 0
     - _AnisotropicSpecular: 0
+    - _AttentionSpan: 0.2
     - _BlendMode: 0
     - _BumpScale: 1
     - _ClearCoat: 0
@@ -131,7 +136,7 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DiscardTile0: 0
-    - _DiscardTile1: 1
+    - _DiscardTile1: 0
     - _DiscardTile10: 0
     - _DiscardTile11: 0
     - _DiscardTile12: 0
@@ -140,12 +145,12 @@ Material:
     - _DiscardTile15: 0
     - _DiscardTile2: 0
     - _DiscardTile3: 0
-    - _DiscardTile4: 1
+    - _DiscardTile4: 0
     - _DiscardTile5: 0
-    - _DiscardTile6: 1
+    - _DiscardTile6: 0
     - _DiscardTile7: 0
     - _DiscardTile8: 0
-    - _DiscardTile9: 1
+    - _DiscardTile9: 0
     - _DissolveBlendPower: 1
     - _DissolveCoordinates: 0
     - _DissolveLayer1Scale: 1
@@ -157,8 +162,11 @@ Material:
     - _DstBlend: 0
     - _EmissionAudioLinkChannel: 0
     - _EmissionToDiffuse: 0
+    - _EyeOffsetLimit: 0.5
     - _FadeDither: 0
     - _FadeDitherDistance: 0
+    - _FollowLimit: 0
+    - _FollowPower: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
@@ -169,6 +177,11 @@ Material:
     - _HalftoneType: 3
     - _Hue: 0
     - _IOR: 0
+    - _IridescentRimPower: 1
+    - _IridescentSamplingPow: 1
+    - _IrisSize: 1
+    - _LeftRightPan: 0
+    - _LookSpeed: 0.9
     - _MatcapTintToDiffuse: 0
     - _Metallic: 0
     - _Mode: 0
@@ -214,8 +227,9 @@ Material:
     - _StencilComp: 0
     - _StencilOp: 0
     - _TilingMode: 0
+    - _Twitchyness: 0.7
     - _UVDiscard: 1
-    - _UVDiscardChannel: 1
+    - _UVDiscardChannel: 0
     - _UVDiscardMode: 1
     - _UVSec: 0
     - _UVSetAlbedo: 0
@@ -231,6 +245,7 @@ Material:
     - _UVSetRimMask: 0
     - _UVSetSpecular: 0
     - _UVSetThickness: 0
+    - _UpDownPan: 0
     - _UseClipsForDissolve: 0
     - _Value: 1
     - _VertexColorAlbedo: 0
@@ -260,6 +275,7 @@ Material:
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor0: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor1: {r: 0, g: 0, b: 0, a: 0}
+    - _IridescentColor: {r: 1, g: 1, b: 1, a: 1}
     - _MatcapTint: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
