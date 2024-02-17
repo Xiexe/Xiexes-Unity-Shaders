@@ -47,6 +47,27 @@ namespace XSToon3
             Texture,
             VertexColors,
         }
+        
+        public enum OutlineNormalMode
+        {
+            MeshNormals,
+            VertexColors,
+            UVChannel
+        }
+
+        public enum HalftoneType
+        {
+            Shadows,
+            Highlights,
+            ShadowsAndHighlights,
+            NoHalftones
+        }
+
+        public enum ShaderMode
+        {
+            Standard,
+            Advanced
+        }
     }
 }
 

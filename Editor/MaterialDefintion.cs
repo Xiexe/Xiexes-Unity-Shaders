@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -252,7 +251,6 @@ namespace XSToon3
             Shader shader = material.shader;
             BlendMode = (Enums.AlphaMode)material.GetInt("_BlendMode");
 
-            // ShaderType |= (Enums.ShaderTypeFlags)BlendMode;
             switch (BlendMode)
             {
                 case Enums.AlphaMode.Opaque:
@@ -283,8 +281,6 @@ namespace XSToon3
             {
                 ShaderType |= Enums.ShaderTypeFlags.Fur;
             }
-            
-            Debug.Log($"Checking Shader Flags: {ShaderType}");
         }
 
         public void DoMaterialSettings(Material material, ref MaterialProperty[] props)

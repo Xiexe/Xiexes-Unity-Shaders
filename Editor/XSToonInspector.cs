@@ -278,7 +278,8 @@ namespace XSToon3
                 {
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._OutlineNormalMode, new GUIContent("Outline Normal Mode", "How to calcuate the outline expand direction. Using mesh normals may result in split edges."));
 
-                    if (Inspector.MaterialProperties._OutlineNormalMode.floatValue == 2) // TODO:: Clean this into an enum
+                    Enums.OutlineNormalMode outlineNormalMode = (Enums.OutlineNormalMode)Inspector.MaterialProperties._OutlineNormalMode.floatValue;
+                    if (outlineNormalMode == Enums.OutlineNormalMode.UVChannel) // TODO:: Clean this into an enum
                         materialEditor.ShaderProperty(Inspector.MaterialProperties._OutlineUVSelect, new GUIContent("Normals UV", "UV Channel to pull the modified normals from for outlines."));
 
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._OutlineLighting, new GUIContent("Outline Lighting", "Makes outlines respect the lighting, or be emissive."));
@@ -494,18 +495,27 @@ namespace XSToon3
             if (Foldouts[material].ShowHalftones)
             {
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneType, new GUIContent("Halftone Style", "Controls where halftone and stippling effects are drawn."));
-
-                // TODO:: Refactor this into an enum.
-                if (Inspector.MaterialProperties._HalftoneType.floatValue == 1 || Inspector.MaterialProperties._HalftoneType.floatValue == 2)
+                
+                Enums.HalftoneType halftoneType = (Enums.HalftoneType)Inspector.MaterialProperties._HalftoneType.floatValue;
+                switch (halftoneType)
                 {
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneDotSize, new GUIContent("Stippling Scale", "How large should the stippling pattern be?"));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneDotAmount, new GUIContent("Stippling Density", "How dense is the stippling effect?"));
-                }
-
-                if (Inspector.MaterialProperties._HalftoneType.floatValue == 0 || Inspector.MaterialProperties._HalftoneType.floatValue == 2)
-                {
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneLineAmount, new GUIContent("Halftone Line Count", "How many lines should the halftone shadows have?"));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneLineIntensity, new GUIContent("Halftone Line Intensity", "How dark should the halftone lines be?"));
+                    case Enums.HalftoneType.Shadows:
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneLineAmount, new GUIContent("Halftone Line Count", "How many lines should the halftone shadows have?"));
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneLineIntensity, new GUIContent("Halftone Line Intensity", "How dark should the halftone lines be?"));
+                        break;
+                    
+                    case Enums.HalftoneType.Highlights:
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneDotSize, new GUIContent("Stippling Scale", "How large should the stippling pattern be?"));
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneDotAmount, new GUIContent("Stippling Density", "How dense is the stippling effect?"));
+                        break;
+                    
+                    case Enums.HalftoneType.ShadowsAndHighlights:
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneLineAmount, new GUIContent("Halftone Line Count", "How many lines should the halftone shadows have?"));
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneLineIntensity, new GUIContent("Halftone Line Intensity", "How dark should the halftone lines be?"));
+                        
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneDotSize, new GUIContent("Stippling Scale", "How large should the stippling pattern be?"));
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._HalftoneDotAmount, new GUIContent("Stippling Density", "How dense is the stippling effect?"));
+                        break;
                 }
             }
         }
@@ -615,9 +625,8 @@ namespace XSToon3
 
         private void DrawAdvancedSettings(MaterialEditor materialEditor, Material material)
         {
-            // TODO:: Refactor this into an enum.
-            bool isAdvancedModeActive = Inspector.MaterialProperties._AdvMode.floatValue == 1;
-            if (isAdvancedModeActive)
+            Enums.ShaderMode shaderMode = (Enums.ShaderMode)Inspector.MaterialProperties._AdvMode.floatValue;
+            if (shaderMode == Enums.ShaderMode.Advanced)
             {
                 Foldouts[material].ShowAdvanced = XSStyles.ShurikenFoldout("Advanced Settings", Foldouts[material].ShowAdvanced);
                 if (Foldouts[material].ShowAdvanced)
@@ -689,6 +698,11 @@ namespace XSToon3
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._ZWrite, new GUIContent("ZWrite", ""));
                     XSStyles.Separator();
                     materialEditor.RenderQueueField();
+                    XSStyles.Separator();
+                    
+                    XSStyles.DoHeader(new GUIContent("Debugging"));
+                    XSStyles.DoHeaderLeft("Shader Flags:");
+                    XSStyles.doLabelLeft($"{Inspector.ShaderType}");
                     XSStyles.Separator();
                 }
             }
