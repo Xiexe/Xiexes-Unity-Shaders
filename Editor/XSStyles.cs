@@ -6,7 +6,7 @@ namespace XSToon3
     [InitializeOnLoad]
     public class XSStyles : MonoBehaviour
     {
-        public static string ver = "3.5.1";
+        public static string ver = "3.6.0";
         public static string uiPath;
         private static string patronpath;
 

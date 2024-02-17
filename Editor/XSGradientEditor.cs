@@ -12,6 +12,7 @@ namespace XSToon3
     {
         public List<int> gradients_index = new List<int>(new int[1] { 0 });
         public List<Gradient> gradients = new List<Gradient>(5);
+        public static List<Gradient> lastGradients = new List<Gradient>(5);
         public Texture2D tex;
 
         private string finalFilePath;
@@ -79,7 +80,18 @@ namespace XSToon3
                 gradients.Add(new Gradient());
                 gradients.Add(new Gradient());
             }
+            
+            if(lastGradients.Count == 0)
+            {
+                lastGradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
+            }
 
+            gradients = lastGradients;
+            
             if (grad_index_reorderable == null)
             {
                 makeReorderedList();
@@ -185,6 +197,9 @@ namespace XSToon3
                 tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             }
 
+            drawSaveGradientButton(ref width, ref height);
+            XSStyles.SeparatorThin();
+            
             bool old_isLinear = isLinear;
             drawAdvancedOptions();
             if (old_isLinear != isLinear)
@@ -237,35 +252,12 @@ namespace XSToon3
                     }
                 }
             }
-
-            XSStyles.Separator();
+            
+            XSStyles.SeparatorThin();
             drawMGInputOutput();
-
-
-            if (GUILayout.Button("Save Ramp"))
-            {
-                finalFilePath = XSStyles.findAssetPath(finalFilePath);
-                string path = EditorUtility.SaveFilePanel("Save Ramp as PNG", finalFilePath + "/Textures/Shadow Ramps/Generated", "gradient", "png");
-                if (path.Length != 0)
-                {
-                    updateTexture(width, height);
-                    bool success = GenTexture(tex, path);
-                    if (success)
-                    {
-                        if (focusedMat != null)
-                        {
-                            string s = path.Substring(path.IndexOf("Assets"));
-                            Texture ramp = AssetDatabase.LoadAssetAtPath<Texture>(s);
-                            if (ramp != null)
-                            {
-                                focusedMat.SetTexture(rampProperty, ramp);
-                                this.oldTexture = null;
-                            }
-                        }
-                    }
-                }
-            }
             drawHelpText();
+            
+            lastGradients = gradients;
         }
 
         Gradient reflessGradient(Gradient old_grad)
@@ -407,6 +399,33 @@ namespace XSToon3
             return false;
         }
 
+        void drawSaveGradientButton(ref int width, ref int height)
+        {
+            if (GUILayout.Button("Save Ramp"))
+            {
+                finalFilePath = XSStyles.findAssetPath(finalFilePath);
+                string path = EditorUtility.SaveFilePanel("Save Ramp as PNG", finalFilePath + "/Textures/Shadow Ramps/Generated", "gradient", "png");
+                if (path.Length != 0)
+                {
+                    updateTexture(width, height);
+                    bool success = GenTexture(tex, path);
+                    if (success)
+                    {
+                        if (focusedMat != null)
+                        {
+                            string s = path.Substring(path.IndexOf("Assets"));
+                            Texture ramp = AssetDatabase.LoadAssetAtPath<Texture>(s);
+                            if (ramp != null)
+                            {
+                                focusedMat.SetTexture(rampProperty, ramp);
+                                this.oldTexture = null;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         void drawMGInputOutput()
         {
             GUILayout.BeginHorizontal();
@@ -469,7 +488,6 @@ namespace XSToon3
 
         void drawHelpText()
         {
-            XSStyles.Separator();
             dHelpText = XSStyles.ShurikenFoldout("Information", dHelpText);
             if(dHelpText)
             {
