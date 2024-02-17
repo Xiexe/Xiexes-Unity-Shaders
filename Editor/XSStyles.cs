@@ -289,6 +289,7 @@ namespace XSToon3
 
         public static bool ShurikenFoldout(string title, bool display)
         {
+            SeparatorThin();
             var rect = DrawShuriken(title, new Vector2(20f, -2f), 22);
             var e = Event.current;
             var toggleRect = new Rect(rect.x + 4f, rect.y + 2f, 13f, 13f);
@@ -301,6 +302,7 @@ namespace XSToon3
                 display = !display;
                 e.Use();
             }
+            
             return display;
         }
 

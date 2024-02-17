@@ -265,7 +265,6 @@ namespace XSToon3
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._OcclusionIntensity, new GUIContent("Intensity", "Occlusion intensity"), 2);
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._UVSetOcclusion, new GUIContent("UV Set", "The UV set to use for the Occlusion Texture"), 2);
                 materialEditor.TextureScaleOffsetProperty(Inspector.MaterialProperties._OcclusionMap);
-
             }
         }
 
@@ -574,6 +573,9 @@ namespace XSToon3
                 }
 
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._UVDiscardChannel, new GUIContent("Channel", "Discard pixels based on UV tile."));
+                
+                GUILayout.Space(16);
+                XSStyles.DoHeaderLeft("Discard Tiles");
 
                 GUILayout.BeginHorizontal(GUILayout.MaxWidth(80));
                 Inspector.DiscardTile12 = EditorGUILayout.Toggle(Inspector.DiscardTile12);
@@ -680,30 +682,30 @@ namespace XSToon3
                         }
                     }
 
-                    XSStyles.Separator();
+                    XSStyles.SeparatorThin();
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._VertexColorAlbedo, new GUIContent("Vertex Color Albedo", "Multiplies the vertex color of the mesh by the Albedo texture to derive the final Albedo color."));
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._WireColor, new GUIContent("Wire Color On UV2", "This will only work with a specific second uv channel setup."));
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._WireWidth, new GUIContent("Wire Width", "Controls the above wire width."));
 
-                    XSStyles.Separator();
+                    XSStyles.SeparatorThin();
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._Stencil, Inspector.MaterialProperties._Stencil.displayName);
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._StencilComp, Inspector.MaterialProperties._StencilComp.displayName);
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._StencilOp, Inspector.MaterialProperties._StencilOp.displayName);
 
-                    XSStyles.Separator();
+                    XSStyles.SeparatorThin();
                     Inspector.OverrideRenderSettings = EditorGUILayout.Toggle(new GUIContent("Override Render Settings", "Allows manual control over all render settings (Queue, ZWrite, Etc.)"), Inspector.OverrideRenderSettings);
 
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._SrcBlend, new GUIContent("SrcBlend", ""));
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._DstBlend, new GUIContent("DstBlend", ""));
                     materialEditor.ShaderProperty(Inspector.MaterialProperties._ZWrite, new GUIContent("ZWrite", ""));
-                    XSStyles.Separator();
+                    XSStyles.SeparatorThin();
                     materialEditor.RenderQueueField();
-                    XSStyles.Separator();
+                    XSStyles.SeparatorThin();
                     
                     XSStyles.DoHeader(new GUIContent("Debugging"));
                     XSStyles.DoHeaderLeft("Shader Flags:");
                     XSStyles.doLabelLeft($"{Inspector.ShaderType}");
-                    XSStyles.Separator();
+                    XSStyles.SeparatorThin();
                 }
             }
         }
