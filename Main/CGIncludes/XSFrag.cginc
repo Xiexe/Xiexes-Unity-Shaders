@@ -128,6 +128,7 @@ float4 frag (
     
         col = PostLightingHook(col, data);
         UNITY_APPLY_FOG(i.fogCoord, col);
+    
         return float4(col.rgb, alpha);
     #endif
 }

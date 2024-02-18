@@ -68,6 +68,13 @@ namespace XSToon3
             Standard,
             Advanced
         }
+        
+        public enum FurType
+        {
+            Shell,
+            Fin,
+            Mixed
+        }
     }
 }
 

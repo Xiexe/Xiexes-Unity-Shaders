@@ -7,13 +7,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Combed
+  m_Name: CardFur
   m_Shader: {fileID: 4800000, guid: 7797e32bdbf27104e9a60321c8ead107, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _ALPHABLEND_ON
   - _ALPHATEST_ON
+  - _FUR_FIN
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -62,7 +63,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FurTexture:
-        m_Texture: {fileID: 2800000, guid: f8eee05554827a14a9b693000d521a26, type: 3}
+        m_Texture: {fileID: 2800000, guid: 432fa8dc3a7ccd4469757e37a859396f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HSVMask:
@@ -71,7 +72,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 3, y: 2}
         m_Offset: {x: 0, y: 0}
     - _Matcap:
         m_Texture: {fileID: 0}
@@ -94,7 +95,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Ramp:
-        m_Texture: {fileID: 2800000, guid: 529b95e318b684643b47bd73e037118a, type: 3}
+        m_Texture: {fileID: 2800000, guid: bcf43f884f40eae42943382e4771f90f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RampSelectionMask:
@@ -126,7 +127,7 @@ Material:
     - _AdvMode: 0
     - _AlphaToMask: 1
     - _AnisotropicReflection: 0
-    - _AnisotropicSpecular: 0
+    - _AnisotropicSpecular: 0.813
     - _BlendMode: 0
     - _BumpScale: 1
     - _ClearCoat: 0
@@ -135,9 +136,9 @@ Material:
     - _ClipIndex: 0
     - _ColorFalloffMax: 1
     - _ColorFalloffMin: 0
-    - _CombX: 0.556
-    - _CombY: -0.342
-    - _Culling: 0
+    - _CombX: 0
+    - _CombY: 0
+    - _Culling: 2
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DiscardTile0: 0
@@ -169,9 +170,17 @@ Material:
     - _EmissionToDiffuse: 0
     - _FadeDither: 0
     - _FadeDitherDistance: 0
-    - _FurLength: 0.132
+    - _FurHeightVariantion: 0
+    - _FurLength: 0.124
+    - _FurLengthRandomness: 0.121
+    - _FurLengthVariation: 0
+    - _FurMessiness: 0.337
+    - _FurMode: 1
     - _FurOcclusion: 0.5
-    - _FurWidth: 0.532
+    - _FurWidth: 0.034
+    - _FurWidthRandomness: 0.087
+    - _FurWidthVariantion: 0
+    - _FurWidthVariation: 0
     - _Glossiness: 0.5
     - _Gravity: 0
     - _HalftoneDotAmount: 5
@@ -216,15 +225,15 @@ Material:
     - _ShadowRimSharpness: 0.3
     - _ShadowRimThreshold: 0.1
     - _ShadowSharpness: 1
-    - _SpecularAlbedoTint: 1
-    - _SpecularArea: 0.5
-    - _SpecularIntensity: 0
+    - _SpecularAlbedoTint: 0
+    - _SpecularArea: 0.185
+    - _SpecularIntensity: 1
     - _SpecularSharpness: 0
     - _SrcBlend: 1
     - _Stencil: 0
     - _StencilComp: 0
     - _StencilOp: 0
-    - _StrandAmount: 3
+    - _StrandAmount: 10
     - _TilingMode: 0
     - _UVDiscardChannel: 0
     - _UVDiscardMode: 0

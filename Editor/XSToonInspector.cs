@@ -57,8 +57,8 @@ namespace XSToon3
             }
 
             DrawMainSettings(materialEditor, material);
-            DrawFurSettings(materialEditor, material);
             DrawShadowSettings(materialEditor, material);
+            DrawFurSettings(materialEditor, material);
             DrawDissolveSettings(materialEditor, material);
             DrawUvDiscardSettings(materialEditor, material);
             DrawOutlineSettings(materialEditor, material);
@@ -321,11 +321,11 @@ namespace XSToon3
 
         private void DrawSpecularSettings(MaterialEditor materialEditor, Material material)
         {
-            Foldouts[material].ShowSpecular = XSStyles.ShurikenFoldout("Specular", Foldouts[material].ShowSpecular);
+            Foldouts[material].ShowSpecular = XSStyles.ShurikenFoldout("Direct Reflections", Foldouts[material].ShowSpecular);
             if (Foldouts[material].ShowSpecular)
             {
                 materialEditor.TexturePropertySingleLine(
-                    new GUIContent("Specular Map(R,G,B)", "Specular Map. Red channel controls Intensity, Green controls how much specular is tinted by Albedo, and Blue controls Smoothness (Only for Blinn-Phong, and GGX)."), 
+                    new GUIContent("Reflection Mask (R,G,B)", "Reflection Mask. \n\nRed = Intensity, \nGreen = Albedo Tint, \nBlue = Smoothness"), 
                     Inspector.MaterialProperties._SpecularMap
                 );
                 materialEditor.TextureScaleOffsetProperty(Inspector.MaterialProperties._SpecularMap);
@@ -340,7 +340,7 @@ namespace XSToon3
 
         private void DrawReflectionsSettings(MaterialEditor materialEditor, Material material)
         {
-            Foldouts[material].ShowReflection = XSStyles.ShurikenFoldout("Reflections", Foldouts[material].ShowReflection);
+            Foldouts[material].ShowReflection = XSStyles.ShurikenFoldout("Indirect Reflections", Foldouts[material].ShowReflection);
             if (Foldouts[material].ShowReflection)
             {
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._ReflectionMode, new GUIContent("Reflection Mode", "Reflection Mode."));
@@ -741,33 +741,74 @@ namespace XSToon3
                 Foldouts[material].ShowFur = XSStyles.ShurikenFoldout("Fur Settings", Foldouts[material].ShowFur);
                 if (Foldouts[material].ShowFur)
                 {
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Noise Texture", "Used to control the pattern of the fur strands."), Inspector.MaterialProperties._NoiseTexture);
+                    materialEditor.ShaderProperty(Inspector.MaterialProperties._FurMode, new GUIContent("Fur Style", "Fur Style. Shells are good for shorter fur, fins are good for longer fur."));
                     XSStyles.SeparatorThin();
+                    
+                    Enums.FurType furType = (Enums.FurType)Inspector.MaterialProperties._FurMode.floatValue;
+                    switch (furType)
+                    {
+                        case Enums.FurType.Shell:
+                        {
+                            material.EnableKeyword("_FUR_SHELL");
+                            material.DisableKeyword("_FUR_FIN");
+                            
+                            materialEditor.TexturePropertySingleLine(new GUIContent("Noise Texture", "Used to control the pattern of the fur strands."), Inspector.MaterialProperties._NoiseTexture);
+                            XSStyles.SeparatorThin();
 
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Fur Albedo", "Albedo Texture for the fur coat"), Inspector.MaterialProperties._FurTexture);
-                    materialEditor.TextureScaleOffsetProperty(Inspector.MaterialProperties._FurTexture);
-                    XSStyles.SeparatorThin();
+                            materialEditor.TexturePropertySingleLine(new GUIContent("Fur Albedo", "Albedo Texture for the fur coat"), Inspector.MaterialProperties._FurTexture);
+                            materialEditor.TextureScaleOffsetProperty(Inspector.MaterialProperties._FurTexture);
+                            XSStyles.SeparatorThin();
 
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Length Mask", "Used to control length of the fur."), Inspector.MaterialProperties._FurLengthMask);
-                    materialEditor.TextureScaleOffsetProperty(Inspector.MaterialProperties._FurLengthMask);
-                    XSStyles.SeparatorThin();
+                            materialEditor.TexturePropertySingleLine(new GUIContent("Length Mask", "Used to control length of the fur."), Inspector.MaterialProperties._FurLengthMask);
+                            materialEditor.TextureScaleOffsetProperty(Inspector.MaterialProperties._FurLengthMask);
+                            XSStyles.SeparatorThin();
 
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._TopColor, new GUIContent("Top Color", ""));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._BottomColor, new GUIContent("Bottom Color", ""));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._ColorFalloffMin, new GUIContent("Blend Min", ""));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._ColorFalloffMax, new GUIContent("Blend Max", ""));
-                    XSStyles.SeparatorThin();
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._TopColor, new GUIContent("Top Color", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._BottomColor, new GUIContent("Bottom Color", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._ColorFalloffMin, new GUIContent("Blend Min", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._ColorFalloffMax, new GUIContent("Blend Max", ""));
+                            XSStyles.SeparatorThin();
 
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._LayerCount, new GUIContent("Layer Count", ""));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._StrandAmount, new GUIContent("Strand Count", ""));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._FurLength, new GUIContent("Length", ""));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._FurWidth, new GUIContent("Strand Width", ""));
-                    XSStyles.SeparatorThin();
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._LayerCount, new GUIContent("Layer Count", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._StrandAmount, new GUIContent("Strand Count", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._FurLength, new GUIContent("Length", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._FurWidth, new GUIContent("Strand Width", ""));
+                            XSStyles.SeparatorThin();
 
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._Gravity, new GUIContent("Gravity Strength", ""));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._CombX, new GUIContent("Comb X", ""));
-                    materialEditor.ShaderProperty(Inspector.MaterialProperties._CombY, new GUIContent("Comb Y", ""));
-                    XSStyles.SeparatorThin();
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._Gravity, new GUIContent("Gravity Strength", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._CombX, new GUIContent("Comb X", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._CombY, new GUIContent("Comb Y", ""));
+                            break;
+                        }
+
+                        case Enums.FurType.Fin:
+                        {
+                            material.DisableKeyword("_FUR_SHELL");
+                            material.EnableKeyword("_FUR_FIN");
+                            
+                            materialEditor.TexturePropertySingleLine(new GUIContent("Fur Albedo", "Albedo Texture for the fur coat"), Inspector.MaterialProperties._FurTexture);
+                            materialEditor.TextureScaleOffsetProperty(Inspector.MaterialProperties._FurTexture);
+                            XSStyles.SeparatorThin();
+
+                            materialEditor.TexturePropertySingleLine(new GUIContent("Length Mask", "Used to control length of the fur."), Inspector.MaterialProperties._FurLengthMask);
+                            materialEditor.TextureScaleOffsetProperty(Inspector.MaterialProperties._FurLengthMask);
+                            XSStyles.SeparatorThin();
+
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._FurMessiness, new GUIContent("Messiness", "How messy the fur is."));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._FurLength, new GUIContent("Length", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._FurLengthRandomness, new GUIContent("Length Variation"));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._FurWidth, new GUIContent("Width", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._FurWidthRandomness, new GUIContent("Width Variation"));
+                            XSStyles.SeparatorThin();
+                            
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._TopColor, new GUIContent("Top Color", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._BottomColor, new GUIContent("Bottom Color", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._ColorFalloffMin, new GUIContent("Blend Min", ""));
+                            materialEditor.ShaderProperty(Inspector.MaterialProperties._ColorFalloffMax, new GUIContent("Blend Max", ""));
+                            
+                            break;
+                        }
+                    }
                 }
             }
         }
