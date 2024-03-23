@@ -231,6 +231,23 @@ namespace XSToon3
             Foldouts[material].ShowShadows = XSStyles.ShurikenFoldout("Shadows", Foldouts[material].ShowShadows);
             if (Foldouts[material].ShowShadows)
             {
+                materialEditor.ShaderProperty(Inspector.MaterialProperties._UseShadowMapTexture, new GUIContent("Use Shadow Map", "Use Shadow Map texture for shadows. (Mainly used for faces. Reference Genshin Impact for style.)"));
+                bool useShadowMapTexture = material.GetInt("_UseShadowMapTexture") > 0;
+
+                if (useShadowMapTexture)
+                {
+                    materialEditor.TexturePropertySingleLine(
+                        new GUIContent("Shadow Map", "Shadow Map Texture, black to white, uses alpha to blend between shadowmap shading and normal based shading. Shadow texture should be in the style of Genshin Impact. (Mainly used for faces.)\n\n Note: Head Mesh must be separate from the rest of the body for this to work correctly."), 
+                        Inspector.MaterialProperties._ShadowMapTexture
+                    );
+                }
+                XSStyles.SeparatorThin();
+                
+                GUILayout.BeginHorizontal();
+                materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), Inspector.MaterialProperties._Ramp);
+                XSStyles.CallGradientEditor(material);
+                GUILayout.EndHorizontal();
+                
                 materialEditor.TexturePropertySingleLine(
                     new GUIContent("Ramp Selection Mask", "A black to white mask that determins how far up on the multi ramp to sample. 0 for bottom, 1 for top, 0.5 for middle, 0.25, and 0.75 for mid bottom and mid top respectively."), 
                     Inspector.MaterialProperties._RampSelectionMask
@@ -251,11 +268,6 @@ namespace XSToon3
                         }
                     }
                 }
-
-                GUILayout.BeginHorizontal();
-                    materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), Inspector.MaterialProperties._Ramp);
-                    XSStyles.CallGradientEditor(material);
-                GUILayout.EndHorizontal();
 
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
 

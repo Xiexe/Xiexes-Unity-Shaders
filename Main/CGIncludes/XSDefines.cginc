@@ -152,6 +152,8 @@ struct TextureUV
 struct DotProducts
 {
     half ndl;
+    half rdl;
+    half fdl;
     half vdn;
     half vdh;
     half tdh;
@@ -171,6 +173,8 @@ struct Directions
     half3 reflView;
     half3 reflLight;
     half3 reflViewAniso;
+    half3 forward;
+    half3 right;
 };
 
 struct HookData
@@ -203,6 +207,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RimMask); half4 _RimMask_ST;
+sampler2D _ShadowMapTexture; half4 _ShadowMapTexture_ST;
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _ClipMask;
@@ -264,6 +269,7 @@ int _NormalMapMode, _OutlineUVSelect;
 int _AlphaToMask;
 int _ALGradientOnRed, _ALGradientOnGreen, _ALGradientOnBlue;
 int _ALUVWidth;
+int _UseShadowMapTexture;
 
 int _UVDiscardMode, _UVDiscardChannel,
     _DiscardTile0,_DiscardTile1,_DiscardTile2,_DiscardTile3,

@@ -65,6 +65,8 @@
         _AnisotropicReflection("Reflection Anisotropic", Range(-1,1)) = 0
         _SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
 
+        [ToggleUI]_UseShadowMapTexture("Use Shadow Map", Int) = 0
+        _ShadowMapTexture("Shadow Map", 2D) = "black" {}
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
@@ -73,7 +75,7 @@
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
         _ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
         _ShadowRimAlbedoTint("Shadow Rim Albedo Tint", Range(0, 1)) = 0
-
+        
         [Enum(Indirect, 0, Integrated, 1)]_OcclusionMode("Occlusion Mode", Int) = 0
         _OcclusionMap("Occlusion", 2D) = "white" {}
         _OcclusionIntensity("Occlusion Intensity", Range(0,1)) = 1

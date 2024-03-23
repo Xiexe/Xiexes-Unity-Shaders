@@ -49,7 +49,7 @@ half4 BRDF_XSLighting(HookData data)
             diffuse += getRealtimeLightmap(t.uv2, i.normal);
         #endif
     #else
-        ramp = calcRamp(i,d);
+        ramp = calcRamp(i,d, dirs, t);
         diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
     #endif
 
