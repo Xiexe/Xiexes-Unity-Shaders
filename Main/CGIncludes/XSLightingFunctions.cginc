@@ -535,6 +535,12 @@ half3 getRightDirection()
     return (right);
 }
 
+half3 getUpDirection()
+{
+    half3 up = UNITY_MATRIX_M._m01_m11_m21;
+    return up;
+}
+
 Directions GetDirections(FragmentData i)
 {
     Directions dirs = (Directions) 0;
@@ -546,7 +552,7 @@ Directions GetDirections(FragmentData i)
     dirs.reflLight = calcReflLight(dirs.lightDir, i.normal);
     dirs.forward = getForwardDirection();
     dirs.right = getRightDirection();
-    dirs.up = unity_ObjectToWorld._m01_m11_m21;
+    dirs.up = getUpDirection();
     dirs.isUpright = (dirs.up.y - dirs.lightDir.y) < 0 ? 1 : -1;
     return dirs;
 }
