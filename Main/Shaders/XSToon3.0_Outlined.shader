@@ -66,7 +66,7 @@
         _SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
 
         [ToggleUI]_UseShadowMapTexture("Use Shadow Map", Int) = 0
-        _ShadowMapTexture("Shadow Map", 2D) = "black" {}
+        _ShadowControlTexture("Shadow Map", 2D) = "black" {}
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5

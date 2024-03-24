@@ -207,7 +207,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RimMask); half4 _RimMask_ST;
-sampler2D _ShadowMapTexture; half4 _ShadowMapTexture_ST;
+sampler2D _ShadowControlTexture; half4 _ShadowControlTexture_ST;
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _ClipMask;

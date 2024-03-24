@@ -231,14 +231,14 @@ namespace XSToon3
             Foldouts[material].ShowShadows = XSStyles.ShurikenFoldout("Shadows", Foldouts[material].ShowShadows);
             if (Foldouts[material].ShowShadows)
             {
-                materialEditor.ShaderProperty(Inspector.MaterialProperties._UseShadowMapTexture, new GUIContent("Use Shadow Map", "Use Shadow Map texture for shadows. (Mainly used for faces. Reference Genshin Impact for style.)"));
+                materialEditor.ShaderProperty(Inspector.MaterialProperties._UseShadowMapTexture, new GUIContent("Use Shadow Control Map", "Use Shadow Map texture for shadows. (Mainly used for faces. Reference Genshin Impact for style.)"));
                 bool useShadowMapTexture = material.GetInt("_UseShadowMapTexture") > 0;
 
                 if (useShadowMapTexture)
                 {
                     materialEditor.TexturePropertySingleLine(
-                        new GUIContent("Shadow Map", "Shadow Map Texture, black to white, uses alpha to blend between shadowmap shading and normal based shading. Shadow texture should be in the style of Genshin Impact. (Mainly used for faces.)\n\n Note: Head Mesh must be separate from the rest of the body for this to work correctly."), 
-                        Inspector.MaterialProperties._ShadowMapTexture
+                        new GUIContent("Shadow Control Map", "Shadow Control Texture, black to white, uses alpha to blend between shadowmap shading and normal based shading. Shadow texture should be in the style of Genshin Impact. (Mainly used for faces.)\n\n Note: Head Mesh must be separate from the rest of the body for this to work correctly."), 
+                        Inspector.MaterialProperties._ShadowControlTexture
                     );
                 }
                 XSStyles.SeparatorThin();

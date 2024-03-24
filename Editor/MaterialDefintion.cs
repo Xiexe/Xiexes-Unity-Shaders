@@ -65,7 +65,7 @@ namespace XSToon3
         public MaterialProperty _AnisotropicSpecular;
         public MaterialProperty _AnisotropicReflection;
         public MaterialProperty _SpecularAlbedoTint;
-        public MaterialProperty _ShadowMapTexture;
+        public MaterialProperty _ShadowControlTexture;
         public MaterialProperty _UseShadowMapTexture;
         public MaterialProperty _RampSelectionMask;
         public MaterialProperty _Ramp;

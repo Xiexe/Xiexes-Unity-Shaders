@@ -155,31 +155,31 @@ half4 sampleShadowMap(DotProducts d, half2 uv)
     half2 flippedUv = half2(1-uv.x, uv.y);
     half2 correctUv = d.rdl > 0 ? uv : flippedUv;
     
-    half4 shadow = tex2D(_ShadowMapTexture, correctUv);
+    half4 shadow = tex2D(_ShadowControlTexture, correctUv);
+    shadow.rgb += 0.125;
     return shadow;
 }
 
 half4 calcRamp(FragmentData i, DotProducts d, Directions dirs, TextureUV t)
 {
-    half remapRamp;
-    remapRamp = (d.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode) ;
+    float atten = 1;
     #if defined(UNITY_PASS_FORWARDBASE)
-    remapRamp *= i.attenuation;
+    atten = i.attenuation;
     #endif
-
-    half4 ramp = tex2D(_Ramp, half2(remapRamp, i.rampMask.r));
     
+    half remapRamp;
+    remapRamp = (d.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode);
     if(_UseShadowMapTexture > 0)
     {
-        half rAcos = ((acos(d.rdl) / UNITY_PI) * 2);
-        half rAcosDir = d.rdl > 0 ? 1 - rAcos : rAcos - 1;
-        half fStep = smoothstep(0, 0.1, d.fdl);
         half4 shadowMap = sampleShadowMap(d, t.uv0);
-        half shadowDir = smoothstep(shadowMap.x, 0, rAcosDir); // why the fuck does this work???
-        half4 altRamp = tex2D(_Ramp, half2(shadowDir, i.rampMask.r));
-        return lerp(ramp, altRamp * fStep, shadowMap.a);
+        half normalizedFdotL = 1 * -0.5 * d.fdl + 0.5;
+        normalizedFdotL %= 1;
+        
+        half shadowDir = smoothstep(shadowMap.x, 0, normalizedFdotL);
+        remapRamp = lerp(remapRamp, shadowDir, shadowMap.a);
     }
-
+    
+    half4 ramp = tex2D(_Ramp, half2(remapRamp * atten, i.rampMask.r));
     return ramp;
 }
 
@@ -525,14 +525,14 @@ void calcClearcoat(inout half4 col, FragmentData i, DotProducts d, half3 untouch
 half3 getForwardDirection()
 {
     half3 forward = UNITY_MATRIX_M._m00_m10_m20;
-    return forward;
+    return normalize(forward);
 }
 
 // TODO:: these need to be flipped if mesh is not from blender.
 half3 getRightDirection()
 {
     half3 right = UNITY_MATRIX_M._m02_m12_m22;
-    return right;
+    return normalize(right);
 }
 
 Directions GetDirections(FragmentData i)
