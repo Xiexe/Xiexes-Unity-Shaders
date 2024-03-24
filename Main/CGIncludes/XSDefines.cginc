@@ -175,6 +175,8 @@ struct Directions
     half3 reflViewAniso;
     half3 forward;
     half3 right;
+    half3 up;
+    bool isUpright;
 };
 
 struct HookData

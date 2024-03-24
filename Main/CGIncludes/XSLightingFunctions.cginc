@@ -525,14 +525,14 @@ void calcClearcoat(inout half4 col, FragmentData i, DotProducts d, half3 untouch
 half3 getForwardDirection()
 {
     half3 forward = UNITY_MATRIX_M._m00_m10_m20;
-    return normalize(forward);
+    return (forward);
 }
 
 // TODO:: these need to be flipped if mesh is not from blender.
 half3 getRightDirection()
 {
     half3 right = UNITY_MATRIX_M._m02_m12_m22;
-    return normalize(right);
+    return (right);
 }
 
 Directions GetDirections(FragmentData i)
@@ -546,6 +546,8 @@ Directions GetDirections(FragmentData i)
     dirs.reflLight = calcReflLight(dirs.lightDir, i.normal);
     dirs.forward = getForwardDirection();
     dirs.right = getRightDirection();
+    dirs.up = unity_ObjectToWorld._m01_m11_m21;
+    dirs.isUpright = (dirs.up.y - dirs.lightDir.y) < 0 ? 1 : -1;
     return dirs;
 }
 
@@ -553,8 +555,8 @@ DotProducts GetDots(Directions dirs, FragmentData i)
 {
     DotProducts d = (DotProducts)0;
     d.ndl = dot(i.normal, dirs.lightDir);
-    d.rdl = dot(dirs.right, dirs.lightDir);
-    d.fdl = dot(dirs.forward, dirs.lightDir);
+    d.rdl = dot(dirs.right, dirs.lightDir) * dirs.isUpright;
+    d.fdl = dot(dirs.forward, dirs.lightDir) * dirs.isUpright;
     d.vdn = abs(dot(dirs.viewDir, i.normal));
     d.vdh = DotClamped(dirs.viewDir, dirs.halfVector);
     d.tdh = dot(i.tangent, dirs.halfVector);
