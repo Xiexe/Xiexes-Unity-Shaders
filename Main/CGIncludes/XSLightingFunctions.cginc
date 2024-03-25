@@ -167,8 +167,8 @@ half4 calcRamp(FragmentData i, DotProducts d, Directions dirs, TextureUV t)
     atten = i.attenuation;
     #endif
     
-    half remapRamp;
-    remapRamp = (d.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode);
+    half remapRamp = (d.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode);
+
     if(_UseShadowMapTexture > 0)
     {
         half4 shadowMap = sampleShadowMap(d, t.uv0);
@@ -195,10 +195,10 @@ float3 getVertexLightsDiffuse(FragmentData i, VertexLightInformation vLight)
 {
     float3 vertexLightsDiffuse = 0;
     #if defined(VERTEXLIGHT_ON)
-        for(int light = 0; light < 4; light++) // I know, I know, not using i. Blame my structs.
+        for(int light = 0; light < 4; light++)
         {
             float vLightNdl = dot(vLight.Direction[light], i.normal);
-            vertexLightsDiffuse += calcRampShadowOverride(i, vLightNdl) * vLight.ColorFalloff[light];
+            vertexLightsDiffuse += vLight.ColorFalloff[light];
         }
     #endif
     return vertexLightsDiffuse;
