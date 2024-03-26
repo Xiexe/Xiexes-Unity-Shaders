@@ -8,13 +8,13 @@ half4 BRDF_XSLighting(HookData data)
     PassLights lights = data.lights;
 
     InitializeSurface(i);
-    
-    PopulateLight(i, dirs, _LightColor0, i.attenuation, GetLightDirection(i), LIGHT_TYPE_MAIN, lights.mainLight);
+
     PopulateLight(i, dirs, GetAmbientColor(i.occlusion), 1, GetProbeLightDirection(), LIGHT_TYPE_AMBIENT, lights.ambientLight);
+    PopulateLight(i, dirs, _LightColor0, i.attenuation, GetLightDirection(i), LIGHT_TYPE_MAIN, lights.mainLight);
     PopulateExtraPassLights(i, dirs, lights.extraLights);
 
-    AccumulateLight(i, d, t, dirs, lights.mainLight, lightInfo);
     AccumulateLight(i, d, t, dirs, lights.ambientLight, lightInfo);
+    AccumulateLight(i, d, t, dirs, lights.mainLight, lightInfo);
     AccumulateExtraPassLights(i, d, t, dirs, lights.extraLights, lightInfo);
     ApplyAccumulatedDiffuseLightToSurface(i, lightInfo);
 

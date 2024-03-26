@@ -41,9 +41,34 @@ float V_SmithGGXCorrelated(float NoV, float NoL, float a)
     return 0.5 / (GGXV + GGXL);
 }
 
-half GetLightBrightness(PassLights lights)
+half3 GetAmbientColor(half occlusion)
+{// We don't care about anything other than the color from probes for toon lighting.
+    #if !defined(LIGHTMAP_ON)
+    half3 ambient = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) * lerp(occlusion, 1, _OcclusionMode);
+    return ambient;
+    #else
+    return 0;
+    #endif
+}
+
+half GetAmbientBrightnessNonPerceptual()
 {
-    return dot(lights.ambientLight.color.rgb, grayscaleVec) + dot(lights.mainLight.color.rgb, grayscaleVec) / 2;
+    return dot(GetAmbientColor(1), half3(1,1,1));
+}
+
+half GetAmbientBrightness()
+{
+    return dot(GetAmbientColor(1), grayscaleVec);
+}
+
+half GetMainLightBrightness()
+{
+    return dot(_LightColor0, grayscaleVec);
+}
+
+half GetEnvironmentBrightness()
+{
+    return (GetMainLightBrightness() + GetAmbientBrightness()) * 0.5;
 }
 
 // TODO:: these need to be flipped if mesh is not from blender.
@@ -225,7 +250,7 @@ half4 GetSubsurfaceScattering(FragmentData i, Light light, half3 viewDir, half3 
 half4 GetEmission(FragmentData i, TextureUV t, DotProducts d, PassLights lights)
 {
     #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
-        half lightAvg = GetLightBrightness(lights);
+        half lightAvg = GetEnvironmentBrightness();
     
         float4 emission = 0;
         if(_EmissionAudioLinkChannel == AUDIOLINK_OFF)
@@ -357,16 +382,6 @@ half4 GetOutlineColor(FragmentData i, Light light, Light ambientLight)
     return half4(outlineColor,1);
 }
 
-half3 GetAmbientColor(half occlusion)
-{// We don't care about anything other than the color from probes for toon lighting.
-    #if !defined(LIGHTMAP_ON)
-        half3 ambient = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) * lerp(occlusion, 1, _OcclusionMode);
-        return ambient;
-    #else
-        return 0;
-    #endif
-}
-
 half3 GetRimLight(FragmentData i, DotProducts d, Light light, Light ambientLight, half3 envMap)
 {
     #if defined(UNITY_PASS_FORWARDBASE)
@@ -495,6 +510,12 @@ void PopulateExtraPassLights(FragmentData i, Directions d, inout Light lights[4]
 void AccumulateLight(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light light, inout SurfaceLightInfo lightInfo)
 {
     half4 ramp = SampleShadowRamp(i, t, light);
+    if(light.type == LIGHT_TYPE_MAIN)
+    {
+        half attenFactor = lerp(light.attenuation, 1, smoothstep(0, 0.01, GetAmbientBrightnessNonPerceptual()));
+        light.attenuation = attenFactor;
+    }
+    
     lightInfo.diffuse += ramp * light.color * light.attenuation;
     lightInfo.directSpecular += GetDirectSpecular(i, d, light, _AnisotropicSpecular) * light.ndl * light.attenuation;
     lightInfo.subsurface += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * light.ndl * light.attenuation;
