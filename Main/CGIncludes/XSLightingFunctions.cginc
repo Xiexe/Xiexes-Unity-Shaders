@@ -484,9 +484,9 @@ half4 SampleShadowRamp(FragmentData i, TextureUV t, Light light)
 void ApplyLight(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light light, inout half3 diffuse, inout half3 specular, inout half3 subsurfaceScattering)
 {
     half4 ramp = SampleShadowRamp(i, t, light);
-    diffuse += ramp * light.color;
+    diffuse += ramp * light.color * light.attenuation;
     specular += GetDirectSpecular(i, d, light, _AnisotropicSpecular) * light.ndl * light.attenuation;
-    subsurfaceScattering += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0);
+    subsurfaceScattering += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * light.ndl * light.attenuation;
 }
 
 void ApplyMainLights(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light mainLight, Light ambientLight, inout half3 diffuse, inout half3 specular, inout half3 subsurfaceScattering)
