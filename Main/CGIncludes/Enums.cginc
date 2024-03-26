@@ -90,4 +90,9 @@
 #define UVDISCARD_PIXEL 2
 
 // UV Discard Channel
-// 
+//
+
+// LIGHT DEFINITONS
+#define LIGHT_TYPE_MAIN 0 // Main light for the pass
+#define LIGHT_TYPE_AMBIENT 1 // Ambient light for the pass
+#define LIGHT_TYPE_EXTRA 2 // Extra lights for the pass

@@ -56,9 +56,8 @@ void DoFurAlpha(FragmentData i, TextureUV t, inout float alpha)
     #endif
 }
 
-void AdjustFurSpecular(FragmentData i, inout float3 directSpecular, inout float3 indirectSpecular)
+void AdjustFurSpecular(FragmentData i, inout float3 totalSpecularLight)
 {
     float layerScalar = i.layer / _LayerCount;
-    directSpecular.rgb *= layerScalar;
-    indirectSpecular *= layerScalar;
+    totalSpecularLight *= layerScalar;
 }

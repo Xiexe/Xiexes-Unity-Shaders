@@ -5,98 +5,71 @@ half4 BRDF_XSLighting(HookData data)
     TextureUV t = data.t;
     Directions dirs = data.dirs;
     DotProducts d = data.d;
+    PassLights lights = data.lights;
+    lights.mainLight.type = LIGHT_TYPE_MAIN;
+    lights.ambientLight.type = LIGHT_TYPE_AMBIENT;
 
-    half3 indirectDiffuse = calcIndirectDiffuse(i);
-    bool lightEnv = any(_WorldSpaceLightPos0.xyz);
     half4 metallicSmoothness = calcMetallicSmoothness(i);
     half3 reflViewAniso = getAnisotropicReflectionVector(dirs.viewDir, i.bitangent, i.tangent, i.normal, metallicSmoothness.a, _AnisotropicReflection);
+    half occlusion = lerp(1, i.occlusion.r, _OcclusionIntensity);
 
     i.albedo.rgb = rgb2hsv(i.albedo.rgb);
     i.albedo.x += fmod(lerp(0, _Hue, i.hsvMask.r), 360);
     i.albedo.y = saturate(i.albedo.y * lerp(1, _Saturation, i.hsvMask.g));
     i.albedo.z *= lerp(1, _Value, i.hsvMask.b);
     i.albedo.rgb = hsv2rgb(i.albedo.rgb);
-
     i.diffuseColor.rgb = i.albedo.rgb;
     i.albedo.rgb *= (1-metallicSmoothness.x);
-    half occlusion = lerp(1, i.occlusion.r, _OcclusionIntensity);
-    indirectDiffuse *= lerp(occlusion, 1, _OcclusionMode);
+    
+    bool isRealtimeLighting = any(_WorldSpaceLightPos0.xyz);
+    half3 totalDiffuseLight = half3(0,0,0);
+    half3 totalSpecularLight = half3(0,0,0);
+    half3 totalSubsurfaceScattering = half3(0,0,0);
+    
+    half3 ambientColor = GetAmbientColor();
+    ambientColor = isRealtimeLighting ? ambientColor : ambientColor * 0.4;
 
-    half4 lightCol = half4(0,0,0,0);
-    calcLightCol(lightEnv, indirectDiffuse, lightCol);
+    half3 mainLightColor = _LightColor0;
+    mainLightColor = isRealtimeLighting ? mainLightColor : ambientColor * 0.6;
+    
+    PopulateLight(i, dirs, mainLightColor, i.attenuation, GetDominantLightDirection(i), lights.mainLight);
+    PopulateLight(i, dirs, ambientColor, 1, half3(0,0,0), lights.ambientLight);
+    lights.ambientLight.color *= lerp(occlusion, 1, _OcclusionMode);
+    
+    PopulateExtraPassLights(i, dirs, lights.extraLights);
 
-    float3 vertexLightDiffuse = 0;
-    float3 vertexLightSpec = 0;
-    #if defined(VERTEXLIGHT_ON) && !defined(LIGHTMAP_ON)
-        VertexLightInformation vLight = (VertexLightInformation)0;
-        float4 vertexLightAtten = float4(0,0,0,0);
-        float3 vertexLightColor = get4VertexLightsColFalloff(vLight, i.worldPos, i.normal, vertexLightAtten);
-        float3 vertexLightDir = getVertexLightsDir(vLight, i.worldPos, vertexLightAtten);
-        vertexLightDiffuse = getVertexLightsDiffuse(i, vLight);
-        indirectDiffuse += vertexLightDiffuse;
+    ApplyMainLights(i, d, t, dirs, lights.mainLight, lights.ambientLight, totalDiffuseLight, totalSpecularLight, totalSubsurfaceScattering);
+    ApplyExtraPassLights(i, d, t, dirs, lights.extraLights, totalDiffuseLight, totalSpecularLight, totalSubsurfaceScattering);
+    i.surfaceColor = i.albedo * totalDiffuseLight;
 
-        vertexLightSpec = getVertexLightSpecular(i, d, vLight, i.normal, dirs.viewDir, _AnisotropicSpecular) * occlusion;
-    #endif
+    half3 environmentMap = getEnvMap(i, d, 5, dirs.reflView, lights.ambientLight.color, i.normal);
 
-    half lightAvg = (dot(indirectDiffuse.rgb, grayscaleVec) + dot(lightCol.rgb, grayscaleVec)) / 2;
-    half3 envMapBlurred = getEnvMap(i, d, 5, dirs.reflView, indirectDiffuse, i.normal);
-
-    half4 ramp = 1;
-    half4 diffuse = 1;
-    #if defined(LIGHTMAP_ON)
-        diffuse = i.albedo * getLightmap(t.uv1, i.normal, i.worldPos);
-        #if defined(DYNAMICLIGHTMAP_ON)
-            diffuse += getRealtimeLightmap(t.uv2, i.normal);
-        #endif
-    #else
-        ramp = calcRamp(i,d, dirs, t);
-        diffuse = calcDiffuse(i, d, indirectDiffuse, lightCol, ramp);
-    #endif
-
-    half4 rimLight = calcRimLight(i, d, lightCol, indirectDiffuse, envMapBlurred);
-    half4 shadowRim = calcShadowRim(i, d, indirectDiffuse);
+    half3 rimLight = GetRimLight(i, d, lights.mainLight, lights.ambientLight, environmentMap);
+    half3 rimShadow = GetRimShadow(i, d, lights.mainLight, lights.ambientLight);
 
     float3 f0 = 0.16 * _Reflectivity * _Reflectivity * (1.0 - metallicSmoothness.r) + i.diffuseColor * metallicSmoothness.r;
     float3 fresnel = F_Schlick(d.vdn, f0);
-    half3 indirectSpecular = calcIndirectSpecular(i, d, metallicSmoothness, reflViewAniso, indirectDiffuse, dirs.viewDir, fresnel, ramp) * occlusion;
-    half3 directSpecular = calcDirectSpecular(i, d.ndl, d.ndh, d.vdn, d.ldh, lightCol, dirs.halfVector, _AnisotropicSpecular) * d.ndl * occlusion * i.attenuation;
-    half4 subsurface = calcSubsurfaceScattering(i, d, dirs.lightDir, dirs.viewDir, i.normal, lightCol, indirectDiffuse);
-    half4 outlineColor = calcOutlineColor(i, d, indirectDiffuse, lightCol);
-
-    half lineHalftone = 0;
-    half stipplingDirect = 0;
-    half stipplingRim = 0;
-    half stipplingIndirect = 0;
-    bool usingLineHalftone = 0;
-    if(_HalftoneType == HALFTONE_SHADOWS || _HalftoneType == HALFTONE_SHADOWS_AND_HIGHLIGHTS)
-    {
-        lineHalftone = lerp(1, LineHalftone(i, 1), 1-saturate(dot(shadowRim * ramp, grayscaleVec)));
-        usingLineHalftone = 1;
-    }
-
-    if(_HalftoneType == HALFTONE_HIGHLIGHTS || _HalftoneType == HALFTONE_SHADOWS_AND_HIGHLIGHTS)
-    {
-        stipplingDirect = DotHalftone(i, saturate(dot(directSpecular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
-        stipplingRim = DotHalftone(i, saturate(dot(rimLight, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
-        stipplingIndirect = DotHalftone(i, saturate(dot(indirectSpecular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
-
-        directSpecular *= stipplingDirect;
-        rimLight *= stipplingRim;
-        indirectSpecular *= lerp(0.5, 1, stipplingIndirect); // Don't want these to go completely black, looks weird
-    }
-
+    half3 indirectSpecular = GetIndirectSpecular(i, metallicSmoothness, reflViewAniso, lights.ambientLight.color, dirs.viewDir, fresnel);
+    DoReflectionBlending(i, i.surfaceColor, indirectSpecular);
+    totalSpecularLight += indirectSpecular;
+    totalSpecularLight *= occlusion;
+    
     #if defined(Fur)
-        AdjustFurSpecular(i, directSpecular.rgb, indirectSpecular.rgb);
+        AdjustFurSpecular(i, totalSpecularLight.rgb);
     #endif
+    
+    ApplyHalftones(i, totalSpecularLight, rimLight, rimShadow, totalDiffuseLight);
 
-    half4 col = diffuse * shadowRim;
-    calcReflectionBlending(i, col, indirectSpecular.xyzz);
-    col += max(directSpecular.xyzz, rimLight);
-    col.rgb += max(vertexLightSpec.rgb, rimLight);
-    col += subsurface;
-    calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, dirs.viewDir, dirs.lightDir, ramp);
-    col += calcEmission(i, t, d, lightAvg);
-    float4 finalColor = lerp(col, outlineColor, i.isOutline) * lerp(1, lineHalftone, _HalftoneLineIntensity * usingLineHalftone);
+    i.surfaceColor += max(totalSpecularLight, rimLight);
+    i.surfaceColor += totalSpecularLight;
+    i.surfaceColor += totalSubsurfaceScattering;
+    i.surfaceColor *= rimShadow;
 
-    return finalColor;
+    half lightAvg = (dot(lights.ambientLight.color.rgb, grayscaleVec) + dot(lights.mainLight.color.rgb, grayscaleVec)) / 2;
+    i.surfaceColor += GetEmission(i, t, d, lightAvg);
+
+    i.surfaceColor = lerp(i.surfaceColor, GetOutlineColor(i, lights.mainLight, lights.ambientLight), i.isOutline);
+    return float4(i.surfaceColor, 1);
+    // TODO:: Add back in clearcoat support.
+    // calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, dirs.viewDir, dirs.lightDir, ramp);
 }

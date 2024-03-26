@@ -122,6 +122,7 @@ struct FragmentData
     float4 screenPos;
     float2 screenUV;
     float3 objPos;
+    half3 surfaceColor;
 
     #if defined(Fur)
         float layer;
@@ -151,32 +152,52 @@ struct TextureUV
 
 struct DotProducts
 {
-    half ndl;
-    half rdl;
-    half fdl;
     half vdn;
-    half vdh;
-    half tdh;
-    half bdh;
-    half ndh;
-    half rdv;
-    half ldh;
+    // half vdh;
+    // half tdh;
+    // half bdh;
+    // half ndh;
+    // half rdv;
     half svdn;
 };
 
 struct Directions
 {
-    half3 lightDir;
     half3 viewDir;
     half3 stereoViewDir;
-    half3 halfVector;
     half3 reflView;
-    half3 reflLight;
     half3 reflViewAniso;
     half3 forward;
     half3 right;
     half3 up;
-    bool isUpright;
+};
+
+struct Light
+{
+    half3 direction;
+    half3 color;
+    half attenuation;
+    
+    half3 reflectionVector;
+    half3 halfVector;
+    half ndl; // normal . light direction
+    half ldh; // light . half direction
+    half tdh; // tangent . half direction
+    half bdh; // bitangent . half direction
+    half ndh; // normal . half direction
+    half vdh; // viewDir . halfVector
+    half rdv; // reflectionVector . viewDir
+    half rdl; // right . light direction
+    half fdl; // forward . light direction
+    bool isAbove; // is the light above the meshes up vector
+    int type; //
+};
+
+struct PassLights
+{
+    Light mainLight;
+    Light ambientLight;
+    Light extraLights[4]; // Only used in forward base pass for vertex lights.
 };
 
 struct HookData
@@ -185,14 +206,9 @@ struct HookData
     TextureUV t;
     Directions dirs;
     DotProducts d;
+    PassLights lights;
     float3 untouchedNormal;
     bool isFrontface;
-};
-
-struct VertexLightInformation {
-    float3 Direction[4];
-    float3 ColorFalloff[4];
-    float Attenuation[4];
 };
 
 UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
