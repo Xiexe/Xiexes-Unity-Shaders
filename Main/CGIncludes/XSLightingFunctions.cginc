@@ -476,8 +476,13 @@ half4 SampleShadowRamp(FragmentData i, TextureUV t, Light light)
         half shadowDir = smoothstep(shadowMap.x, 0, normalizedFdotL);
         remapRamp = lerp(remapRamp, shadowDir, shadowMap.a);
     }
+
+    float atten = light.type == LIGHT_TYPE_EXTRA ? 1 : light.attenuation;
+    #if !defined(UNITY_PASS_FORWARDBASE)
+        atten = 1;
+    #endif
     
-    half4 ramp = tex2D(_Ramp, half2(remapRamp * light.attenuation, i.rampMask.r));
+    half4 ramp = tex2D(_Ramp, half2(remapRamp * atten, i.rampMask.r));
     return ramp;
 }
 

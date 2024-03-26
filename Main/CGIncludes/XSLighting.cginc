@@ -37,7 +37,7 @@ half4 BRDF_XSLighting(HookData data)
     lights.ambientLight.color *= lerp(occlusion, 1, _OcclusionMode);
     
     PopulateExtraPassLights(i, dirs, lights.extraLights);
-
+    
     ApplyMainLights(i, d, t, dirs, lights.mainLight, lights.ambientLight, totalDiffuseLight, totalSpecularLight, totalSubsurfaceScattering);
     ApplyExtraPassLights(i, d, t, dirs, lights.extraLights, totalDiffuseLight, totalSpecularLight, totalSubsurfaceScattering);
     i.surfaceColor = i.albedo * totalDiffuseLight;
