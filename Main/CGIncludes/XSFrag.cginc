@@ -78,7 +78,7 @@ float4 frag (
         o.normalMap = UNITY_SAMPLE_TEX2D_SAMPLER(_BumpMap, _MainTex, t.normalMapUV);
         o.detailNormal = UNITY_SAMPLE_TEX2D_SAMPLER(_DetailNormalMap, _MainTex, t.detailNormalUV);
         o.thickness = UNITY_SAMPLE_TEX2D_SAMPLER(_ThicknessMap, _MainTex, t.thicknessMapUV);
-        o.occlusion = tex2D(_OcclusionMap, t.occlusionUV);
+        o.occlusion = lerp(1, tex2D(_OcclusionMap, t.occlusionUV), _OcclusionIntensity);
         o.reflectivityMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectivityMask, _MainTex, t.reflectivityMaskUV) * _Reflectivity;
         o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV);
         o.rampMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RampSelectionMask, _MainTex, i.uv); // This texture doesn't need to ever be on a second uv channel, and doesn't need tiling, convince me otherwise.
@@ -89,6 +89,7 @@ float4 frag (
         o.rimMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RimMask, _MainTex, t.rimMaskUV);
 
         o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
+        o.metallicSmoothness = GetMetallicSmoothness(o);
         o.attenuation = attenuation;
         o.normal = i.ntb[0];
         o.tangent = i.ntb[1];
@@ -112,19 +113,19 @@ float4 frag (
         o.tangent = normalize(o.tangent);
         o.bitangent = normalize(o.bitangent);
         calcNormal(o);
-        data.i = o;
-        data.t = t;
+        data.frag = o;
+        data.uvs = t;
         data.isFrontface = face;
 
         Directions dirs = GetDirections(o);
         DotProducts d = GetDots(dirs, o);
         data.dirs = dirs;
-        data.d = d;
+        data.dots = d;
         data = PreLightingHook(data);
 
         float4 col = BRDF_XSLighting(data);
-        calcAlpha(data.i, data.t, alpha);
-        calcDissolve(data.i, col.rgb);
+        calcAlpha(data.frag, data.uvs, alpha);
+        calcDissolve(data.frag, col.rgb);
     
         col = PostLightingHook(col, data);
         UNITY_APPLY_FOG(i.fogCoord, col);

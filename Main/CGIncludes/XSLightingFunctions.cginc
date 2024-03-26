@@ -41,12 +41,32 @@ float V_SmithGGXCorrelated(float NoV, float NoL, float a)
     return 0.5 / (GGXV + GGXL);
 }
 
-half3 calcReflView(half3 viewDir, half3 normal)
+half GetLightBrightness(PassLights lights)
 {
-    return reflect(-viewDir, normal);
+    return dot(lights.ambientLight.color.rgb, grayscaleVec) + dot(lights.mainLight.color.rgb, grayscaleVec) / 2;
 }
 
-half4 calcMetallicSmoothness(FragmentData i)
+// TODO:: these need to be flipped if mesh is not from blender.
+half3 GetMeshForwardDirection()
+{
+    half3 forward = UNITY_MATRIX_M._m00_m10_m20;
+    return forward;
+}
+
+// TODO:: these need to be flipped if mesh is not from blender.
+half3 GetMeshRightDirection()
+{
+    half3 right = UNITY_MATRIX_M._m02_m12_m22;
+    return right;
+}
+
+half3 GetMeshUpDirection()
+{
+    half3 up = UNITY_MATRIX_M._m01_m11_m21;
+    return up;
+}
+
+half4 GetMetallicSmoothness(FragmentData i)
 {
     half roughness = 1-(_Glossiness * i.metallicGlossMap.a);
     roughness *= 1.7 - 0.7 * roughness;
@@ -54,27 +74,7 @@ half4 calcMetallicSmoothness(FragmentData i)
     return half4(metallic, 0, 0, roughness);
 }
 
-// half4 calcRimLight(FragmentData i, DotProducts d, half4 lightCol, half3 indirectDiffuse, half3 envMap)
-// {
-//     half rimIntensity = saturate((1-d.svdn)) * pow(d.ndl, _RimThreshold);
-//     rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
-//     half4 rim = rimIntensity * _RimIntensity * (lightCol + indirectDiffuse.xyzz);
-//     rim *= lerp(1, i.attenuation + indirectDiffuse.xyzz, _RimAttenEffect);
-//
-//     half4 rimLight = rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
-//     return lerp(0, rimLight, i.rimMask.r);
-// }
-//
-// half4 calcShadowRim(FragmentData i, DotProducts d, half3 indirectDiffuse)
-// {
-//     half rimIntensity = saturate((1-d.svdn)) * pow(1-d.ndl, _ShadowRimThreshold * 2);
-//     rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
-//     half4 shadowRim = lerp(1, (_ShadowRim * lerp(1, i.diffuseColor.rgbb, _ShadowRimAlbedoTint)) + (indirectDiffuse.xyzz * 0.1), rimIntensity);
-//
-//     return lerp(1, shadowRim, i.rimMask.g);
-// }
-
-float3 getAnisotropicReflectionVector(float3 viewDir, float3 bitangent, float3 tangent, float3 normal, float roughness, float anisotropy)
+float3 GetAnisotropicReflectionVector(float3 viewDir, float3 bitangent, float3 tangent, float3 normal, float roughness, float anisotropy)
 {
     //_Anisotropy = lerp(-0.2, 0.2, sin(_Time.y / 20)); //This is pretty fun
     float3 anisotropicDirection = anisotropy >= 0.0 ? bitangent : tangent;
@@ -172,8 +172,7 @@ half3 GetIndirectSpecular(FragmentData i, half4 metallicSmoothness, half3 reflDi
     return spec;
 }
 
-
-float4 getRealtimeLightmap(float2 uv, float3 worldNormal)
+float4 SampleRealtimeLightmap(float2 uv, float3 worldNormal)
 {
     float2 realtimeUV = uv * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
     float4 bakedCol = UNITY_SAMPLE_TEX2D(unity_DynamicLightmap, realtimeUV);
@@ -187,7 +186,7 @@ float4 getRealtimeLightmap(float2 uv, float3 worldNormal)
     return float4(realtimeLightmap.rgb, 1);
 }
 
-float4 getLightmap(float2 uv, float3 worldNormal, float3 worldPos)
+float4 SampleLightmap(float2 uv, float3 worldNormal, float3 worldPos)
 {
     float2 lightmapUV = uv * unity_LightmapST.xy + unity_LightmapST.zw;
     float4 bakedColorTex = UNITY_SAMPLE_TEX2D(unity_Lightmap, lightmapUV);
@@ -223,9 +222,11 @@ half4 GetSubsurfaceScattering(FragmentData i, Light light, half3 viewDir, half3 
     }
 }
 
-half4 GetEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
+half4 GetEmission(FragmentData i, TextureUV t, DotProducts d, PassLights lights)
 {
     #if defined(UNITY_PASS_FORWARDBASE) // Emission only in Base Pass, and vertex lights
+        half lightAvg = GetLightBrightness(lights);
+    
         float4 emission = 0;
         if(_EmissionAudioLinkChannel == AUDIOLINK_OFF)
         {
@@ -281,17 +282,7 @@ half4 GetEmission(FragmentData i, TextureUV t, DotProducts d, half lightAvg)
     #endif
 }
 
-void DoReflectionBlending(FragmentData i, inout half3 col, half3 indirectSpecular)
-{
-    if(_ReflectionBlendMode == 0) // Additive
-        col += indirectSpecular * i.reflectivityMask.r;
-    else if(_ReflectionBlendMode == 1) //Multiplicitive
-        col = lerp(col, col * indirectSpecular, i.reflectivityMask.r);
-    else if(_ReflectionBlendMode == 2) //Subtractive
-        col -= indirectSpecular * i.reflectivityMask.r;
-}
-
-// void calcClearcoat(inout half4 col, FragmentData i, DotProducts d, half3 untouchedNormal, half3 indirectDiffuse, half3 lightCol, half3 viewDir, half3 lightDir, half4 ramp)
+// void GetClearcoat(inout half4 col, FragmentData i, DotProducts d, half3 untouchedNormal, half3 indirectDiffuse, half3 lightCol, half3 viewDir, half3 lightDir, half4 ramp)
 // {
 //     UNITY_BRANCH
 //     if(_ClearCoat != OPTION_OFF)
@@ -312,32 +303,13 @@ void DoReflectionBlending(FragmentData i, inout half3 col, half3 indirectSpecula
 //     }
 // }
 
-// TODO:: these need to be flipped if mesh is not from blender.
-half3 GetMeshForwardDirection()
-{
-    half3 forward = UNITY_MATRIX_M._m00_m10_m20;
-    return forward;
-}
-
-// TODO:: these need to be flipped if mesh is not from blender.
-half3 GetMeshRightDirection()
-{
-    half3 right = UNITY_MATRIX_M._m02_m12_m22;
-    return right;
-}
-
-half3 GetMeshUpDirection()
-{
-    half3 up = UNITY_MATRIX_M._m01_m11_m21;
-    return up;
-}
-
 Directions GetDirections(FragmentData i)
 {
     Directions dirs = (Directions) 0;
     dirs.viewDir = calcViewDir(i.worldPos);
     dirs.stereoViewDir = calcStereoViewDir(i.worldPos);
-    dirs.reflView = calcReflView(dirs.viewDir, i.normal);
+    dirs.reflView = reflect(-dirs.viewDir, i.normal);
+    dirs.reflViewAniso = GetAnisotropicReflectionVector(dirs.viewDir, i.bitangent, i.tangent, i.normal, i.metallicSmoothness.a, _AnisotropicReflection); 
     dirs.forward = GetMeshForwardDirection();
     dirs.right = GetMeshRightDirection();
     dirs.up = GetMeshUpDirection();
@@ -352,19 +324,25 @@ DotProducts GetDots(Directions dirs, FragmentData i)
     return d;
 }
 
-// Get the most intense light Dir from probes OR from a light source. Method developed by Xiexe / Merlin
-half3 GetDominantLightDirection(FragmentData i)
+bool IsRealtimeLighting()
 {
-    half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
-    half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
-    lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
-    #if !defined(POINT) && !defined(SPOT)// if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
-    if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0 && length(lightDir) < 0.1)
-    {
-        lightDir = half4(1, 1, 1, 0);
-    }
-    #endif
-    return normalize(lightDir);
+    return any(_WorldSpaceLightPos0.xyz);
+}
+
+half3 GetLightDirection(FragmentData i)
+{
+    return UnityWorldSpaceLightDir(i.worldPos);
+}
+
+half3 GetProbeLightDirection()
+{
+    half3 probeDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
+
+    // Probes are null.
+    if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0)
+        probeDir = half3(1, 1, 1);
+
+    return probeDir;
 }
 
 half4 GetOutlineColor(FragmentData i, Light light, Light ambientLight)
@@ -379,14 +357,74 @@ half4 GetOutlineColor(FragmentData i, Light light, Light ambientLight)
     return half4(outlineColor,1);
 }
 
-half3 GetAmbientColor()
+half3 GetAmbientColor(half occlusion)
 {// We don't care about anything other than the color from probes for toon lighting.
     #if !defined(LIGHTMAP_ON)
-        half3 indirectDiffuse = ShadeSH9(float4(0,0.5,0,1));//half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w);
-        return indirectDiffuse;
+        half3 ambient = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) * lerp(occlusion, 1, _OcclusionMode);
+        return ambient;
     #else
         return 0;
     #endif
+}
+
+half3 GetRimLight(FragmentData i, DotProducts d, Light light, Light ambientLight, half3 envMap)
+{
+    #if defined(UNITY_PASS_FORWARDBASE)
+        half rimIntensity = saturate((1-d.svdn)) * pow(light.ndl, _RimThreshold);
+        rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
+        half3 rim = rimIntensity * _RimIntensity * (light.color + ambientLight.color);
+        rim *= lerp(1, i.attenuation + ambientLight.color, _RimAttenEffect);
+
+        half3 rimLight = rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
+        return rimLight;
+    #endif
+
+    return 0;
+}
+
+half3 GetRimShadow(FragmentData i, DotProducts d, Light light, Light ambientLight)
+{
+    #if defined(UNITY_PASS_FORWARDBASE)
+    half rimIntensity = saturate((1-d.svdn)) * pow(1-light.ndl, _ShadowRimThreshold * 2);
+    rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
+    half3 shadowRim = lerp(1, (_ShadowRim * lerp(1, i.diffuseColor.rgbb, _ShadowRimAlbedoTint)) + (ambientLight.color * 0.1), rimIntensity);
+    return shadowRim;
+    #endif
+
+    return 1;
+}
+
+half4 SampleShadowMap(half rdl, half2 uv)
+{
+    half2 flippedUv = half2(1-uv.x, uv.y);
+    half2 correctUv = rdl > 0 ? uv : flippedUv;
+    
+    half4 shadow = tex2D(_ShadowControlTexture, correctUv);
+    shadow.rgb += 0.125;
+    return shadow;
+}
+
+half4 SampleShadowRamp(FragmentData i, TextureUV t, Light light)
+{
+    half remapRamp = (light.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode);
+
+    if(_UseShadowMapTexture > 0)
+    {
+        half4 shadowMap = SampleShadowMap(light.rdl, t.uv0);
+        half normalizedFdotL = 1 * -0.5 * light.fdl + 0.5;
+        normalizedFdotL %= 1;
+        
+        half shadowDir = smoothstep(shadowMap.x, 0, normalizedFdotL);
+        remapRamp = lerp(remapRamp, shadowDir, shadowMap.a);
+    }
+
+    float atten = light.type == LIGHT_TYPE_EXTRA ? 1 : light.attenuation;
+    #if !defined(UNITY_PASS_FORWARDBASE)
+    atten = 1;
+    #endif
+    
+    half4 ramp = tex2D(_Ramp, half2(remapRamp * atten, i.rampMask.r));
+    return ramp;
 }
 
 void GetExtraLightAttenuations(float3 worldPos, out half attenuations[4])
@@ -410,8 +448,9 @@ void GetExtraLightAttenuations(float3 worldPos, out half attenuations[4])
     attenuations[3] = atten.w;
 }
 
-void PopulateLight(FragmentData i, Directions d, half3 color, half3 attenuation, half3 direction, inout Light light)
+void PopulateLight(FragmentData i, Directions d, half3 color, half3 attenuation, half3 direction, int lightType, inout Light light)
 {
+    light.type = lightType;
     light.color = color;
     light.attenuation = attenuation;
     light.direction = direction;
@@ -453,113 +492,89 @@ void PopulateExtraPassLights(FragmentData i, Directions d, inout Light lights[4]
     #endif
 }
 
-half4 SampleShadowMap(half rdl, half2 uv)
-{
-    half2 flippedUv = half2(1-uv.x, uv.y);
-    half2 correctUv = rdl > 0 ? uv : flippedUv;
-    
-    half4 shadow = tex2D(_ShadowControlTexture, correctUv);
-    shadow.rgb += 0.125;
-    return shadow;
-}
-
-half4 SampleShadowRamp(FragmentData i, TextureUV t, Light light)
-{
-    half remapRamp = (light.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode);
-
-    if(_UseShadowMapTexture > 0)
-    {
-        half4 shadowMap = SampleShadowMap(light.rdl, t.uv0);
-        half normalizedFdotL = 1 * -0.5 * light.fdl + 0.5;
-        normalizedFdotL %= 1;
-        
-        half shadowDir = smoothstep(shadowMap.x, 0, normalizedFdotL);
-        remapRamp = lerp(remapRamp, shadowDir, shadowMap.a);
-    }
-
-    float atten = light.type == LIGHT_TYPE_EXTRA ? 1 : light.attenuation;
-    #if !defined(UNITY_PASS_FORWARDBASE)
-        atten = 1;
-    #endif
-    
-    half4 ramp = tex2D(_Ramp, half2(remapRamp * atten, i.rampMask.r));
-    return ramp;
-}
-
-void ApplyLight(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light light, inout half3 diffuse, inout half3 specular, inout half3 subsurfaceScattering)
+void AccumulateLight(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light light, inout SurfaceLightInfo lightInfo)
 {
     half4 ramp = SampleShadowRamp(i, t, light);
-    diffuse += ramp * light.color * light.attenuation;
-    specular += GetDirectSpecular(i, d, light, _AnisotropicSpecular) * light.ndl * light.attenuation;
-    subsurfaceScattering += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * light.ndl * light.attenuation;
+    lightInfo.diffuse += ramp * light.color * light.attenuation;
+    lightInfo.directSpecular += GetDirectSpecular(i, d, light, _AnisotropicSpecular) * light.ndl * light.attenuation;
+    lightInfo.subsurface += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * light.ndl * light.attenuation;
 }
 
-void ApplyMainLights(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light mainLight, Light ambientLight, inout half3 diffuse, inout half3 specular, inout half3 subsurfaceScattering)
-{
-    half4 indirect = ambientLight.color.rgbb;
-
-    half grayIndirect = dot(ambientLight.color.rgbb, float3(1,1,1));
-    half attenFactor = lerp(mainLight.attenuation, 1, smoothstep(0, 0.2, grayIndirect));
-
-    half4 ramp = SampleShadowRamp(i, t, mainLight);
-    diffuse += ramp * mainLight.color * attenFactor + indirect;
-    specular += GetDirectSpecular(i, d, mainLight, _AnisotropicSpecular) * mainLight.ndl * mainLight.attenuation;
-    subsurfaceScattering += GetSubsurfaceScattering(i, mainLight, dir.viewDir, i.normal, ambientLight.color);
-}
-
-void ApplyExtraPassLights(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light lights[4], inout half3 diffuse, inout half3 specular, inout half3 subsurfaceScattering)
+void AccumulateExtraPassLights(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light lights[4], inout SurfaceLightInfo lightInfo)
 {
     #if defined(UNITY_PASS_FORWARDBASE)
         #if defined(VERTEXLIGHT_ON)
             for(int light = 0; light < 4; light++)
             {
-                ApplyLight(i, d, t, dir, lights[light], diffuse, specular, subsurfaceScattering);
+                AccumulateLight(i, d, t, dir, lights[light], lightInfo);
             }
         #endif
     #endif
 }
 
-half3 GetRimLight(FragmentData i, DotProducts d, Light light, Light ambientLight, half3 envMap)
+void AccumulateIndirectSpecularLight(FragmentData i, Directions dirs, DotProducts d, PassLights lights, half occlusion, inout SurfaceLightInfo lightInfo)
 {
     #if defined(UNITY_PASS_FORWARDBASE)
-        half rimIntensity = saturate((1-d.svdn)) * pow(light.ndl, _RimThreshold);
-        rimIntensity = smoothstep(_RimRange - _RimSharpness, _RimRange + _RimSharpness, rimIntensity);
-        half3 rim = rimIntensity * _RimIntensity * (light.color + ambientLight.color);
-        rim *= lerp(1, i.attenuation + ambientLight.color, _RimAttenEffect);
-
-        half3 rimLight = rim * _RimColor * lerp(1, i.diffuseColor.rgbb, _RimAlbedoTint) * lerp(1, envMap.rgbb, _RimCubemapTint);
-        return rimLight;
+        half3 f0 = 0.16 * _Reflectivity * _Reflectivity * (1.0 - i.metallicSmoothness.r) + i.diffuseColor * i.metallicSmoothness.r;
+        half3 fresnel = F_Schlick(d.vdn, f0);
+        lightInfo.indirectSpecular += GetIndirectSpecular(i, i.metallicSmoothness, dirs.reflViewAniso, lights.ambientLight.color, dirs.viewDir, fresnel) * occlusion;
     #endif
-
-    return 0;
 }
 
-half3 GetRimShadow(FragmentData i, DotProducts d, Light light, Light ambientLight)
+void ApplyAccumulatedDiffuseLightToSurface(inout FragmentData i, SurfaceLightInfo lightInfo)
 {
-    #if defined(UNITY_PASS_FORWARDBASE)
-        half rimIntensity = saturate((1-d.svdn)) * pow(1-light.ndl, _ShadowRimThreshold * 2);
-        rimIntensity = smoothstep(_ShadowRimRange - _ShadowRimSharpness, _ShadowRimRange + _ShadowRimSharpness, rimIntensity);
-        half3 shadowRim = lerp(1, (_ShadowRim * lerp(1, i.diffuseColor.rgbb, _ShadowRimAlbedoTint)) + (ambientLight.color * 0.1), rimIntensity);
-        return shadowRim;
-    #endif
-
-    return 1;
+    i.surfaceColor = i.albedo * lightInfo.diffuse;
 }
 
-void ApplyHalftones(FragmentData i, inout half3 specular, inout half3 rimLight, inout half3 shadowRim, inout half3 ramp)
+void ApplyAccumulatedIndirectSpecularLightToSurface(inout FragmentData i, SurfaceLightInfo lightInfo)
+{
+    if(_ReflectionBlendMode == 0) // Additive
+        i.surfaceColor += lightInfo.indirectSpecular * i.reflectivityMask.r;
+    else if(_ReflectionBlendMode == 1) //Multiplicitive
+        i.surfaceColor = lerp(i.surfaceColor, i.surfaceColor * lightInfo.indirectSpecular, i.reflectivityMask.r);
+    else if(_ReflectionBlendMode == 2) //Subtractive
+        i.surfaceColor -= lightInfo.indirectSpecular * i.reflectivityMask.r;
+}
+
+void ApplyAccumulatedDirectSpecularLightToSurface(inout FragmentData i, half occlusion, SurfaceLightInfo lightInfo)
+{
+    i.surfaceColor += lightInfo.directSpecular * occlusion;
+}
+
+void ApplyHalftones(FragmentData i, inout SurfaceLightInfo lightInfo, inout half3 rimLight, inout half3 shadowRim)
 {
     if(_HalftoneType == HALFTONE_SHADOWS || _HalftoneType == HALFTONE_SHADOWS_AND_HIGHLIGHTS)
     {
-        half lineHalftone = lerp(1, LineHalftone(i, 1), 1-saturate(dot(shadowRim * ramp, grayscaleVec)));
-        ramp *= lerp(1, lineHalftone, _HalftoneLineIntensity);
+        half lineHalftone = lerp(1, LineHalftone(i, 1), 1-saturate(dot(shadowRim * lightInfo.diffuse, grayscaleVec)));
+        lightInfo.diffuse *= lerp(1, lineHalftone, _HalftoneLineIntensity);
     }
     
     if(_HalftoneType == HALFTONE_HIGHLIGHTS || _HalftoneType == HALFTONE_SHADOWS_AND_HIGHLIGHTS)
     {
-        half stipplingSpecular = DotHalftone(i, saturate(dot(specular, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
-        half stipplingRim = DotHalftone(i, saturate(dot(rimLight, grayscaleVec))) * saturate(dot(shadowRim * ramp, grayscaleVec));
+        half stipplingSpecular = DotHalftone(i, saturate(dot(lightInfo.directSpecular, grayscaleVec))) * saturate(dot(shadowRim * lightInfo.diffuse, grayscaleVec));
+        half stipplingRim = DotHalftone(i, saturate(dot(rimLight, grayscaleVec))) * saturate(dot(shadowRim * lightInfo.diffuse, grayscaleVec));
 
         rimLight *= stipplingRim;
-        specular *= stipplingSpecular;
+        lightInfo.directSpecular *= stipplingSpecular;
     }
+}
+
+// dunno if I even need to initalize this but w/e
+void InitializeSurfaceLightingOutput(inout SurfaceLightInfo lightInfo)
+{
+    lightInfo.diffuse = half3(0,0,0);
+    lightInfo.directSpecular = half3(0,0,0);
+    lightInfo.indirectSpecular = half3(0,0,0);
+    lightInfo.subsurface = half3(0,0,0);
+}
+
+void InitializeSurface(inout FragmentData i)
+{
+    i.albedo.rgb = rgb2hsv(i.albedo.rgb);
+    i.albedo.x += fmod(lerp(0, _Hue, i.hsvMask.r), 360);
+    i.albedo.y = saturate(i.albedo.y * lerp(1, _Saturation, i.hsvMask.g));
+    i.albedo.z *= lerp(1, _Value, i.hsvMask.b);
+    i.albedo.rgb = hsv2rgb(i.albedo.rgb);
+    i.diffuseColor.rgb = i.albedo.rgb;
+    i.albedo.rgb *= (1-i.metallicSmoothness.x);
 }

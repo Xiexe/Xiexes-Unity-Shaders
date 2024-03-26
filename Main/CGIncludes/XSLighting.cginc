@@ -1,75 +1,44 @@
 half4 BRDF_XSLighting(HookData data)
 {
-    FragmentData i = data.i;
-    float3 untouchedNormal = data.untouchedNormal;
-    TextureUV t = data.t;
+    SurfaceLightInfo lightInfo = data.lightInfo;
+    FragmentData i = data.frag;
+    TextureUV t = data.uvs;
     Directions dirs = data.dirs;
-    DotProducts d = data.d;
+    DotProducts d = data.dots;
     PassLights lights = data.lights;
-    lights.mainLight.type = LIGHT_TYPE_MAIN;
-    lights.ambientLight.type = LIGHT_TYPE_AMBIENT;
 
-    half4 metallicSmoothness = calcMetallicSmoothness(i);
-    half3 reflViewAniso = getAnisotropicReflectionVector(dirs.viewDir, i.bitangent, i.tangent, i.normal, metallicSmoothness.a, _AnisotropicReflection);
-    half occlusion = lerp(1, i.occlusion.r, _OcclusionIntensity);
-
-    i.albedo.rgb = rgb2hsv(i.albedo.rgb);
-    i.albedo.x += fmod(lerp(0, _Hue, i.hsvMask.r), 360);
-    i.albedo.y = saturate(i.albedo.y * lerp(1, _Saturation, i.hsvMask.g));
-    i.albedo.z *= lerp(1, _Value, i.hsvMask.b);
-    i.albedo.rgb = hsv2rgb(i.albedo.rgb);
-    i.diffuseColor.rgb = i.albedo.rgb;
-    i.albedo.rgb *= (1-metallicSmoothness.x);
+    InitializeSurface(i);
     
-    bool isRealtimeLighting = any(_WorldSpaceLightPos0.xyz);
-    half3 totalDiffuseLight = half3(0,0,0);
-    half3 totalSpecularLight = half3(0,0,0);
-    half3 totalSubsurfaceScattering = half3(0,0,0);
-    
-    half3 ambientColor = GetAmbientColor();
-    ambientColor = isRealtimeLighting ? ambientColor : ambientColor * 0.4;
-
-    half3 mainLightColor = _LightColor0;
-    mainLightColor = isRealtimeLighting ? mainLightColor : ambientColor * 0.6;
-    
-    PopulateLight(i, dirs, mainLightColor, i.attenuation, GetDominantLightDirection(i), lights.mainLight);
-    PopulateLight(i, dirs, ambientColor, 1, half3(0,0,0), lights.ambientLight);
-    lights.ambientLight.color *= lerp(occlusion, 1, _OcclusionMode);
-    
+    PopulateLight(i, dirs, _LightColor0, i.attenuation, GetLightDirection(i), LIGHT_TYPE_MAIN, lights.mainLight);
+    PopulateLight(i, dirs, GetAmbientColor(i.occlusion), 1, GetProbeLightDirection(), LIGHT_TYPE_AMBIENT, lights.ambientLight);
     PopulateExtraPassLights(i, dirs, lights.extraLights);
+
+    AccumulateLight(i, d, t, dirs, lights.mainLight, lightInfo);
+    AccumulateLight(i, d, t, dirs, lights.ambientLight, lightInfo);
+    AccumulateExtraPassLights(i, d, t, dirs, lights.extraLights, lightInfo);
+    ApplyAccumulatedDiffuseLightToSurface(i, lightInfo);
+
+    AccumulateIndirectSpecularLight(i, dirs, d, lights, i.occlusion, lightInfo);
+    ApplyAccumulatedIndirectSpecularLightToSurface(i, lightInfo);
+    ApplyAccumulatedDirectSpecularLightToSurface(i, i.occlusion, lightInfo);
     
-    ApplyMainLights(i, d, t, dirs, lights.mainLight, lights.ambientLight, totalDiffuseLight, totalSpecularLight, totalSubsurfaceScattering);
-    ApplyExtraPassLights(i, d, t, dirs, lights.extraLights, totalDiffuseLight, totalSpecularLight, totalSubsurfaceScattering);
-    i.surfaceColor = i.albedo * totalDiffuseLight;
-
     half3 environmentMap = getEnvMap(i, d, 5, dirs.reflView, lights.ambientLight.color, i.normal);
-
     half3 rimLight = GetRimLight(i, d, lights.mainLight, lights.ambientLight, environmentMap);
     half3 rimShadow = GetRimShadow(i, d, lights.mainLight, lights.ambientLight);
 
-    float3 f0 = 0.16 * _Reflectivity * _Reflectivity * (1.0 - metallicSmoothness.r) + i.diffuseColor * metallicSmoothness.r;
-    float3 fresnel = F_Schlick(d.vdn, f0);
-    half3 indirectSpecular = GetIndirectSpecular(i, metallicSmoothness, reflViewAniso, lights.ambientLight.color, dirs.viewDir, fresnel);
-    DoReflectionBlending(i, i.surfaceColor, indirectSpecular);
-    totalSpecularLight += indirectSpecular;
-    totalSpecularLight *= occlusion;
-    
     #if defined(Fur)
-        AdjustFurSpecular(i, totalSpecularLight.rgb);
+        AdjustFurSpecular(i, lightInfo);
     #endif
     
-    ApplyHalftones(i, totalSpecularLight, rimLight, rimShadow, totalDiffuseLight);
+    ApplyHalftones(i, lightInfo, rimLight, rimShadow);
 
-    i.surfaceColor += max(totalSpecularLight, rimLight);
-    i.surfaceColor += totalSpecularLight;
-    i.surfaceColor += totalSubsurfaceScattering;
+    i.surfaceColor += max(lightInfo.directSpecular, rimLight);
+    i.surfaceColor += lightInfo.subsurface;
     i.surfaceColor *= rimShadow;
-
-    half lightAvg = (dot(lights.ambientLight.color.rgb, grayscaleVec) + dot(lights.mainLight.color.rgb, grayscaleVec)) / 2;
-    i.surfaceColor += GetEmission(i, t, d, lightAvg);
-
+    i.surfaceColor += GetEmission(i, t, d, lights);
     i.surfaceColor = lerp(i.surfaceColor, GetOutlineColor(i, lights.mainLight, lights.ambientLight), i.isOutline);
     return float4(i.surfaceColor, 1);
     // TODO:: Add back in clearcoat support.
+    // TODO:: Add back in lightmapping support for the fur shader.
     // calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, dirs.viewDir, dirs.lightDir, ramp);
 }

@@ -100,6 +100,7 @@ struct FragmentData
     half4 detailNormal;
     half4 detailMask;
     half4 metallicGlossMap;
+    half4 metallicSmoothness;
     half4 reflectivityMask;
     half4 specularMap;
     half4 thickness;
@@ -153,11 +154,6 @@ struct TextureUV
 struct DotProducts
 {
     half vdn;
-    // half vdh;
-    // half tdh;
-    // half bdh;
-    // half ndh;
-    // half rdv;
     half svdn;
 };
 
@@ -200,12 +196,21 @@ struct PassLights
     Light extraLights[4]; // Only used in forward base pass for vertex lights.
 };
 
+struct SurfaceLightInfo
+{
+    half3 diffuse;
+    half3 directSpecular;
+    half3 indirectSpecular;
+    half3 subsurface;
+};
+
 struct HookData
 {
-    FragmentData i;
-    TextureUV t;
+    SurfaceLightInfo lightInfo;
+    FragmentData frag;
+    TextureUV uvs;
     Directions dirs;
-    DotProducts d;
+    DotProducts dots;
     PassLights lights;
     float3 untouchedNormal;
     bool isFrontface;
