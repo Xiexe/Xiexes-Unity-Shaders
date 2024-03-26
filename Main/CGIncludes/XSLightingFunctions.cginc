@@ -486,7 +486,7 @@ void PopulateExtraPassLights(FragmentData i, Directions d, inout Light lights[4]
                 half3 direction = normalize(toLight - i.worldPos);
                 direction *= length(toLight) * attenuations[light];
                 
-                PopulateLight(i, d, unity_LightColor[light], attenuations[light], direction, lights[light]);
+                PopulateLight(i, d, unity_LightColor[light], attenuations[light], direction, LIGHT_TYPE_EXTRA, lights[light]);
             }
         #endif
     #endif
