@@ -13,10 +13,13 @@ half4 BRDF_XSLighting(HookData data)
     PopulateLight(i, dirs, _LightColor0, i.attenuation, lightDirection, _WorldSpaceLightPos0, LIGHT_TYPE_MAIN, lights.mainLight);
     PopulateLight(i, dirs, GetAmbientColor(i.occlusion), 0, lightDirection, half3(0,0,0), LIGHT_TYPE_AMBIENT, lights.ambientLight);
     PopulateExtraPassLights(i, dirs, lights.extraLights);
-    
+
     AccumulateLight(i, d, t, dirs, lights.mainLight, lightInfo);
-    AccumulateLight(i, d, t, dirs, lights.ambientLight, lightInfo);
-    AccumulateExtraPassLights(i, d, t, dirs, lights.extraLights, lightInfo);
+
+    #if defined(UNITY_PASS_FORWARDBASE)
+        AccumulateLight(i, d, t, dirs, lights.ambientLight, lightInfo);
+        AccumulateExtraPassLights(i, d, t, dirs, lights.extraLights, lightInfo);
+    #endif
     
     ApplyShadingAdjustments(i, lightInfo, t, lights.ambientLight);
 

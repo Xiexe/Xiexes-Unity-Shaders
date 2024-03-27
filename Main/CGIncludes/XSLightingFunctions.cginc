@@ -551,7 +551,12 @@ void AccumulateLight(FragmentData i, DotProducts d, TextureUV t, Directions dir,
     
     half3 shadow = GetShading(i, t, light);
     
-    lightInfo.diffuse += light.color * lerp(1, light.attenuation, isVertexLight);
+    #if defined(UNITY_PASS_FORWARDBASE)
+        lightInfo.diffuse += light.color * lerp(1, light.attenuation, isVertexLight);
+    #elif defined(UNITY_PASS_FORWARDADD)
+        lightInfo.diffuse += light.color * light.attenuation;
+    #endif
+    
     lightInfo.directSpecular += GetDirectSpecular(i, d, light, _AnisotropicSpecular) * light.ndl * light.attenuation;
     lightInfo.subsurface += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * light.ndl * light.attenuation;
     lightInfo.shadowMask = max(lightInfo.shadowMask, shadow);
@@ -620,14 +625,16 @@ void ApplyShadingAdjustments(inout FragmentData i, inout SurfaceLightInfo lightI
         lightInfo.shadowMask = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, lightInfo.shadowMask);
         lightInfo.shadowMask *= lightInfo.attenuationMask;
         lightInfo.shadowMask = 1-lightInfo.shadowMask;
+        lightInfo.shadows = lerp(1, i.shadeMap, lightInfo.shadowMask);
 
         // we only want to do the blending when there's a light with realtime shadows. Otherwise we should just treat it as normal.
         #if defined(SHADOWS_SCREEN)
-            float blendFactor = smoothstep(0.2,0,GetAmbientBrightnessNonPerceptual());
-            i.shadeMap.rgb = lerp(i.shadeMap, ambient.color, blendFactor);
+        float blendFactor = smoothstep(0.25,0,GetAmbientBrightnessNonPerceptual());
+        lightInfo.shadows = lerp(i.shadeMap, ambient.color, blendFactor);
+
+        i.shadeMap.rgb = lerp(i.shadeMap, i.albedo * ambient.color, blendFactor);
         #endif
         
-        lightInfo.shadows = lerp(1, i.shadeMap, lightInfo.shadowMask);
         i.surfaceColor = lerp(i.albedo, i.shadeMap, lightInfo.shadowMask) * lightInfo.diffuse;
     }
     else
