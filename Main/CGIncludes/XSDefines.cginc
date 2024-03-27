@@ -96,6 +96,7 @@ struct VertexOutput
 struct FragmentData
 {
     half4 albedo;
+    half4 shadeMap;
     half4 normalMap;
     half4 detailNormal;
     half4 detailMask;

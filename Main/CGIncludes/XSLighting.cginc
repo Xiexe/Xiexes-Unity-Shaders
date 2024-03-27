@@ -18,9 +18,7 @@ half4 BRDF_XSLighting(HookData data)
     AccumulateLight(i, d, t, dirs, lights.ambientLight, lightInfo);
     AccumulateExtraPassLights(i, d, t, dirs, lights.extraLights, lightInfo);
     
-    ApplyShadingAdjustments(lightInfo, t, lights.ambientLight);
-    
-    ApplyAccumulatedDiffuseLightToSurface(i, lightInfo);
+    ApplyShadingAdjustments(i, lightInfo, t, lights.ambientLight);
 
     AccumulateIndirectSpecularLight(i, dirs, d, lights, i.occlusion, lightInfo);
     ApplyAccumulatedIndirectSpecularLightToSurface(i, lightInfo);

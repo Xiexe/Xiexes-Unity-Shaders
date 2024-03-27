@@ -579,11 +579,6 @@ void AccumulateIndirectSpecularLight(FragmentData i, Directions dirs, DotProduct
     #endif
 }
 
-void ApplyAccumulatedDiffuseLightToSurface(inout FragmentData i, SurfaceLightInfo lightInfo)
-{
-    i.surfaceColor = i.albedo * lightInfo.diffuse * lightInfo.shadows;
-}
-
 void ApplyAccumulatedIndirectSpecularLightToSurface(inout FragmentData i, SurfaceLightInfo lightInfo)
 {
     if(_ReflectionBlendMode == 0) // Additive
@@ -617,24 +612,27 @@ void ApplyHalftones(FragmentData i, inout SurfaceLightInfo lightInfo, inout half
     }
 }
 
-void ApplyShadingAdjustments(inout SurfaceLightInfo lightInfo, TextureUV uvs, Light ambient)
+void ApplyShadingAdjustments(inout FragmentData i, inout SurfaceLightInfo lightInfo, TextureUV uvs, Light ambient)
 {
     if(_ShadowType == SHADOW_MODE_SHADEMAP)
     {
         _ShadowSharpness = 1-_ShadowSharpness;
         lightInfo.shadowMask = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, lightInfo.shadowMask);
         lightInfo.shadowMask *= lightInfo.attenuationMask;
-
-        half colorArea = 1-lightInfo.shadowMask;
-        half3 shadowColor = _ShadowColor * UNITY_SAMPLE_TEX2D_SAMPLER(_ShadeMap, _MainTex, uvs.uv0).rgb;
+        lightInfo.shadowMask = 1-lightInfo.shadowMask;
 
         // we only want to do the blending when there's a light with realtime shadows. Otherwise we should just treat it as normal.
         #if defined(SHADOWS_SCREEN)
             float blendFactor = smoothstep(0.2,0,GetAmbientBrightnessNonPerceptual());
-            shadowColor = lerp(shadowColor, ambient.color, blendFactor);
+            i.shadeMap.rgb = lerp(i.shadeMap, ambient.color, blendFactor);
         #endif
         
-        lightInfo.shadows = lerp(1, shadowColor, colorArea);
+        lightInfo.shadows = lerp(1, i.shadeMap, lightInfo.shadowMask);
+        i.surfaceColor = lerp(i.albedo, i.shadeMap, lightInfo.shadowMask) * lightInfo.diffuse;
+    }
+    else
+    {
+        i.surfaceColor = i.albedo * lightInfo.diffuse * lightInfo.shadows;
     }
 }
 
@@ -654,4 +652,5 @@ void InitializeSurface(inout FragmentData i, inout SurfaceLightInfo lightInfo)
     i.albedo.rgb = hsv2rgb(i.albedo.rgb);
     i.diffuseColor.rgb = i.albedo.rgb;
     i.albedo.rgb *= (1-i.metallicSmoothness.x);
+    i.shadeMap.rgb *= (1-i.metallicSmoothness.x);
 }
