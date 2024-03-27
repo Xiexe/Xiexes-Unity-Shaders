@@ -628,12 +628,11 @@ void ApplyShadingAdjustments(inout SurfaceLightInfo lightInfo, TextureUV uvs, Li
         half colorArea = 1-lightInfo.shadowMask;
         half3 shadowColor = _ShadowColor * UNITY_SAMPLE_TEX2D_SAMPLER(_ShadeMap, _MainTex, uvs.uv0).rgb;
 
-        if(IsRealtimeLighting())
-        {
-            // Blend the shadow color with the ambient color based on the brightness of the scene.
-            float blendFactor = smoothstep(1,0,GetAmbientBrightnessNonPerceptual());
+        // we only want to do the blending when there's a light with realtime shadows. Otherwise we should just treat it as normal.
+        #if defined(SHADOWS_SCREEN)
+            float blendFactor = smoothstep(0.2,0,GetAmbientBrightnessNonPerceptual());
             shadowColor = lerp(shadowColor, ambient.color, blendFactor);
-        }
+        #endif
         
         lightInfo.shadows = lerp(1, shadowColor, colorArea);
     }
