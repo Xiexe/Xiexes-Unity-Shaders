@@ -630,7 +630,7 @@ void ApplyShadingAdjustments(inout SurfaceLightInfo lightInfo, TextureUV uvs, Li
         if(IsRealtimeLighting())
         {
             // Blend the shadow color with the ambient color based on the brightness of the scene.
-            float blendFactor = saturate(smoothstep(0.25, 0, GetAmbientBrightnessNonPerceptual()));
+            float blendFactor = smoothstep(1,0,GetAmbientBrightnessNonPerceptual());
             shadowColor = lerp(shadowColor, ambient.color, blendFactor);
         }
         
