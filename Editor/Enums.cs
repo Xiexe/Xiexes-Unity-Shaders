@@ -79,7 +79,8 @@ namespace XSToon3
         public enum ShadowType
         {
             Ramp,
-            ShadeMap
+            ShadeMap,
+            SolidColor
         }
     }
 }

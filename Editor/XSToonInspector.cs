@@ -268,6 +268,12 @@ namespace XSToon3
                         materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls how sharp shadows are"), 2);
                         materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowRange, new GUIContent("Shadow Range", "Range of the shadows"), 2);
                         break;
+                    
+                    case Enums.ShadowType.SolidColor:
+                        XSStyles.constrainedShaderProperty(materialEditor, Inspector.MaterialProperties._ShadowColor, new GUIContent("Shadow Color", "Color of the shadows"), 0);
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls how sharp shadows are"), 2);
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowRange, new GUIContent("Shadow Range", "Range of the shadows"), 2);
+                        break;
                 }
                 
                 XSStyles.SeparatorThin();

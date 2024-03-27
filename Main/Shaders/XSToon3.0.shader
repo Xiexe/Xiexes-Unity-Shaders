@@ -65,7 +65,7 @@
         _AnisotropicReflection("Reflection Anisotropic", Range(-1,1)) = 0
         _SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
         
-        [Enum(Ramp, 0, ShadeMap, 1)]_ShadowType("Shadow Type", Int) = 0
+        [Enum(Ramp, 0, Shade Map, 1, Solid Color, 2)]_ShadowType("Shadow Type", Int) = 0
         [ToggleUI]_UseShadowMapTexture("Use Shadow Map", Int) = 0
         _ShadowControlTexture("Shadow Map", 2D) = "black" {}
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}

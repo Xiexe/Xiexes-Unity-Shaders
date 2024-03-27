@@ -94,6 +94,7 @@
 
 #define SHADOW_MODE_RAMP 0
 #define SHADOW_MODE_SHADEMAP 1
+#define SHADOW_MODE_SOLIDCOLOR 2
 
 // LIGHT DEFINITONS
 #define LIGHT_TYPE_MAIN 0 // Main light for the pass
