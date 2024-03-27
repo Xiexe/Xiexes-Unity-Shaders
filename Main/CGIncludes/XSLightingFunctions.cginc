@@ -545,12 +545,13 @@ void PopulateExtraPassLights(FragmentData i, Directions d, inout Light lights[4]
 void AccumulateLight(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light light, inout SurfaceLightInfo lightInfo)
 {
     // hack because vertex lights at 0 have an attenuation even if they don't exist. Fucking stupid ass ghost lights.
-    if(!any(light.position) && light.type == LIGHT_TYPE_EXTRA)
+    bool isVertexLight = light.type == LIGHT_TYPE_EXTRA;
+    if(!any(light.position) && isVertexLight)
         return;
     
     half3 shadow = GetShading(i, t, light);
     
-    lightInfo.diffuse += light.color;
+    lightInfo.diffuse += light.color * lerp(1, light.attenuation, isVertexLight);
     lightInfo.directSpecular += GetDirectSpecular(i, d, light, _AnisotropicSpecular) * light.ndl * light.attenuation;
     lightInfo.subsurface += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * light.ndl * light.attenuation;
     lightInfo.shadowMask = max(lightInfo.shadowMask, shadow);
