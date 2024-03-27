@@ -70,6 +70,9 @@
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
+        _ShadowFalloff("Shadow Falloff", Range(0,1)) = 0.5
+        _ShadowRange("Shadow Range", Range(0,1)) = 0.5
+        _ShadowColor("Shadow Tint", Color) = (0,0,0,1)
 
         _RimMask("Rim Masks", 2D) = "white" {}
         _ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)

@@ -170,6 +170,7 @@ struct Directions
 
 struct Light
 {
+    half3 position;
     half3 direction;
     half3 color;
     half attenuation;
@@ -202,6 +203,9 @@ struct SurfaceLightInfo
     half3 directSpecular;
     half3 indirectSpecular;
     half3 subsurface;
+    half3 shadows;
+    half3 shadowMask;
+    half attenuationMask;
 };
 
 struct HookData
@@ -217,6 +221,7 @@ struct HookData
 };
 
 UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_ShadeMap); half4 _ShadeMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_DissolveTexture); half4 _DissolveTexture_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_BumpMap); half4 _BumpMap_ST;
@@ -251,7 +256,8 @@ int _UseClipsForDissolve;
 
 half4 _ShadowRim, _OutlineColor, _SSColor,
       _EmissionColor, _EmissionColor0, _EmissionColor1,
-      _MatcapTint, _RimColor, _DissolveColor;
+      _MatcapTint, _RimColor, _DissolveColor,
+      _ShadowColor;
 
 half _MatcapTintToDiffuse;
 
@@ -268,6 +274,7 @@ half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;
 half _DissolveBlendPower, _DissolveLayer1Scale, _DissolveLayer2Scale, _DissolveLayer1Speed, _DissolveLayer2Speed;
+half _ShadowFalloff, _ShadowRange;
 
 half4 _ClipSlider00,_ClipSlider01,_ClipSlider02,_ClipSlider03,
       _ClipSlider04,_ClipSlider05,_ClipSlider06,_ClipSlider07,
@@ -292,7 +299,7 @@ int _NormalMapMode, _OutlineUVSelect;
 int _AlphaToMask;
 int _ALGradientOnRed, _ALGradientOnGreen, _ALGradientOnBlue;
 int _ALUVWidth;
-int _UseShadowMapTexture;
+int _ShadowType, _UseShadowMapTexture;
 
 int _UVDiscardMode, _UVDiscardChannel,
     _DiscardTile0,_DiscardTile1,_DiscardTile2,_DiscardTile3,

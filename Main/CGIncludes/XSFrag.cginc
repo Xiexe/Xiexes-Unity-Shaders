@@ -56,8 +56,7 @@ float4 frag (
         #endif
 
         #if defined(DIRECTIONAL)
-            half sharp = _ShadowSharpness * 0.5;
-            attenuation = smoothstep(sharp, 1-sharp, attenuation); //Converge at the center line
+            attenuation = smoothstep(_ShadowSharpness * 0.35, 1-_ShadowSharpness * 0.35, attenuation);
         #endif
 
         bool face = facing > 0; // True if on front face, False if on back face

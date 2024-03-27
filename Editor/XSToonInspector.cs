@@ -231,6 +231,10 @@ namespace XSToon3
             Foldouts[material].ShowShadows = XSStyles.ShurikenFoldout("Shadows", Foldouts[material].ShowShadows);
             if (Foldouts[material].ShowShadows)
             {
+                materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowType, new GUIContent("Shadow Type", "How to calculate shadows."));
+                
+                
+                XSStyles.SeparatorThin();
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._UseShadowMapTexture, new GUIContent("Use Shadow Control Map", "Use Shadow Map texture for shadows. (Mainly used for faces. Reference Genshin Impact for style.)"));
                 bool useShadowMapTexture = material.GetInt("_UseShadowMapTexture") > 0;
 
@@ -241,18 +245,31 @@ namespace XSToon3
                         Inspector.MaterialProperties._ShadowControlTexture
                     );
                 }
-                XSStyles.SeparatorThin();
                 
-                GUILayout.BeginHorizontal();
-                materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), Inspector.MaterialProperties._Ramp);
-                XSStyles.CallGradientEditor(material);
-                GUILayout.EndHorizontal();
+                Enums.ShadowType shadowType = (Enums.ShadowType)Inspector.MaterialProperties._ShadowType.floatValue;
+                switch (shadowType)
+                {
+                    case Enums.ShadowType.Ramp:
+                        GUILayout.BeginHorizontal();
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Shadow Ramp", "Shadow Ramp, Dark to Light should be Left to Right"), Inspector.MaterialProperties._Ramp);
+                        XSStyles.CallGradientEditor(material);
+                        GUILayout.EndHorizontal();
                 
-                materialEditor.TexturePropertySingleLine(
-                    new GUIContent("Ramp Selection Mask", "A black to white mask that determins how far up on the multi ramp to sample. 0 for bottom, 1 for top, 0.5 for middle, 0.25, and 0.75 for mid bottom and mid top respectively."), 
-                    Inspector.MaterialProperties._RampSelectionMask
-                );
-
+                        materialEditor.TexturePropertySingleLine(
+                            new GUIContent("Ramp Selection Mask", "A black to white mask that determins how far up on the multi ramp to sample. 0 for bottom, 1 for top, 0.5 for middle, 0.25, and 0.75 for mid bottom and mid top respectively."), 
+                            Inspector.MaterialProperties._RampSelectionMask
+                        );
+                        
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
+                        break;
+                    
+                    case Enums.ShadowType.ShadeMap:
+                        materialEditor.TexturePropertySingleLine(new GUIContent("Shade Map", "Texture to determine the base color of shadows in the area."), Inspector.MaterialProperties._ShadeMap, Inspector.MaterialProperties._ShadowColor);
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls how sharp shadows are"), 2);
+                        materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowRange, new GUIContent("Shadow Range", "Range of the shadows"), 2);
+                        break;
+                }
+                
                 XSStyles.SeparatorThin();
                 if (Inspector.MaterialProperties._RampSelectionMask.textureValue != null)
                 {
@@ -269,9 +286,6 @@ namespace XSToon3
                     }
                 }
 
-                materialEditor.ShaderProperty(Inspector.MaterialProperties._ShadowSharpness, new GUIContent("Shadow Sharpness", "Controls the sharpness of recieved shadows, as well as the sharpness of 'shadows' from Vertex Lighting."));
-
-                XSStyles.SeparatorThin();
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._OcclusionMode, new GUIContent("Occlusion Mode", "How to calculate the occlusion map contribution"));
                 materialEditor.TexturePropertySingleLine(new GUIContent("Occlusion Map", "Occlusion Map, used to darken areas on the model artifically."), Inspector.MaterialProperties._OcclusionMap);
                 materialEditor.ShaderProperty(Inspector.MaterialProperties._OcclusionIntensity, new GUIContent("Intensity", "Occlusion intensity"), 2);

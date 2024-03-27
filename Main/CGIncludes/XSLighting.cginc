@@ -7,15 +7,20 @@ half4 BRDF_XSLighting(HookData data)
     DotProducts d = data.dots;
     PassLights lights = data.lights;
 
-    InitializeSurface(i);
-
-    PopulateLight(i, dirs, GetAmbientColor(i.occlusion), 1, GetProbeLightDirection(), LIGHT_TYPE_AMBIENT, lights.ambientLight);
-    PopulateLight(i, dirs, _LightColor0, i.attenuation, GetLightDirection(i), LIGHT_TYPE_MAIN, lights.mainLight);
+    InitializeSurface(i, lightInfo);
+    
+    half3 lightDirection = GetLightDirection(i);
+    PopulateLight(i, dirs, _LightColor0, i.attenuation, lightDirection, _WorldSpaceLightPos0, LIGHT_TYPE_MAIN, lights.mainLight);
+    PopulateLight(i, dirs, GetAmbientColor(i.occlusion), 0, lightDirection, half3(0,0,0), LIGHT_TYPE_AMBIENT, lights.ambientLight);
     PopulateExtraPassLights(i, dirs, lights.extraLights);
 
-    AccumulateLight(i, d, t, dirs, lights.ambientLight, lightInfo);
     AccumulateLight(i, d, t, dirs, lights.mainLight, lightInfo);
+    AccumulateLight(i, d, t, dirs, lights.ambientLight, lightInfo);
     AccumulateExtraPassLights(i, d, t, dirs, lights.extraLights, lightInfo);
+
+    ApplyShadingAdjustments(lightInfo, t, lights.ambientLight);
+    // return float4(lightInfo.shadowMask.xxx, 1);
+
     ApplyAccumulatedDiffuseLightToSurface(i, lightInfo);
 
     AccumulateIndirectSpecularLight(i, dirs, d, lights, i.occlusion, lightInfo);

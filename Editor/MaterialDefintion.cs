@@ -74,6 +74,11 @@ namespace XSToon3
         public MaterialProperty _ShadowRimRange;
         public MaterialProperty _ShadowRimThreshold;
         public MaterialProperty _ShadowRimSharpness;
+        public MaterialProperty _ShadeMap;
+        public MaterialProperty _ShadowType;
+        public MaterialProperty _ShadowColor;
+        public MaterialProperty _ShadowRange;
+        public MaterialProperty _ShadowFalloff;
         public MaterialProperty _ShadowRimAlbedoTint;
         public MaterialProperty _OcclusionMap;
         public MaterialProperty _OcclusionIntensity;

@@ -68,7 +68,7 @@ half GetMainLightBrightness()
 
 half GetEnvironmentBrightness()
 {
-    return (GetMainLightBrightness() + GetAmbientBrightness()) * 0.5;
+    return (GetMainLightBrightness() + GetAmbientBrightnessNonPerceptual()) * 0.5;
 }
 
 // TODO:: these need to be flipped if mesh is not from blender.
@@ -356,18 +356,16 @@ bool IsRealtimeLighting()
 
 half3 GetLightDirection(FragmentData i)
 {
-    return UnityWorldSpaceLightDir(i.worldPos);
-}
-
-half3 GetProbeLightDirection()
-{
-    half3 probeDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
-
-    // Probes are null.
-    if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0)
-        probeDir = half3(1, 1, 1);
-
-    return probeDir;
+    half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
+    half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
+    lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
+    #if !defined(POINT) && !defined(SPOT)// if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
+    if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0 && length(lightDir) < 0.1)
+    {
+        lightDir = half4(1, 1, 1, 0);
+    }
+    #endif
+    return normalize(lightDir);
 }
 
 half4 GetOutlineColor(FragmentData i, Light light, Light ambientLight)
@@ -419,18 +417,24 @@ half4 SampleShadowMap(half rdl, half2 uv)
     return shadow;
 }
 
+half2 GetShadowMapDirectionAndInterpolator(Light light, half2 uv)
+{
+    half4 shadowMap = SampleShadowMap(light.rdl, uv);
+    half normalizedFdotL = 1 * -0.5 * light.fdl + 0.5;
+    normalizedFdotL %= 1;
+        
+    half shadowDir = smoothstep(shadowMap.x, 0, normalizedFdotL);
+    return half2(shadowDir, shadowMap.a);
+}
+
 half4 SampleShadowRamp(FragmentData i, TextureUV t, Light light)
 {
     half remapRamp = (light.ndl * 0.5 + 0.5) * lerp(1, i.occlusion.r, _OcclusionMode);
 
     if(_UseShadowMapTexture > 0)
     {
-        half4 shadowMap = SampleShadowMap(light.rdl, t.uv0);
-        half normalizedFdotL = 1 * -0.5 * light.fdl + 0.5;
-        normalizedFdotL %= 1;
-        
-        half shadowDir = smoothstep(shadowMap.x, 0, normalizedFdotL);
-        remapRamp = lerp(remapRamp, shadowDir, shadowMap.a);
+        half2 shadowMap = GetShadowMapDirectionAndInterpolator(light, t.uv0);
+        remapRamp = lerp(remapRamp, shadowMap.x, shadowMap.y);
     }
 
     float atten = light.type == LIGHT_TYPE_EXTRA ? 1 : light.attenuation;
@@ -440,6 +444,34 @@ half4 SampleShadowRamp(FragmentData i, TextureUV t, Light light)
     
     half4 ramp = tex2D(_Ramp, half2(remapRamp * atten, i.rampMask.r));
     return ramp;
+}
+
+half4 GetShading(FragmentData i, TextureUV t, Light light)
+{
+    if(_ShadowType == SHADOW_MODE_RAMP)
+    {
+        return SampleShadowRamp(i, t, light);
+    }
+    else
+    {
+        float shadow = light.ndl * 0.5 + 0.5;
+        
+        if(_UseShadowMapTexture > 0)
+        {
+            half2 shadowMap = GetShadowMapDirectionAndInterpolator(light, t.uv0);
+            shadow = lerp(shadow, shadowMap.x, shadowMap.y);
+        }
+        
+        return shadow;
+    }
+}
+
+void GetExtraLightPositions(out half3 positions[4])
+{
+    positions[0] = half3(unity_4LightPosX0.x, unity_4LightPosY0.x, unity_4LightPosZ0.x);
+    positions[1] = half3(unity_4LightPosX0.y, unity_4LightPosY0.y, unity_4LightPosZ0.y);
+    positions[2] = half3(unity_4LightPosX0.z, unity_4LightPosY0.z, unity_4LightPosZ0.z);
+    positions[3] = half3(unity_4LightPosX0.w, unity_4LightPosY0.w, unity_4LightPosZ0.w);
 }
 
 void GetExtraLightAttenuations(float3 worldPos, out half attenuations[4])
@@ -463,11 +495,12 @@ void GetExtraLightAttenuations(float3 worldPos, out half attenuations[4])
     attenuations[3] = atten.w;
 }
 
-void PopulateLight(FragmentData i, Directions d, half3 color, half3 attenuation, half3 direction, int lightType, inout Light light)
+void PopulateLight(FragmentData i, Directions d, half3 color, half attenuation, half3 direction, half3 position, int lightType, inout Light light)
 {
     light.type = lightType;
     light.color = color;
     light.attenuation = attenuation;
+    light.position = position;
     light.direction = direction;
     
     light.reflectionVector = reflect(light.direction, i.normal);
@@ -492,8 +525,10 @@ void PopulateExtraPassLights(FragmentData i, Directions d, inout Light lights[4]
     #if defined(UNITY_PASS_FORWARDBASE)
         #if defined(VERTEXLIGHT_ON)
             half attenuations[4];
+            half3 positions[4];
             GetExtraLightAttenuations(i.worldPos, attenuations);
-            
+            GetExtraLightPositions(positions);
+    
             for(int light = 0; light < 4; light++)
             {
                 lights[light].type = LIGHT_TYPE_EXTRA;
@@ -501,7 +536,7 @@ void PopulateExtraPassLights(FragmentData i, Directions d, inout Light lights[4]
                 half3 direction = normalize(toLight - i.worldPos);
                 direction *= length(toLight) * attenuations[light];
                 
-                PopulateLight(i, d, unity_LightColor[light], attenuations[light], direction, LIGHT_TYPE_EXTRA, lights[light]);
+                PopulateLight(i, d, unity_LightColor[light], attenuations[light], direction, positions[light], LIGHT_TYPE_EXTRA, lights[light]);
             }
         #endif
     #endif
@@ -509,16 +544,17 @@ void PopulateExtraPassLights(FragmentData i, Directions d, inout Light lights[4]
 
 void AccumulateLight(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light light, inout SurfaceLightInfo lightInfo)
 {
-    half4 ramp = SampleShadowRamp(i, t, light);
-    if(light.type == LIGHT_TYPE_MAIN)
-    {
-        half attenFactor = lerp(light.attenuation, 1, smoothstep(0, 0.01, GetAmbientBrightnessNonPerceptual()));
-        light.attenuation = attenFactor;
-    }
+    // hack because vertex lights at 0 have an attenuation even if they don't exist. Fucking stupid ass ghost lights.
+    if(!any(light.position) && light.type == LIGHT_TYPE_EXTRA)
+        return;
     
-    lightInfo.diffuse += ramp * light.color * light.attenuation;
+    half3 shadow = GetShading(i, t, light);
+    
+    lightInfo.diffuse += light.color;
     lightInfo.directSpecular += GetDirectSpecular(i, d, light, _AnisotropicSpecular) * light.ndl * light.attenuation;
     lightInfo.subsurface += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * light.ndl * light.attenuation;
+    lightInfo.shadowMask = max(lightInfo.shadowMask, shadow);
+    lightInfo.attenuationMask = max(lightInfo.attenuationMask, light.attenuation);
 }
 
 void AccumulateExtraPassLights(FragmentData i, DotProducts d, TextureUV t, Directions dir, Light lights[4], inout SurfaceLightInfo lightInfo)
@@ -544,7 +580,7 @@ void AccumulateIndirectSpecularLight(FragmentData i, Directions dirs, DotProduct
 
 void ApplyAccumulatedDiffuseLightToSurface(inout FragmentData i, SurfaceLightInfo lightInfo)
 {
-    i.surfaceColor = i.albedo * lightInfo.diffuse;
+    i.surfaceColor = i.albedo * lightInfo.diffuse * lightInfo.shadows;
 }
 
 void ApplyAccumulatedIndirectSpecularLightToSurface(inout FragmentData i, SurfaceLightInfo lightInfo)
@@ -580,17 +616,37 @@ void ApplyHalftones(FragmentData i, inout SurfaceLightInfo lightInfo, inout half
     }
 }
 
-// dunno if I even need to initalize this but w/e
-void InitializeSurfaceLightingOutput(inout SurfaceLightInfo lightInfo)
+void ApplyShadingAdjustments(inout SurfaceLightInfo lightInfo, TextureUV uvs, Light ambient)
+{
+    if(_ShadowType == SHADOW_MODE_SHADEMAP)
+    {
+        _ShadowSharpness = 1-_ShadowSharpness;
+        lightInfo.shadowMask = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, lightInfo.shadowMask);
+        lightInfo.shadowMask *= lightInfo.attenuationMask;
+
+        half colorArea = 1-lightInfo.shadowMask;
+        half3 shadowColor = _ShadowColor * UNITY_SAMPLE_TEX2D_SAMPLER(_ShadeMap, _MainTex, uvs.uv0).rgb;
+
+        if(IsRealtimeLighting())
+        {
+            // Blend the shadow color with the ambient color based on the brightness of the scene.
+            float blendFactor = saturate(smoothstep(0.25, 0, GetAmbientBrightnessNonPerceptual()));
+            shadowColor = lerp(shadowColor, ambient.color, blendFactor);
+        }
+        
+        lightInfo.shadows = lerp(1, shadowColor, colorArea);
+    }
+}
+
+void InitializeSurface(inout FragmentData i, inout SurfaceLightInfo lightInfo)
 {
     lightInfo.diffuse = half3(0,0,0);
     lightInfo.directSpecular = half3(0,0,0);
     lightInfo.indirectSpecular = half3(0,0,0);
     lightInfo.subsurface = half3(0,0,0);
-}
-
-void InitializeSurface(inout FragmentData i)
-{
+    lightInfo.shadowMask = half3(0,0,0);
+    lightInfo.attenuationMask = 0;
+    
     i.albedo.rgb = rgb2hsv(i.albedo.rgb);
     i.albedo.x += fmod(lerp(0, _Hue, i.hsvMask.r), 360);
     i.albedo.y = saturate(i.albedo.y * lerp(1, _Saturation, i.hsvMask.g));

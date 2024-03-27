@@ -75,6 +75,12 @@ namespace XSToon3
             Fin,
             Mixed
         }
+
+        public enum ShadowType
+        {
+            Ramp,
+            ShadeMap
+        }
     }
 }
 
