@@ -619,7 +619,7 @@ void ApplyHalftones(FragmentData i, inout SurfaceLightInfo lightInfo, inout half
 
 void ApplyShadingAdjustments(inout FragmentData i, inout SurfaceLightInfo lightInfo, TextureUV uvs, Light ambient)
 {
-    float shadowEnvColorBlendFactor = smoothstep(0.25,0,GetAmbientBrightnessNonPerceptual());
+    float shadowEnvColorBlendFactor = smoothstep(0.15,0,GetAmbientBrightnessNonPerceptual());
     switch (_ShadowType)
     {
         case SHADOW_MODE_RAMP:
