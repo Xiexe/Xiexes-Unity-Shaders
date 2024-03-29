@@ -619,12 +619,12 @@ void ApplyHalftones(FragmentData i, inout SurfaceLightInfo lightInfo, inout half
 
 void ApplyShadingAdjustments(inout FragmentData i, inout SurfaceLightInfo lightInfo, TextureUV uvs, Light ambient)
 {
-    float shadowEnvColorBlendFactor = smoothstep(0.15,0,GetAmbientBrightnessNonPerceptual());
     switch (_ShadowType)
     {
         case SHADOW_MODE_RAMP:
             lightInfo.shadows = lightInfo.shadowMask;
             #if defined(SHADOWS_SCREEN)
+                float shadowEnvColorBlendFactor = smoothstep(0.2,0,GetAmbientBrightnessNonPerceptual());
                 lightInfo.shadows *= lerp(1, lightInfo.attenuationMask, shadowEnvColorBlendFactor);
             #endif
             
@@ -636,13 +636,7 @@ void ApplyShadingAdjustments(inout FragmentData i, inout SurfaceLightInfo lightI
             lightInfo.shadowMask = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, lightInfo.shadowMask);
             lightInfo.shadowMask *= lightInfo.attenuationMask;
             lightInfo.shadows = lerp(1, i.shadeMap, 1-lightInfo.shadowMask);
-
-            // we only want to do the blending when there's a light with realtime shadows. Otherwise we should just treat it as normal.
-            #if defined(SHADOWS_SCREEN)
-                lightInfo.shadows = lerp(i.shadeMap, ambient.color, shadowEnvColorBlendFactor);
-                i.shadeMap.rgb = lerp(i.shadeMap, i.albedo * ambient.color, shadowEnvColorBlendFactor);
-            #endif
-            
+        
             i.surfaceColor = lerp(i.albedo, i.shadeMap, 1-lightInfo.shadowMask) * lightInfo.diffuse;
             break;
 
@@ -651,12 +645,6 @@ void ApplyShadingAdjustments(inout FragmentData i, inout SurfaceLightInfo lightI
             lightInfo.shadowMask = smoothstep(_ShadowRange - _ShadowSharpness, _ShadowRange + _ShadowSharpness, lightInfo.shadowMask);
             lightInfo.shadowMask *= lightInfo.attenuationMask;
             lightInfo.shadows = lerp(1, _ShadowColor, 1-lightInfo.shadowMask);
-
-            // we only want to do the blending when there's a light with realtime shadows. Otherwise we should just treat it as normal.
-            #if defined(SHADOWS_SCREEN)
-                half3 ambientColorShadows = lerp(1, ambient.color, 1-lightInfo.shadowMask);
-                lightInfo.shadows = lerp(lightInfo.shadows, ambientColorShadows, shadowEnvColorBlendFactor);
-            #endif
 
             i.surfaceColor = i.albedo * lightInfo.diffuse * lightInfo.shadows;
             break;
