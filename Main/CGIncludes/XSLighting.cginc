@@ -37,11 +37,11 @@ half4 BRDF_XSLighting(HookData data)
     ApplyAccumulatedDirectSpecularLightToSurface(i, i.occlusion, lightInfo);
     ApplyHalftones(i, lightInfo, rimLight, rimShadow);
 
-    // i.surfaceColor += rimLight;
-    // i.surfaceColor += lightInfo.subsurface;
-    // i.surfaceColor *= rimShadow;
-    // i.surfaceColor += GetEmission(i, t, d, lights);
-    // i.surfaceColor = lerp(i.surfaceColor, GetOutlineColor(i, lights.mainLight, lights.ambientLight), i.isOutline);
+    i.surfaceColor += rimLight;
+    i.surfaceColor += lightInfo.subsurface;
+    i.surfaceColor *= rimShadow;
+    i.surfaceColor += GetEmission(i, t, d, lights);
+    i.surfaceColor = lerp(i.surfaceColor, GetOutlineColor(i, lights.mainLight, lights.ambientLight), i.isOutline);
     return float4(i.surfaceColor, 1);
     // TODO:: Add back in lightmapping support.
 }
