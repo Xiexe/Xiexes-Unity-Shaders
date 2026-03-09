@@ -64,10 +64,17 @@
         _AnisotropicSpecular("Specular Anisotropic", Range(-1,1)) = 0
         _AnisotropicReflection("Reflection Anisotropic", Range(-1,1)) = 0
         _SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
-
+        
+        [ToggleUI]_UseShadowMapTexture("Use Shadow Map", Int) = 0
+        _ShadowControlTexture("Shadow Map", 2D) = "black" {}
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
+        _ShadowFalloff("Shadow Falloff", Range(0,1)) = 0.5
+        _ShadowRange("Shadow Range", Range(0,1)) = 0.5
+        _ShadowColor("Shadow Tint", Color) = (0,0,0,1)
+
+        _RimMask("Rim Masks", 2D) = "white" {}
         _ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
         _ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
@@ -126,14 +133,16 @@
         [Enum(UV1,0,UV2,1)] _UVSetEmission("Emission Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetClipMap("Clip Map UVs", Int) = 0
         [Enum(UV1,0,UV2,1)] _UVSetDissolve("Dissolve Map UVs", Int) = 0
+        [Enum(UV1,0,UV2,1)] _UVSetRimMask("Rim MAsk UVs", Int) = 0
 
-        [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
+        [Enum(None,0,Bass,1,Low Mids,2,High Mids,3,Treble,4,Packed Map,5,UV Based,6)]_EmissionAudioLinkChannel("Emisssion Audio Link Channel", int) = 0
         [ToggleUI]_ALGradientOnRed("Gradient Red", Int) = 0
         [ToggleUI]_ALGradientOnGreen("Gradient Green", Int) = 0
         [ToggleUI]_ALGradientOnBlue("Gradient Blue", Int) = 0
         [HDR]_EmissionColor("Emission Color", Color) = (0,0,0,0)
         [HDR]_EmissionColor0("Emission Packed Color 1", Color) = (0,0,0,0)
         [HDR]_EmissionColor1("Emission Packed Color 2", Color) = (0,0,0,0)
+        [IntRange]_ALUVWidth("History Sample Amount", Range(0,128)) = 128
 
         _ClipMap("Clip Map", 2D) = "black" {}
         _WireColor("Wire Color", Color) = (0,0,0,0)
@@ -143,11 +152,12 @@
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilOp ("Stencil Operation", Int) = 0
 
-        [HideInInspector] _SrcBlend ("__src", int) = 1
-        [HideInInspector] _DstBlend ("__dst", int) = 0
-        [HideInInspector] _ZWrite ("__zw", int) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)]_SrcBlend ("__src", int) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)]_DstBlend ("__dst", int) = 0
+        [Enum(Off,0,On,1)]_ZWrite ("__zw", int) = 1
         [HideInInspector] _AlphaToMask("__am", int) = 0
-
+        [HideInInspector] _Mode ("__mode", Float) = 0.0
+        
         [Enum(Off,0,Vertex,1,Pixel,2)] _UVDiscardMode ("Discard Mode", int) = 0
         [Enum(UV1,0,UV2,1)] _UVDiscardChannel ("Discard Channel", int) = 0
         [ToggleUI]_DiscardTile0("Tile 0", int) = 0
@@ -187,6 +197,7 @@
         _ClipSlider15("", Vector) = (0,0,0,0)
 
         //Fur properties
+        [Enum(Shell, 0, Fin, 1)] _FurMode ("Fur Mode", Int) = 0
         _TopColor("Top Color", Color) = (1,1,1,1)
         _BottomColor("Bottom Color", Color) = (1,1,1,1)
         _ColorFalloffMin("Color Falloff Min", Range(0,1)) = 0
@@ -198,13 +209,13 @@
         [IntRange]_StrandAmount("Strand Count", Range(0,200)) = 10
         [IntRange]_LayerCount("Fur Layer Count", Range(1,32)) = 10
         _FurLength("Fur Length", Range(0,1)) = 0.2
-        _FurWidth("Fur Width", Range(0.35, 0.65)) = 0.5
+        _FurWidth("Fur Width", Range(0, 1)) = 0.5
         _Gravity("Gravity", Range(0,1)) = 0
         _CombX("Comb X", Range(-1,1)) = 0
         _CombY("Comb Y", Range(-1,1)) = 0
-        _FurOcclusion("Fur Occlusion", Range(0,1)) = 0.5
-        _OcclusionFalloffMin("Occlusion Falloff Min", Range(0,1)) = 0
-        _OcclusionFalloffMax("Occlusion Falloff Max", Range(0,1)) = 1
+        _FurWidthRandomness("Width Variation", Range(0,1)) = 0
+        _FurLengthRandomness("Height Variation", Range(0,1)) = 0
+        _FurMessiness("Messiness", Range(0,1)) = 0
         //!RDPSProps
     }
 
@@ -231,8 +242,9 @@
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local _FUR_SHELL _FUR_FIN
             #pragma multi_compile _ VERTEXLIGHT_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase
@@ -244,6 +256,8 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"
@@ -273,8 +287,9 @@
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local _FUR_SHELL _FUR_FIN
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
             #ifndef UNITY_PASS_FORWARDADD
@@ -283,6 +298,8 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"
@@ -309,8 +326,9 @@
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local _FUR_SHELL _FUR_FIN
             #pragma multi_compile_shadowcaster
             #pragma multi_compile_instancing
             #ifndef UNITY_PASS_SHADOWCASTER
@@ -320,6 +338,8 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"

@@ -2,20 +2,26 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!21 &2100000
 Material:
-  serializedVersion: 6
+  serializedVersion: 8
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Combed
-  m_Shader: {fileID: 4800000, guid: 3a74f10861cf4644cb585676682180ed, type: 3}
-  m_ShaderKeywords: _ALPHABLEND_ON _ALPHATEST_ON
+  m_Shader: {fileID: 4800000, guid: 7797e32bdbf27104e9a60321c8ead107, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _ALPHABLEND_ON
+  - _ALPHATEST_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2450
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -88,7 +94,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Ramp:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 529b95e318b684643b47bd73e037118a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _RampSelectionMask:
@@ -96,6 +102,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ReflectivityMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RimMask:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -107,6 +117,7 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    m_Ints: []
     m_Floats:
     - _ALGradientOnBlue: 0
     - _ALGradientOnGreen: 0
@@ -129,6 +140,22 @@ Material:
     - _Culling: 0
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
+    - _DiscardTile0: 0
+    - _DiscardTile1: 0
+    - _DiscardTile10: 0
+    - _DiscardTile11: 0
+    - _DiscardTile12: 0
+    - _DiscardTile13: 0
+    - _DiscardTile14: 0
+    - _DiscardTile15: 0
+    - _DiscardTile2: 0
+    - _DiscardTile3: 0
+    - _DiscardTile4: 0
+    - _DiscardTile5: 0
+    - _DiscardTile6: 0
+    - _DiscardTile7: 0
+    - _DiscardTile8: 0
+    - _DiscardTile9: 0
     - _DissolveBlendPower: 1
     - _DissolveCoordinates: 0
     - _DissolveLayer1Scale: 1
@@ -157,6 +184,7 @@ Material:
     - _LayerCount: 32
     - _MatcapTintToDiffuse: 0
     - _Metallic: 0
+    - _Mode: 0
     - _NormalMapMode: 0
     - _OcclusionFalloffMax: 1
     - _OcclusionFalloffMin: 0
@@ -198,6 +226,8 @@ Material:
     - _StencilOp: 0
     - _StrandAmount: 3
     - _TilingMode: 0
+    - _UVDiscardChannel: 0
+    - _UVDiscardMode: 0
     - _UVSetAlbedo: 0
     - _UVSetClipMap: 0
     - _UVSetDetMask: 0
@@ -208,6 +238,7 @@ Material:
     - _UVSetNormal: 0
     - _UVSetOcclusion: 0
     - _UVSetReflectivity: 0
+    - _UVSetRimMask: 0
     - _UVSetSpecular: 0
     - _UVSetThickness: 0
     - _UseClipsForDissolve: 0
@@ -247,3 +278,4 @@ Material:
     - _ShadowRim: {r: 1, g: 1, b: 1, a: 1}
     - _TopColor: {r: 1, g: 1, b: 1, a: 1}
     - _WireColor: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []

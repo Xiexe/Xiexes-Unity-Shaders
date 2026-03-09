@@ -66,9 +66,15 @@
         _AnisotropicReflection("Reflection Anisotropic", Range(-1,1)) = 0
         _SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
 
+        [ToggleUI]_UseShadowMapTexture("Use Shadow Map", Int) = 0
+        _ShadowControlTexture("Shadow Map", 2D) = "black" {}
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
+        _ShadowFalloff("Shadow Falloff", Range(0,1)) = 0.5
+        _ShadowRange("Shadow Range", Range(0,1)) = 0.5
+        _ShadowColor("Shadow Tint", Color) = (0,0,0,1)
+        
         _ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
         _ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
@@ -221,8 +227,8 @@
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
             #pragma multi_compile _ VERTEXLIGHT_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase
@@ -233,6 +239,8 @@
             #endif
 
             #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../CGIncludes/Enums.cginc"
             #include "../../CGIncludes/XSDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"
@@ -261,8 +269,8 @@
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
             #ifndef UNITY_PASS_FORWARDADD
@@ -270,6 +278,8 @@
             #endif
 
             #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../CGIncludes/Enums.cginc"
             #include "../../CGIncludes/XSDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"
@@ -295,8 +305,8 @@
             #pragma vertex vert
             #pragma geometry geom
             #pragma fragment frag
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
             #pragma multi_compile_shadowcaster
             #pragma multi_compile_instancing
             #ifndef UNITY_PASS_SHADOWCASTER
@@ -305,6 +315,8 @@
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
             #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../CGIncludes/Enums.cginc"
             #include "../../CGIncludes/XSDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"

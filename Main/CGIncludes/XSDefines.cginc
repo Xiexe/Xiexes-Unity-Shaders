@@ -96,10 +96,12 @@ struct VertexOutput
 struct FragmentData
 {
     half4 albedo;
+    half4 shadeMap;
     half4 normalMap;
     half4 detailNormal;
     half4 detailMask;
     half4 metallicGlossMap;
+    half4 metallicSmoothness;
     half4 reflectivityMask;
     half4 specularMap;
     half4 thickness;
@@ -113,6 +115,7 @@ struct FragmentData
     half3 diffuseColor;
     half4 rimMask;
     half attenuation;
+    half3 rawNormal;
     half3 normal;
     half3 tangent;
     half3 bitangent;
@@ -122,6 +125,7 @@ struct FragmentData
     float4 screenPos;
     float2 screenUV;
     float3 objPos;
+    half3 surfaceColor;
 
     #if defined(Fur)
         float layer;
@@ -151,45 +155,74 @@ struct TextureUV
 
 struct DotProducts
 {
-    half ndl;
     half vdn;
-    half vdh;
-    half tdh;
-    half bdh;
-    half ndh;
-    half rdv;
-    half ldh;
     half svdn;
 };
 
 struct Directions
 {
-    half3 lightDir;
     half3 viewDir;
     half3 stereoViewDir;
-    half3 halfVector;
     half3 reflView;
-    half3 reflLight;
     half3 reflViewAniso;
+    half3 forward;
+    half3 right;
+    half3 up;
+};
+
+struct Light
+{
+    half3 position;
+    half3 direction;
+    half3 color;
+    half attenuation;
+    
+    half3 reflectionVector;
+    half3 halfVector;
+    half ndl; // normal . light direction
+    half ldh; // light . half direction
+    half tdh; // tangent . half direction
+    half bdh; // bitangent . half direction
+    half ndh; // normal . half direction
+    half vdh; // viewDir . halfVector
+    half rdv; // reflectionVector . viewDir
+    half rdl; // right . light direction
+    half fdl; // forward . light direction
+    bool isAbove; // is the light above the meshes up vector
+    int type; //
+};
+
+struct PassLights
+{
+    Light mainLight;
+    Light ambientLight;
+    Light extraLights[4]; // Only used in forward base pass for vertex lights.
+};
+
+struct SurfaceLightInfo
+{
+    half3 diffuse;
+    half3 directSpecular;
+    half3 indirectSpecular;
+    half3 subsurface;
+    half3 shadows;
+    half3 shadowMask;
+    half attenuationMask;
 };
 
 struct HookData
 {
-    FragmentData i;
-    TextureUV t;
+    SurfaceLightInfo lightInfo;
+    FragmentData frag;
+    TextureUV uvs;
     Directions dirs;
-    DotProducts d;
-    float3 untouchedNormal;
+    DotProducts dots;
+    PassLights lights;
     bool isFrontface;
 };
 
-struct VertexLightInformation {
-    float3 Direction[4];
-    float3 ColorFalloff[4];
-    float Attenuation[4];
-};
-
 UNITY_DECLARE_TEX2D(_MainTex); half4 _MainTex_ST;
+UNITY_DECLARE_TEX2D_NOSAMPLER(_ShadeMap); half4 _ShadeMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_ClipMap); half4 _ClipMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_DissolveTexture); half4 _DissolveTexture_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_BumpMap); half4 _BumpMap_ST;
@@ -203,6 +236,7 @@ UNITY_DECLARE_TEX2D_NOSAMPLER(_EmissionMap); half4 _EmissionMap_ST;
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RampSelectionMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_HSVMask);
 UNITY_DECLARE_TEX2D_NOSAMPLER(_RimMask); half4 _RimMask_ST;
+sampler2D _ShadowControlTexture; half4 _ShadowControlTexture_ST;
 sampler2D _OcclusionMap; half4 _OcclusionMap_ST;
 sampler2D _OutlineMask;
 sampler2D _ClipMask;
@@ -223,7 +257,8 @@ int _UseClipsForDissolve;
 
 half4 _ShadowRim, _OutlineColor, _SSColor,
       _EmissionColor, _EmissionColor0, _EmissionColor1,
-      _MatcapTint, _RimColor, _DissolveColor;
+      _MatcapTint, _RimColor, _DissolveColor,
+      _ShadowColor;
 
 half _MatcapTintToDiffuse;
 
@@ -240,6 +275,7 @@ half _ShadowRimRange, _ShadowRimThreshold, _ShadowRimSharpness, _ShadowSharpness
 half _SSDistortion, _SSPower, _SSScale;
 half _OutlineWidth;
 half _DissolveBlendPower, _DissolveLayer1Scale, _DissolveLayer2Scale, _DissolveLayer1Speed, _DissolveLayer2Speed;
+half _ShadowFalloff, _ShadowRange;
 
 half4 _ClipSlider00,_ClipSlider01,_ClipSlider02,_ClipSlider03,
       _ClipSlider04,_ClipSlider05,_ClipSlider06,_ClipSlider07,
@@ -264,6 +300,7 @@ int _NormalMapMode, _OutlineUVSelect;
 int _AlphaToMask;
 int _ALGradientOnRed, _ALGradientOnGreen, _ALGradientOnBlue;
 int _ALUVWidth;
+int _ShadowType, _UseShadowMapTexture;
 
 int _UVDiscardMode, _UVDiscardChannel,
     _DiscardTile0,_DiscardTile1,_DiscardTile2,_DiscardTile3,

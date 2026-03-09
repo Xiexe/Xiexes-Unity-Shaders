@@ -56,8 +56,7 @@ float4 frag (
         #endif
 
         #if defined(DIRECTIONAL)
-            half sharp = _ShadowSharpness * 0.5;
-            attenuation = smoothstep(sharp, 1-sharp, attenuation); //Converge at the center line
+            attenuation = smoothstep(_ShadowSharpness * 0.35, 1-_ShadowSharpness * 0.35, attenuation);
         #endif
 
         bool face = facing > 0; // True if on front face, False if on back face
@@ -72,13 +71,14 @@ float4 frag (
 
         FragmentData o = (FragmentData)0; //Populate Surface Fragment Struct
         o.albedo = UNITY_SAMPLE_TEX2D(_MainTex, t.albedoUV) * _Color * lerp(1, float4(i.color.rgb, 1), _VertexColorAlbedo);
+        o.shadeMap = UNITY_SAMPLE_TEX2D_SAMPLER(_ShadeMap, _MainTex, t.albedoUV) * _ShadowColor;
         o.specularMap = UNITY_SAMPLE_TEX2D_SAMPLER(_SpecularMap, _MainTex, t.specularMapUV);
         o.metallicGlossMap = UNITY_SAMPLE_TEX2D_SAMPLER(_MetallicGlossMap, _MainTex, t.metallicGlossMapUV);
         o.detailMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DetailMask, _MainTex, t.detailMaskUV);
         o.normalMap = UNITY_SAMPLE_TEX2D_SAMPLER(_BumpMap, _MainTex, t.normalMapUV);
         o.detailNormal = UNITY_SAMPLE_TEX2D_SAMPLER(_DetailNormalMap, _MainTex, t.detailNormalUV);
         o.thickness = UNITY_SAMPLE_TEX2D_SAMPLER(_ThicknessMap, _MainTex, t.thicknessMapUV);
-        o.occlusion = tex2D(_OcclusionMap, t.occlusionUV);
+        o.occlusion = lerp(1, tex2D(_OcclusionMap, t.occlusionUV), _OcclusionIntensity);
         o.reflectivityMask = UNITY_SAMPLE_TEX2D_SAMPLER(_ReflectivityMask, _MainTex, t.reflectivityMaskUV) * _Reflectivity;
         o.emissionMap = UNITY_SAMPLE_TEX2D_SAMPLER(_EmissionMap, _MainTex, t.emissionMapUV);
         o.rampMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RampSelectionMask, _MainTex, i.uv); // This texture doesn't need to ever be on a second uv channel, and doesn't need tiling, convince me otherwise.
@@ -87,8 +87,9 @@ float4 frag (
         o.dissolveMask = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV * _DissolveLayer1Scale + (_Time.y * _DissolveLayer1Speed));
         o.dissolveMaskSecondLayer = UNITY_SAMPLE_TEX2D_SAMPLER(_DissolveTexture, _MainTex, t.dissolveUV * _DissolveLayer2Scale + (_Time.y * _DissolveLayer2Speed));
         o.rimMask = UNITY_SAMPLE_TEX2D_SAMPLER(_RimMask, _MainTex, t.rimMaskUV);
-
+    
         o.diffuseColor = o.albedo.rgb; //Store this to separate the texture color and diffuse color for later.
+        o.metallicSmoothness = GetMetallicSmoothness(o);
         o.attenuation = attenuation;
         o.normal = i.ntb[0];
         o.tangent = i.ntb[1];
@@ -108,26 +109,26 @@ float4 frag (
         #endif
 
         HookData data = (HookData) 0;
-        data.untouchedNormal = o.normal;
         o.tangent = normalize(o.tangent);
         o.bitangent = normalize(o.bitangent);
         calcNormal(o);
-        data.i = o;
-        data.t = t;
+        data.frag = o;
+        data.uvs = t;
         data.isFrontface = face;
 
         Directions dirs = GetDirections(o);
         DotProducts d = GetDots(dirs, o);
         data.dirs = dirs;
-        data.d = d;
+        data.dots = d;
         data = PreLightingHook(data);
 
         float4 col = BRDF_XSLighting(data);
-        calcAlpha(data.i, data.t, alpha);
-        calcDissolve(data.i, col.rgb);
+        calcAlpha(data.frag, data.uvs, alpha);
+        calcDissolve(data.frag, col.rgb);
     
         col = PostLightingHook(col, data);
         UNITY_APPLY_FOG(i.fogCoord, col);
+    
         return float4(col.rgb, alpha);
     #endif
 }

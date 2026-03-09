@@ -6,7 +6,7 @@ namespace XSToon3
     [InitializeOnLoad]
     public class XSStyles : MonoBehaviour
     {
-        public static string ver = "3.5.1";
+        public static string ver = "3.6.0";
         public static string uiPath;
         private static string patronpath;
 
@@ -230,7 +230,7 @@ namespace XSToon3
         //Find Asset Path
         public static string findAssetPath(string finalFilePath)
         {
-            string[] guids1 = AssetDatabase.FindAssets("XSStyles", null);
+            string[] guids1 = AssetDatabase.FindAssets("XSToonInspector", null);
             string untouchedString = AssetDatabase.GUIDToAssetPath(guids1[0]);
             string[] splitString = untouchedString.Split('/');
 
@@ -289,6 +289,7 @@ namespace XSToon3
 
         public static bool ShurikenFoldout(string title, bool display)
         {
+            SeparatorThin();
             var rect = DrawShuriken(title, new Vector2(20f, -2f), 22);
             var e = Event.current;
             var toggleRect = new Rect(rect.x + 4f, rect.y + 2f, 13f, 13f);
@@ -301,6 +302,7 @@ namespace XSToon3
                 display = !display;
                 e.Use();
             }
+            
             return display;
         }
 

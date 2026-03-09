@@ -65,15 +65,21 @@
         _AnisotropicReflection("Reflection Anisotropic", Range(-1,1)) = 0
         _SpecularAlbedoTint("Specular Albedo Tint", Range(0,1)) = 1
 
+        [ToggleUI]_UseShadowMapTexture("Use Shadow Map", Int) = 0
+        _ShadowControlTexture("Shadow Map", 2D) = "black" {}
         _RampSelectionMask("Ramp Mask", 2D) = "black" {}
         _Ramp("Shadow Ramp", 2D) = "white" {}
         _ShadowSharpness("Received Shadow Sharpness", Range(0,1)) = 0.5
+        _ShadowFalloff("Shadow Falloff", Range(0,1)) = 0.5
+        _ShadowRange("Shadow Range", Range(0,1)) = 0.5
+        _ShadowColor("Shadow Tint", Color) = (0,0,0,1)
+        
         _ShadowRim("Shadow Rim Tint", Color) = (1,1,1,1)
         _ShadowRimRange("Shadow Rim Range", Range(0,1)) = 0.7
         _ShadowRimThreshold("Shadow Rim Threshold", Range(0, 1)) = 0.1
         _ShadowRimSharpness("Shadow Rim Sharpness", Range(0,1)) = 0.3
         _ShadowRimAlbedoTint("Shadow Rim Albedo Tint", Range(0, 1)) = 0
-
+        
         [Enum(Indirect, 0, Integrated, 1)]_OcclusionMode("Occlusion Mode", Int) = 0
         _OcclusionMap("Occlusion", 2D) = "white" {}
         _OcclusionIntensity("Occlusion Intensity", Range(0,1)) = 1
@@ -219,10 +225,10 @@
             #pragma vertex vert
             #pragma fragment frag
 
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
             #pragma multi_compile _ VERTEXLIGHT_ON
-            #pragma shader_feature _COLOROVERLAY_ON
+            #pragma shader_feature_local _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdbase
             #pragma multi_compile_instancing
@@ -234,6 +240,8 @@
             #define EYE_TRACKING_2D
 
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/XSPatreonCG.cginc"
@@ -260,9 +268,9 @@
             #pragma target 3.0
             #pragma vertex vert
             #pragma fragment frag
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
-            #pragma shader_feature _COLOROVERLAY_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local _COLOROVERLAY_ON
             #pragma multi_compile_fog
             #pragma multi_compile_fwdadd_fullshadows
             #ifndef UNITY_PASS_FORWARDADD
@@ -272,6 +280,8 @@
             #define EYE_TRACKING_2D
 
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/XSPatreonCG.cginc"
@@ -296,9 +306,9 @@
             #pragma fragment frag
             #pragma target 3.0
 
-            #pragma shader_feature _ALPHABLEND_ON
-            #pragma shader_feature _ALPHATEST_ON
-            #pragma shader_feature _COLOROVERLAY_ON
+            #pragma shader_feature_local _ALPHABLEND_ON
+            #pragma shader_feature_local _ALPHATEST_ON
+            #pragma shader_feature_local _COLOROVERLAY_ON
             #pragma multi_compile_shadowcaster
             #pragma multi_compile_instancing
             #ifndef UNITY_PASS_SHADOWCASTER
@@ -309,6 +319,8 @@
             #define EYE_TRACKING_2D
 
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/XSPatreonCG.cginc"

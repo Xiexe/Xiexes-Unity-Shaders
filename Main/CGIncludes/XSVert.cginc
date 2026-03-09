@@ -31,9 +31,6 @@ VertexOutput vert (VertexInput v)
 
     o.pos = UnityObjectToClipPos(v.vertex);
     o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-    o.ntb[0] = wnormal;
-    o.ntb[1] = tangent;
-    o.ntb[2] = bitangent;
     o.uv = v.uv;
     o.uv1 = v.uv1;
     o.uv2 = v.uv2;
@@ -41,6 +38,16 @@ VertexOutput vert (VertexInput v)
     o.normal = v.normal;
     o.screenPos = ComputeScreenPos(o.pos);
     o.objPos = normalize(v.vertex);
+
+    #if defined(_FUR_FIN)
+        o.ntb[0] = v.normal;
+        o.ntb[1] = v.tangent;
+        o.ntb[2] = cross(v.normal, v.tangent) * tangentSign;
+    #else
+        o.ntb[0] = wnormal;
+        o.ntb[1] = tangent;
+        o.ntb[2] = bitangent;
+    #endif
     
     #if !defined(UNITY_PASS_SHADOWCASTER)
         UNITY_TRANSFER_SHADOW(o, o.uv);

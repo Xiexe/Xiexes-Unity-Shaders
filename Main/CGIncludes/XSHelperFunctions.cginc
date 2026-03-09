@@ -1,5 +1,7 @@
 void calcNormal(inout FragmentData i)
 {
+    i.rawNormal = normalize(i.normal);
+    
     if(_NormalMapMode == 0)
     {
         half3 nMap = UnpackScaleNormal(i.normalMap, _BumpScale);

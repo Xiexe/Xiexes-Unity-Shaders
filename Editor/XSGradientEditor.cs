@@ -12,7 +12,9 @@ namespace XSToon3
     {
         public List<int> gradients_index = new List<int>(new int[1] { 0 });
         public List<Gradient> gradients = new List<Gradient>(5);
+        public static List<Gradient> lastGradients = new List<Gradient>(5);
         public Texture2D tex;
+        public static bool needsToLoadGradient = true;
 
         private string finalFilePath;
 
@@ -49,6 +51,7 @@ namespace XSToon3
         {
             XSGradientEditor window = EditorWindow.GetWindow<XSGradientEditor>(false, "XSToon: Gradient Editor", true);
             window.minSize = new Vector2(450, 390);
+            needsToLoadGradient = true;
         }
 
         public void OnGUI()
@@ -70,16 +73,21 @@ namespace XSToon3
                 preButton = new GUIStyle("RL FooterButton");
                 buttonBackground = new GUIStyle("RL Header");
             }
-
-            if (gradients.Count == 0)
+            
+            if(lastGradients.Count == 0)
             {
-                gradients.Add(new Gradient());
-                gradients.Add(new Gradient());
-                gradients.Add(new Gradient());
-                gradients.Add(new Gradient());
-                gradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
+                lastGradients.Add(new Gradient());
             }
-
+            
+            if(gradients != lastGradients)
+            {
+                changed = true;
+                gradients = lastGradients;
+            }
             if (grad_index_reorderable == null)
             {
                 makeReorderedList();
@@ -185,6 +193,9 @@ namespace XSToon3
                 tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             }
 
+            drawSaveGradientButton(ref width, ref height);
+            XSStyles.SeparatorThin();
+            
             bool old_isLinear = isLinear;
             drawAdvancedOptions();
             if (old_isLinear != isLinear)
@@ -212,6 +223,11 @@ namespace XSToon3
                     }
                 }
             }
+            
+            if (needsToLoadGradient)
+            {
+                loadGradientAsset();
+            }
 
             if (changed)
             {
@@ -237,35 +253,10 @@ namespace XSToon3
                     }
                 }
             }
-
-            XSStyles.Separator();
-            drawMGInputOutput();
-
-
-            if (GUILayout.Button("Save Ramp"))
-            {
-                finalFilePath = XSStyles.findAssetPath(finalFilePath);
-                string path = EditorUtility.SaveFilePanel("Save Ramp as PNG", finalFilePath + "/Textures/Shadow Ramps/Generated", "gradient", "png");
-                if (path.Length != 0)
-                {
-                    updateTexture(width, height);
-                    bool success = GenTexture(tex, path);
-                    if (success)
-                    {
-                        if (focusedMat != null)
-                        {
-                            string s = path.Substring(path.IndexOf("Assets"));
-                            Texture ramp = AssetDatabase.LoadAssetAtPath<Texture>(s);
-                            if (ramp != null)
-                            {
-                                focusedMat.SetTexture(rampProperty, ramp);
-                                this.oldTexture = null;
-                            }
-                        }
-                    }
-                }
-            }
+            
             drawHelpText();
+
+            lastGradients = gradients;
         }
 
         Gradient reflessGradient(Gradient old_grad)
@@ -407,56 +398,111 @@ namespace XSToon3
             return false;
         }
 
-        void drawMGInputOutput()
+        void drawSaveGradientButton(ref int width, ref int height)
         {
-            GUILayout.BeginHorizontal();
-            XSMultiGradient old_xsmg = xsmg;
-            xsmg = (XSMultiGradient)EditorGUILayout.ObjectField("MultiGradient Preset", xsmg, typeof(XSMultiGradient), false, null);
-            if (xsmg != old_xsmg)
-            {
-                if (xsmg != null)
-                {
-                    this.gradients = xsmg.gradients;
-                    this.gradients_index = xsmg.order;
-                    makeReorderedList();
-                }
-                else
-                {
-                    List<Gradient> new_Grads = new List<Gradient>();
-                    for (int i = 0; i < this.gradients.Count; i++)
-                    {
-                        new_Grads.Add(reflessGradient(this.gradients[i]));
-                    }
-                    this.gradients = new_Grads;
-                    this.gradients_index = reflessIndexes(this.gradients_index);
-                    makeReorderedList();
-                }
-                changed = true;
-            }
-
-            if (GUILayout.Button("Save New", EditorStyles.miniButton, GUILayout.ExpandWidth(false)))
+            if (GUILayout.Button("Save"))
             {
                 finalFilePath = XSStyles.findAssetPath(finalFilePath);
-                string path = EditorUtility.SaveFilePanel("Save MultiGradient", (finalFilePath + "/Textures/Shadow Ramps/MGPresets"), "MultiGradient", "asset");
+                string path = EditorUtility.SaveFilePanel("Save as PNG", finalFilePath + "/Textures/Shadow Ramps/Generated", "gradient", "png");
+                string gradientAssetPath = finalFilePath + "/WorkingGradients";
                 if (path.Length != 0)
                 {
-                    path = path.Substring(Application.dataPath.Length - "Assets".Length);
-                    XSMultiGradient _xsmg = ScriptableObject.CreateInstance<XSMultiGradient>();
-                    _xsmg.uniqueName = Path.GetFileNameWithoutExtension(path);
-                    foreach (Gradient grad in gradients)
+                    updateTexture(width, height);
+                    bool success = GenTexture(tex, path);
+                    if (success)
                     {
-                        _xsmg.gradients.Add(reflessGradient(grad));
+                        if (focusedMat != null)
+                        {
+                            string s = path.Substring(path.IndexOf("Assets"));
+                            Texture ramp = AssetDatabase.LoadAssetAtPath<Texture>(s);
+                            if (ramp != null)
+                            {
+                                focusedMat.SetTexture(rampProperty, ramp);
+                                this.oldTexture = null;
+                            }
+
+                            string matGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(focusedMat));
+                            saveGradientAsset($"{gradientAssetPath}/{focusedMat.name}_{matGuid}");
+                        }
                     }
-                    _xsmg.order.AddRange(gradients_index.ToArray());
-                    xsmg = _xsmg;
-                    AssetDatabase.CreateAsset(_xsmg, path);
-                    this.gradients = xsmg.gradients;
-                    this.gradients_index = xsmg.order;
-                    makeReorderedList();
-                    AssetDatabase.SaveAssets();
                 }
             }
-            GUILayout.EndHorizontal();
+        }
+
+        void saveGradientAsset(string path)
+        {
+            path = $"{path}.asset";
+            if (!AssetDatabase.IsValidFolder(finalFilePath + "/WorkingGradients"))
+            {
+                AssetDatabase.CreateFolder(finalFilePath, "WorkingGradients");
+                AssetDatabase.Refresh();
+            }
+            
+            Debug.Log("Attempt Saving Asset: " + path);
+            if (path.Length != 0)
+            {
+                //path = path.Substring(Application.dataPath.Length - "Assets".Length);
+                XSMultiGradient _xsmg = ScriptableObject.CreateInstance<XSMultiGradient>();
+                _xsmg.uniqueName = Path.GetFileNameWithoutExtension(path);
+                foreach (Gradient grad in gradients)
+                {
+                    _xsmg.gradients.Add(reflessGradient(grad));
+                }
+                _xsmg.order.AddRange(gradients_index.ToArray());
+                xsmg = _xsmg;
+                Debug.Log("Saving Asset: " + path);
+                AssetDatabase.CreateAsset(_xsmg, path);
+                this.gradients = xsmg.gradients;
+                this.gradients_index = xsmg.order;
+                makeReorderedList();
+                AssetDatabase.SaveAssets();
+            }
+        }
+
+        void loadGradientAsset()
+        {
+            if (focusedMat != null)
+            {
+                XSMultiGradient old_xsmg = xsmg;
+                
+                finalFilePath = XSStyles.findAssetPath(finalFilePath);
+                string materialGuid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(focusedMat));
+                string[] possibleGradients = AssetDatabase.FindAssets($"t:XSMultiGradient {materialGuid}", new string[] { $"{finalFilePath}/WorkingGradients" });
+                if (possibleGradients.Length > 0)
+                {
+                    string gradientPath = AssetDatabase.GUIDToAssetPath(possibleGradients[0]);
+                    XSMultiGradient materialGradient = AssetDatabase.LoadAssetAtPath<XSMultiGradient>(gradientPath);
+                    if (materialGradient != null)
+                    {
+                        Debug.Log("Found gradient asset for material: " + focusedMat.name);
+                        xsmg = materialGradient;
+                        if (xsmg != old_xsmg)
+                        {
+                            if (xsmg != null)
+                            {
+                                this.gradients = xsmg.gradients;
+                                this.gradients_index = xsmg.order;
+                                makeReorderedList();
+                            }
+                            else
+                            {
+                                List<Gradient> new_Grads = new List<Gradient>();
+                                for (int i = 0; i < this.gradients.Count; i++)
+                                {
+                                    new_Grads.Add(reflessGradient(this.gradients[i]));
+                                }
+
+                                this.gradients = new_Grads;
+                                this.gradients_index = reflessIndexes(this.gradients_index);
+                                makeReorderedList();
+                            }
+
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            needsToLoadGradient = false;
         }
 
         void drawAdvancedOptions()
@@ -469,7 +515,6 @@ namespace XSToon3
 
         void drawHelpText()
         {
-            XSStyles.Separator();
             dHelpText = XSStyles.ShurikenFoldout("Information", dHelpText);
             if(dHelpText)
             {
