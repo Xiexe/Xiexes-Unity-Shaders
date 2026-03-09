@@ -240,6 +240,8 @@
             #define EYE_TRACKING_2D
 
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/XSPatreonCG.cginc"
@@ -278,6 +280,8 @@
             #define EYE_TRACKING_2D
 
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/XSPatreonCG.cginc"
@@ -315,6 +319,8 @@
             #define EYE_TRACKING_2D
 
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/XSPatreonCG.cginc"

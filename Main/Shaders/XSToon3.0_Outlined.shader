@@ -238,17 +238,7 @@
                 #define UNITY_PASS_FORWARDBASE
             #endif
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/Enums.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../CGIncludes/Shared.cginc"
             ENDCG
         }
 
@@ -274,18 +264,8 @@
             #ifndef UNITY_PASS_FORWARDADD
                  #define UNITY_PASS_FORWARDADD
             #endif
-
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/Enums.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            
+            #include "../CGIncludes/Shared.cginc"
             ENDCG
         }
 
@@ -310,17 +290,7 @@
             #endif
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
-            #include "../CGIncludes/AudioLink.cginc"
-            #include "../CGIncludes/Enums.cginc"
-            #include "../CGIncludes/XSDefines.cginc"
-            #include "../CGIncludes/XSHelperFunctions.cginc"
-            #include "../CGIncludes/XSLightingFunctions.cginc"
-            #include "../CGIncludes/XSLighting.cginc"
-            #include "../CGIncludes/XSPreLighting.cginc"
-            #include "../CGIncludes/XSPostLighting.cginc"
-            #include "../CGIncludes/XSVert.cginc"
-            #include "../CGIncludes/XSGeom.cginc"
-            #include "../CGIncludes/XSFrag.cginc"
+            #include "../CGIncludes/Shared.cginc"
             ENDCG
         }
     }

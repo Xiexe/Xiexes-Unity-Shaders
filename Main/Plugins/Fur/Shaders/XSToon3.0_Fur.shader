@@ -256,6 +256,8 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"
@@ -296,6 +298,8 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"
@@ -334,6 +338,8 @@
             #define Geometry
             #define Fur
             #include "../../../CGIncludes/AudioLink.cginc"
+            #include "../../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../../CGIncludes/Enums.cginc"
             #include "../../../CGIncludes/XSDefines.cginc"
             #include "../CGInc/Defines.cginc"

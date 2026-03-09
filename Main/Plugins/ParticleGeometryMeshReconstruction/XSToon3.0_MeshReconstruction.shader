@@ -239,6 +239,8 @@
             #endif
 
             #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../CGIncludes/Enums.cginc"
             #include "../../CGIncludes/XSDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"
@@ -276,6 +278,8 @@
             #endif
 
             #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../CGIncludes/Enums.cginc"
             #include "../../CGIncludes/XSDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"
@@ -311,6 +315,8 @@
             #pragma skip_variants FOG_LINEAR FOG_EXP FOG_EXP2
 
             #include "../../CGIncludes/AudioLink.cginc"
+            #include "../../CGIncludes/LightVolumes.cginc"
+            
             #include "../../CGIncludes/Enums.cginc"
             #include "../../CGIncludes/XSDefines.cginc"
             #include "../../CGIncludes/XSHelperFunctions.cginc"

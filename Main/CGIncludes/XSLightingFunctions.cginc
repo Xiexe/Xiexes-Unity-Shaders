@@ -41,24 +41,24 @@ float V_SmithGGXCorrelated(float NoV, float NoL, float a)
     return 0.5 / (GGXV + GGXL);
 }
 
-half3 GetAmbientColor(half occlusion)
+half3 GetAmbientColor(float3 worldPos, half occlusion)
 {// We don't care about anything other than the color from probes for toon lighting.
     #if !defined(LIGHTMAP_ON)
-    half3 ambient = half3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) * lerp(occlusion, 1, _OcclusionMode);
-    return ambient;
+        half3 ambient =  LightVolumeSH_L0(worldPos) * lerp(occlusion, 1, _OcclusionMode);
+        return ambient;
     #else
-    return 0;
+        return 0;
     #endif
 }
 
 half GetAmbientBrightnessNonPerceptual()
 {
-    return dot(GetAmbientColor(1), half3(1,1,1));
+    return dot(GetAmbientColor(0, 1), half3(1,1,1));
 }
 
 half GetAmbientBrightness()
 {
-    return dot(GetAmbientColor(1), grayscaleVec);
+    return dot(GetAmbientColor(0, 1), grayscaleVec);
 }
 
 half GetMainLightBrightness()
@@ -354,17 +354,36 @@ bool IsRealtimeLighting()
     return any(_WorldSpaceLightPos0.xyz);
 }
 
+bool InvalidLightDir(float3 lightDir)
+{
+    return length(lightDir) < 0.1;
+}
+
+bool InvalidLightProbes(float3 L1r, float3 L1g, float3 L1b)
+{
+    return length(L1r.xyz + L1g.xyz + L1b.xyz) == 0;
+}
+
 half3 GetLightDirection(FragmentData i)
 {
     half3 lightDir = UnityWorldSpaceLightDir(i.worldPos);
-    half3 probeLightDir = unity_SHAr.xyz + unity_SHAg.xyz + unity_SHAb.xyz;
-    lightDir = (lightDir + probeLightDir); //Make light dir the average of the probe direction and the light source direction.
-    #if !defined(POINT) && !defined(SPOT)// if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
-    if(length(unity_SHAr.xyz*unity_SHAr.w + unity_SHAg.xyz*unity_SHAg.w + unity_SHAb.xyz*unity_SHAb.w) == 0 && length(lightDir) < 0.1)
-    {
-        lightDir = half4(1, 1, 1, 0);
-    }
+    
+    float3 L0, L1r, L1g, L1b;
+    LightVolumeSH(i.worldPos, L0, L1r, L1g, L1b);
+    
+    half3 probeLightDir = L1r.xyz + L1g.xyz + L1b.xyz;
+    
+    //Make light dir the average of the probe direction and the light source direction.
+    lightDir = (lightDir + probeLightDir); 
+    
+    // if the average length of the light probes is null, and we don't have a directional light in the scene, fall back to our fallback lightDir
+    #if !defined(POINT) && !defined(SPOT)
+        if(InvalidLightDir(lightDir) && InvalidLightProbes(L1r, L1g, L1b))
+        {
+            lightDir = half4(1, 1, 1, 0);
+        }
     #endif
+    
     return normalize(lightDir);
 }
 
