@@ -29,7 +29,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 2800000, guid: 0c540c5cf863ea743b3091ace3a20e07, type: 3}
-        m_Scale: {x: 20, y: 20}
+        m_Scale: {x: 160, y: 80}
         m_Offset: {x: 0, y: 0}
     - _ClipMap:
         m_Texture: {fileID: 0}
@@ -128,12 +128,12 @@ Material:
     - _AdvMode: 0
     - _AlphaToMask: 0
     - _AnisotropicReflection: 0
-    - _AnisotropicSpecular: 0
+    - _AnisotropicSpecular: 0.709
     - _BlendMode: 0
     - _BumpScale: 1
     - _ClearCoat: 1
     - _ClearcoatSmoothness: 1
-    - _ClearcoatStrength: 0.502
+    - _ClearcoatStrength: 1
     - _ClipIndex: 0
     - _Culling: 2
     - _Cutoff: 0.5
@@ -212,12 +212,12 @@ Material:
     - _ShadowRimSharpness: 0.3
     - _ShadowRimThreshold: 0.1
     - _ShadowSharpness: 0.9
-    - _ShadowType: 0
+    - _ShadowType: 2
     - _SmoothnessTextureChannel: 0
-    - _SpecularAlbedoTint: 1
-    - _SpecularArea: 0.5
+    - _SpecularAlbedoTint: 0
+    - _SpecularArea: 0.826
     - _SpecularHighlights: 1
-    - _SpecularIntensity: 0
+    - _SpecularIntensity: 1
     - _SpecularSharpness: 0
     - _SrcBlend: 1
     - _Stencil: 0
@@ -274,7 +274,7 @@ Material:
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _SSColor: {r: 0, g: 0, b: 0, a: 0}
-    - _ShadowColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ShadowColor: {r: 0, g: 0, b: 0, a: 1}
     - _ShadowRim: {r: 1, g: 1, b: 1, a: 1}
     - _WireColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
