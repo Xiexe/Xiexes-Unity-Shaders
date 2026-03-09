@@ -115,6 +115,7 @@ struct FragmentData
     half3 diffuseColor;
     half4 rimMask;
     half attenuation;
+    half3 rawNormal;
     half3 normal;
     half3 tangent;
     half3 bitangent;
@@ -217,7 +218,6 @@ struct HookData
     Directions dirs;
     DotProducts dots;
     PassLights lights;
-    float3 untouchedNormal;
     bool isFrontface;
 };
 

@@ -109,7 +109,6 @@ float4 frag (
         #endif
 
         HookData data = (HookData) 0;
-        data.untouchedNormal = o.normal;
         o.tangent = normalize(o.tangent);
         o.bitangent = normalize(o.bitangent);
         calcNormal(o);

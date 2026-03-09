@@ -24,12 +24,12 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BakedCubemap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 8900000, guid: 40ea18bf7298bd3428adcd1737d4b66e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 0c540c5cf863ea743b3091ace3a20e07, type: 3}
+        m_Scale: {x: 20, y: 20}
         m_Offset: {x: 0, y: 0}
     - _ClipMap:
         m_Texture: {fileID: 0}
@@ -131,9 +131,9 @@ Material:
     - _AnisotropicSpecular: 0
     - _BlendMode: 0
     - _BumpScale: 1
-    - _ClearCoat: 0
-    - _ClearcoatSmoothness: 0.8
-    - _ClearcoatStrength: 1
+    - _ClearCoat: 1
+    - _ClearcoatSmoothness: 1
+    - _ClearcoatStrength: 0.502
     - _ClipIndex: 0
     - _Culling: 2
     - _Cutoff: 0.5
@@ -168,7 +168,7 @@ Material:
     - _FadeDither: 0
     - _FadeDitherDistance: 0
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: 0.821
     - _GlossyReflections: 1
     - _HalftoneDotAmount: 5
     - _HalftoneDotSize: 0.5
@@ -191,7 +191,7 @@ Material:
     - _OutlineWidth: 1
     - _Parallax: 0.02
     - _ReflectionBlendMode: 0
-    - _ReflectionMode: 3
+    - _ReflectionMode: 1
     - _Reflectivity: 0.5
     - _RimAlbedoTint: 0
     - _RimAttenEffect: 1
@@ -265,7 +265,7 @@ Material:
     - _ClipSlider13: {r: 0, g: 0, b: 0, a: 0}
     - _ClipSlider14: {r: 0, g: 0, b: 0, a: 0}
     - _ClipSlider15: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color: {r: 0, g: 0, b: 0, a: 1}
     - _DissolveColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor0: {r: 0, g: 0, b: 0, a: 0}

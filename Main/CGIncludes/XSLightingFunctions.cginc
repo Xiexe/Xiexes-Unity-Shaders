@@ -110,17 +110,13 @@ float3 GetAnisotropicReflectionVector(float3 viewDir, float3 bitangent, float3 t
     return reflect(-viewDir, bentNormal);
 }
 
-half3 GetDirectSpecular(FragmentData i, DotProducts d, Light light, half anisotropy)
+half3 GetDirectSpecular(FragmentData i, DotProducts d, Light light, float ndh, float ndl, half anisotropy, half smoothness, half intensity)
 {
-    half specularIntensity = _SpecularIntensity * i.specularMap.r;
     half3 specular = half3(0,0,0);
-    half smoothness = max(0.01, (_SpecularArea * i.specularMap.b));
-    smoothness *= 1.7 - 0.7 * smoothness;
-
     float rough = max(smoothness * smoothness, 0.0045);
-    float Dn = D_GGX(light.ndh, rough);
+    float Dn = D_GGX(ndh, rough);
     float3 F = 1-F_Schlick(light.ldh, 0);
-    float V = V_SmithGGXCorrelated(d.vdn, light.ndl, rough);
+    float V = V_SmithGGXCorrelated(d.vdn, ndl, rough);
     float3 directSpecularNonAniso = max(0, (Dn * V) * F);
 
     anisotropy *= saturate(5.0 * smoothness);
@@ -130,12 +126,12 @@ half3 GetDirectSpecular(FragmentData i, DotProducts d, Light light, half anisotr
     float3 directSpecularAniso = max(0, (D * V) * F);
 
     specular = lerp(directSpecularNonAniso, directSpecularAniso, saturate(abs(anisotropy * 100)));
-    specular = lerp(specular, smoothstep(0.5, 0.51, specular), _SpecularSharpness) * 3 * light.color * specularIntensity; // Multiply by 3 to bring up to brightness of standard
+    specular = lerp(specular, smoothstep(0.5, 0.51, specular), _SpecularSharpness) * light.color * intensity;
     specular *= lerp(1, i.diffuseColor, _SpecularAlbedoTint * i.specularMap.g);
     return specular;
 }
 
-half3 GetIndirectSpecular(FragmentData i, half4 metallicSmoothness, half3 reflDir, half3 indirectLight, half3 viewDir, float3 fresnel)
+half3 GetIndirectSpecular(FragmentData i, half4 metallicSmoothness, half3 normal, half3 reflDir, half3 indirectLight, half3 viewDir, float3 fresnel)
 {//This function handls Unity style reflections, Matcaps, and a baked in fallback cubemap.
     half3 spec = half3(0,0,0);
 
@@ -184,7 +180,7 @@ half3 GetIndirectSpecular(FragmentData i, half4 metallicSmoothness, half3 reflDi
     else if (_ReflectionMode == REFLECTIONMODE_MATCAP) //Matcap
     {
         half3 upVector = half3(0,1,0);
-        half2 remapUV = matcapSample(upVector, viewDir, i.normal);
+        half2 remapUV = matcapSample(upVector, viewDir, normal);
         spec = tex2Dlod(_Matcap, half4(remapUV, 0, ((1-metallicSmoothness.w) * UNITY_SPECCUBE_LOD_STEPS))) * _MatcapTint;
 
         if(_ReflectionBlendMode != 1)
@@ -306,27 +302,6 @@ half4 GetEmission(FragmentData i, TextureUV t, DotProducts d, PassLights lights)
         return 0;
     #endif
 }
-
-// void GetClearcoat(inout half4 col, FragmentData i, DotProducts d, half3 untouchedNormal, half3 indirectDiffuse, half3 lightCol, half3 viewDir, half3 lightDir, half4 ramp)
-// {
-//     UNITY_BRANCH
-//     if(_ClearCoat != OPTION_OFF)
-//     {
-//         untouchedNormal = normalize(untouchedNormal);
-//         half clearcoatSmoothness = _ClearcoatSmoothness * i.metallicGlossMap.g;
-//         half clearcoatStrength = _ClearcoatStrength * i.metallicGlossMap.b;
-//
-//         half3 reflView = calcReflView(viewDir, untouchedNormal);
-//         half3 reflLight = calcReflLight(lightDir, untouchedNormal);
-//         half rdv = saturate( dot( reflLight, half4(-viewDir, 0) ));
-//         half3 clearcoatIndirect = calcIndirectSpecular(i, d, half4(0, 0, 0, 1-clearcoatSmoothness), reflView, indirectDiffuse, viewDir, 1, ramp);
-//         half3 clearcoatDirect = saturate(pow(rdv, clearcoatSmoothness * 256)) * i.attenuation * lightCol;
-//
-//         half3 clearcoat = (clearcoatIndirect + clearcoatDirect) * clearcoatStrength;
-//         clearcoat = lerp(clearcoat * 0.5, clearcoat, saturate(pow(1-dot(viewDir, untouchedNormal), 0.8)) );
-//         col += clearcoat.xyzz;
-//     }
-// }
 
 Directions GetDirections(FragmentData i)
 {
@@ -532,7 +507,7 @@ void PopulateLight(FragmentData i, Directions d, half3 color, half attenuation, 
     light.ndh = DotClamped(i.normal, light.halfVector);
     light.vdh = DotClamped(d.viewDir, light.halfVector);
     
-    light.rdv = saturate(dot(light.reflectionVector, float4(-d.viewDir, 0)));
+    light.rdv = DotClamped(light.reflectionVector, float4(-d.viewDir, 0));
     light.rdl = dot(d.right, light.direction);
     light.fdl = dot(d.forward, light.direction);
     
@@ -576,8 +551,22 @@ void AccumulateLight(FragmentData i, DotProducts d, TextureUV t, Directions dir,
         lightInfo.diffuse += light.color * light.attenuation;
     #endif
     
-    lightInfo.directSpecular += GetDirectSpecular(i, d, light, _AnisotropicSpecular) * light.ndl * light.attenuation;
-    lightInfo.subsurface += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * light.ndl * light.attenuation;
+    half specularIntensity = _SpecularIntensity * i.specularMap.r;
+    half smoothness = max(0.01, (_SpecularArea * i.specularMap.b));
+    smoothness *= 1.7 - 0.7 * smoothness;
+    
+    lightInfo.directSpecular += GetDirectSpecular(i, d, light, light.ndh, light.ndl, _AnisotropicSpecular, smoothness, specularIntensity) * saturate(light.ndl) * light.attenuation;
+    UNITY_BRANCH
+    if (_ClearCoat != OPTION_OFF)
+    {
+        float ndl = dot(i.rawNormal, light.direction);
+        float ndh = DotClamped(i.rawNormal, light.halfVector);
+        half clearcoatSmoothness = _ClearcoatSmoothness * i.metallicGlossMap.g;
+        half clearcoatStrength = _ClearcoatStrength * i.metallicGlossMap.b;
+        lightInfo.directSpecular += GetDirectSpecular(i, d, light, ndh, ndl, 0, 1-clearcoatSmoothness, clearcoatStrength) * saturate(ndl) * light.attenuation;
+    }
+    
+    lightInfo.subsurface += GetSubsurfaceScattering(i, light, dir.viewDir, i.normal, 0) * saturate(light.ndl) * light.attenuation;
     lightInfo.shadowMask = max(lightInfo.shadowMask, shadow);
     lightInfo.attenuationMask = max(lightInfo.attenuationMask, light.attenuation);
 }
@@ -599,7 +588,20 @@ void AccumulateIndirectSpecularLight(FragmentData i, Directions dirs, DotProduct
     #if defined(UNITY_PASS_FORWARDBASE)
         half3 f0 = 0.16 * _Reflectivity * _Reflectivity * (1.0 - i.metallicSmoothness.r) + i.diffuseColor * i.metallicSmoothness.r;
         half3 fresnel = F_Schlick(d.vdn, f0);
-        lightInfo.indirectSpecular += GetIndirectSpecular(i, i.metallicSmoothness, dirs.reflViewAniso, lights.ambientLight.color, dirs.viewDir, fresnel) * occlusion;
+        lightInfo.indirectSpecular += GetIndirectSpecular(i, i.metallicSmoothness, i.normal, dirs.reflViewAniso, lights.ambientLight.color, dirs.viewDir, fresnel) * occlusion;
+    
+        UNITY_BRANCH
+        if(_ClearCoat != OPTION_OFF)
+        {
+            half clearcoatSmoothness = _ClearcoatSmoothness * i.metallicGlossMap.g;
+            half clearcoatStrength = _ClearcoatStrength * i.metallicGlossMap.b;
+            half vdn = dot(i.rawNormal, dirs.viewDir);
+            half3 reflView = reflect(-dirs.viewDir, i.rawNormal);
+            f0 = 0.16 * clearcoatStrength * clearcoatStrength * (clearcoatSmoothness);
+            fresnel = F_Schlick(vdn, f0);
+            
+            lightInfo.indirectSpecular += GetIndirectSpecular(i, 1-clearcoatSmoothness, i.rawNormal, reflView, lights.ambientLight.color, dirs.viewDir, fresnel) * occlusion;
+        }
     #endif
 }
 

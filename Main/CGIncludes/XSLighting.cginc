@@ -21,12 +21,10 @@ half4 BRDF_XSLighting(HookData data)
         AccumulateExtraPassLights(i, d, t, dirs, lights.extraLights, lightInfo);
     #endif
     
+    // Adjust lighting using the shadow ramp or shadow color.
     ApplyShadingAdjustments(i, lightInfo, t, lights.ambientLight);
-
-    AccumulateIndirectSpecularLight(i, dirs, d, lights, i.occlusion, lightInfo);
-    ApplyAccumulatedIndirectSpecularLightToSurface(i, lightInfo);
-    ApplyAccumulatedDirectSpecularLightToSurface(i, i.occlusion, lightInfo);
     
+    AccumulateIndirectSpecularLight(i, dirs, d, lights, i.occlusion, lightInfo);
     half3 environmentMap = getEnvMap(i, d, 5, dirs.reflView, lights.ambientLight.color, i.normal);
     half3 rimLight = GetRimLight(i, d, lights.mainLight, lights.ambientLight, environmentMap);
     half3 rimShadow = GetRimShadow(i, d, lights.mainLight, lights.ambientLight);
@@ -35,15 +33,15 @@ half4 BRDF_XSLighting(HookData data)
         AdjustFurSpecular(i, lightInfo);
     #endif
     
+    ApplyAccumulatedIndirectSpecularLightToSurface(i, lightInfo);
+    ApplyAccumulatedDirectSpecularLightToSurface(i, i.occlusion, lightInfo);
     ApplyHalftones(i, lightInfo, rimLight, rimShadow);
 
-    i.surfaceColor += max(lightInfo.directSpecular, rimLight);
-    i.surfaceColor += lightInfo.subsurface;
-    i.surfaceColor *= rimShadow;
-    i.surfaceColor += GetEmission(i, t, d, lights);
-    i.surfaceColor = lerp(i.surfaceColor, GetOutlineColor(i, lights.mainLight, lights.ambientLight), i.isOutline);
+    // i.surfaceColor += rimLight;
+    // i.surfaceColor += lightInfo.subsurface;
+    // i.surfaceColor *= rimShadow;
+    // i.surfaceColor += GetEmission(i, t, d, lights);
+    // i.surfaceColor = lerp(i.surfaceColor, GetOutlineColor(i, lights.mainLight, lights.ambientLight), i.isOutline);
     return float4(i.surfaceColor, 1);
-    // TODO:: Add back in clearcoat support.
-    // TODO:: Add back in lightmapping support for the fur shader.
-    // calcClearcoat(col, i, d, untouchedNormal, indirectDiffuse, lightCol, dirs.viewDir, dirs.lightDir, ramp);
+    // TODO:: Add back in lightmapping support.
 }
